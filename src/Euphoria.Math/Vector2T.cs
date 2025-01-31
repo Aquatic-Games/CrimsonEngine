@@ -14,9 +14,9 @@ public struct Vector2T<T> :
     IFormattable
     where T : INumber<T>
 {
-    public T X;
+    public readonly T X;
 
-    public T Y;
+    public readonly T Y;
 
     public Vector2T(T scalar)
     {

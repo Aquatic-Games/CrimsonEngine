@@ -12,6 +12,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Math", "src\Euphor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Audio", "src\Euphoria.Audio\Euphoria.Audio.csproj", "{7BAD6C39-362F-4780-8B43-7B039CE594E6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E844E99B-D674-48E8-8FB5-718E65F4AB19}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Math.Tests", "tests\Euphoria.Math.Tests\Euphoria.Math.Tests.csproj", "{DC68DCED-473A-4DAF-80D9-22B9E093D431}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +46,12 @@ Global
 		{7BAD6C39-362F-4780-8B43-7B039CE594E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7BAD6C39-362F-4780-8B43-7B039CE594E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7BAD6C39-362F-4780-8B43-7B039CE594E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC68DCED-473A-4DAF-80D9-22B9E093D431}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC68DCED-473A-4DAF-80D9-22B9E093D431}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC68DCED-473A-4DAF-80D9-22B9E093D431}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC68DCED-473A-4DAF-80D9-22B9E093D431}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DC68DCED-473A-4DAF-80D9-22B9E093D431} = {E844E99B-D674-48E8-8FB5-718E65F4AB19}
 	EndGlobalSection
 EndGlobal
