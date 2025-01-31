@@ -21,5 +21,40 @@ public class Vector2OperationsTests
     [Test]
     public void TestMagnitudeSquared()
     {
+        Vector2 control = new Vector2(-3, 1.5f);
+        float controlMagnitude = control.LengthSquared();
+        
+        Vector2T<float> vector = new Vector2T<float>(-3, 1.5f);
+        float magnitude = vector.LengthSquared();
+        
+        Assert.That(magnitude, Is.EqualTo(controlMagnitude));
+    }
+    
+    [Test]
+    public void TestMagnitude()
+    {
+        Vector2 control = new Vector2(-3, 1.5f);
+        float controlMagnitude = control.Length();
+        
+        Vector2T<float> vector = new Vector2T<float>(-3, 1.5f);
+        float magnitude = vector.Length();
+        
+        Assert.That(magnitude, Is.EqualTo(controlMagnitude));
+    }
+
+    [Test]
+    public void TestNormalize()
+    {
+        Vector2 control = new Vector2(-3, 1.5f);
+        Vector2 controlNormalized = Vector2.Normalize(control);
+
+        Vector2T<float> vector = new Vector2T<float>(-3, 1.5f);
+        Vector2T<float> normalized = vector.Normalize();
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(normalized.X, Is.EqualTo(controlNormalized.X));
+            Assert.That(normalized.Y, Is.EqualTo(controlNormalized.Y));
+        });
     }
 }

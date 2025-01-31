@@ -10,6 +10,7 @@ public readonly struct Vector2T<T> :
     IEqualityOperators<Vector2T<T>, Vector2T<T>, bool>,
     IAdditionOperators<Vector2T<T>, Vector2T<T>, Vector2T<T>>, 
     ISubtractionOperators<Vector2T<T>, Vector2T<T>, Vector2T<T>>,
+    IUnaryNegationOperators<Vector2T<T>, Vector2T<T>>,
     IMultiplyOperators<Vector2T<T>, Vector2T<T>, Vector2T<T>>,
     IMultiplyOperators<Vector2T<T>, T, Vector2T<T>>,
     IDivisionOperators<Vector2T<T>, Vector2T<T>, Vector2T<T>>,
@@ -17,6 +18,14 @@ public readonly struct Vector2T<T> :
     IFormattable
     where T : INumber<T>
 {
+    public static Vector2T<T> Zero => new Vector2T<T>(T.Zero, T.Zero);
+
+    public static Vector2T<T> One => new Vector2T<T>(T.One, T.One);
+
+    public static Vector2T<T> UnitX => new Vector2T<T>(T.One, T.Zero);
+
+    public static Vector2T<T> UnitY => new Vector2T<T>(T.Zero, T.One);
+    
     public readonly T X;
 
     public readonly T Y;
@@ -78,6 +87,9 @@ public readonly struct Vector2T<T> :
     {
         return new Vector2T<T>(left.X - right.X, left.Y - right.Y);
     }
+    
+    public static Vector2T<T> operator -(Vector2T<T> value)
+        => new Vector2T<T>(-value.X, -value.Y);
     
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static Vector2T<T> operator *(Vector2T<T> left, Vector2T<T> right)
