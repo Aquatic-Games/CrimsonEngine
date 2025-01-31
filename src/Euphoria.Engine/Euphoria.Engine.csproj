@@ -6,4 +6,11 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Euphoria.Audio\Euphoria.Audio.csproj" />
+      <ProjectReference Include="..\Euphoria.Core\Euphoria.Core.csproj" />
+      <ProjectReference Include="..\Euphoria.Graphics\Euphoria.Graphics.csproj" />
+      <ProjectReference Include="..\Euphoria.Math\Euphoria.Math.csproj" />
+    </ItemGroup>
+
 </Project>
