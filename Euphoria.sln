@@ -16,6 +16,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E844E99B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Math.Tests", "tests\Euphoria.Math.Tests\Euphoria.Math.Tests.csproj", "{DC68DCED-473A-4DAF-80D9-22B9E093D431}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Input", "src\Euphoria.Input\Euphoria.Input.csproj", "{E8585C41-45F5-4C6D-9137-1BEE2FC3F3E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Engine.Tests", "tests\Euphoria.Engine.Tests\Euphoria.Engine.Tests.csproj", "{411B0077-8B10-41B8-B7F4-5A0E6541C850}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,8 +54,17 @@ Global
 		{DC68DCED-473A-4DAF-80D9-22B9E093D431}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC68DCED-473A-4DAF-80D9-22B9E093D431}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC68DCED-473A-4DAF-80D9-22B9E093D431}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8585C41-45F5-4C6D-9137-1BEE2FC3F3E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8585C41-45F5-4C6D-9137-1BEE2FC3F3E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8585C41-45F5-4C6D-9137-1BEE2FC3F3E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8585C41-45F5-4C6D-9137-1BEE2FC3F3E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{411B0077-8B10-41B8-B7F4-5A0E6541C850}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{411B0077-8B10-41B8-B7F4-5A0E6541C850}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{411B0077-8B10-41B8-B7F4-5A0E6541C850}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{411B0077-8B10-41B8-B7F4-5A0E6541C850}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DC68DCED-473A-4DAF-80D9-22B9E093D431} = {E844E99B-D674-48E8-8FB5-718E65F4AB19}
+		{411B0077-8B10-41B8-B7F4-5A0E6541C850} = {E844E99B-D674-48E8-8FB5-718E65F4AB19}
 	EndGlobalSection
 EndGlobal

@@ -13,4 +13,6 @@ public struct WindowInfo
         Title = title;
         Size = size;
     }
+
+    public static WindowInfo Default => new WindowInfo("Euphoria Application", new Size<int>(1280, 720));
 }
