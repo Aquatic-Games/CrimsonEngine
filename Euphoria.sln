@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria", "src\Euphoria\Euphoria.csproj", "{851EF637-6A5A-47EA-8C7E-60DDF32E5884}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Engine", "src\Euphoria.Engine\Euphoria.Engine.csproj", "{D17B316D-DD9D-47AB-B0AA-1CF13A0F7F29}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Core", "src\Euphoria.Core\Euphoria.Core.csproj", "{180D0B54-FBB4-425B-B612-40DF0EAC6211}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Graphics", "src\Euphoria.Graphics\Euphoria.Graphics.csproj", "{85B79694-9F39-444A-BAA7-AA75399652F3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Math", "src\Euphoria.Math\Euphoria.Math.csproj", "{28B45E66-21DC-4ACF-8B1F-AA8017A5EC52}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Audio", "src\Euphoria.Audio\Euphoria.Audio.csproj", "{7BAD6C39-362F-4780-8B43-7B039CE594E6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{851EF637-6A5A-47EA-8C7E-60DDF32E5884}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{851EF637-6A5A-47EA-8C7E-60DDF32E5884}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{851EF637-6A5A-47EA-8C7E-60DDF32E5884}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{851EF637-6A5A-47EA-8C7E-60DDF32E5884}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D17B316D-DD9D-47AB-B0AA-1CF13A0F7F29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D17B316D-DD9D-47AB-B0AA-1CF13A0F7F29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D17B316D-DD9D-47AB-B0AA-1CF13A0F7F29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D17B316D-DD9D-47AB-B0AA-1CF13A0F7F29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{180D0B54-FBB4-425B-B612-40DF0EAC6211}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{180D0B54-FBB4-425B-B612-40DF0EAC6211}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{180D0B54-FBB4-425B-B612-40DF0EAC6211}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{180D0B54-FBB4-425B-B612-40DF0EAC6211}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85B79694-9F39-444A-BAA7-AA75399652F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85B79694-9F39-444A-BAA7-AA75399652F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85B79694-9F39-444A-BAA7-AA75399652F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85B79694-9F39-444A-BAA7-AA75399652F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28B45E66-21DC-4ACF-8B1F-AA8017A5EC52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28B45E66-21DC-4ACF-8B1F-AA8017A5EC52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28B45E66-21DC-4ACF-8B1F-AA8017A5EC52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28B45E66-21DC-4ACF-8B1F-AA8017A5EC52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BAD6C39-362F-4780-8B43-7B039CE594E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BAD6C39-362F-4780-8B43-7B039CE594E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BAD6C39-362F-4780-8B43-7B039CE594E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BAD6C39-362F-4780-8B43-7B039CE594E6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
