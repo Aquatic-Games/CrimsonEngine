@@ -1,16 +1,17 @@
+using Euphoria.Core;
 using SDL;
 using Silk.NET.Vulkan;
 
 namespace Euphoria.Graphics.Vulkan.RenderAbstraction;
 
-internal class VkDevice : IDisposable
+internal unsafe class VkDevice : IDisposable
 {
     public readonly Vk Vk;
 
     public readonly Instance Instance;
     public readonly Device Device;
 
-    public unsafe VkDevice()
+    public VkDevice()
     {
         Vk = Vk.GetApi();
 
@@ -35,13 +36,18 @@ internal class VkDevice : IDisposable
                 PApplicationInfo = &appInfo,
 
                 PpEnabledExtensionNames = extensions,
-                EnabledExtensionCount = numExtensions
+                EnabledExtensionCount = numExtensions,
             };
+
+            Logger.Trace("Creating instance.");
+            Vk.CreateInstance(&instanceInfo, null, out Instance).Check("Create instance");
         }
     }
     
     public void Dispose()
     {
+        Vk.DestroyInstance(Instance, null);
+        
         Vk.Dispose();
     }
 }
