@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Euphoria.Core\Euphoria.Core.csproj" />
+      <ProjectReference Include="..\Euphoria.Graphics\Euphoria.Graphics.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="ppy.SDL3-CS" Version="2025.127.0" />
+      <PackageReference Include="Silk.NET.Vulkan" Version="2.22.0" />
+      <PackageReference Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.22.0" />
+      <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.22.0" />
+    </ItemGroup>
+
+</Project>

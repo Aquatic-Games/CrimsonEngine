@@ -1,5 +1,8 @@
-﻿using Euphoria.Engine;
+﻿using Euphoria.Core;
+using Euphoria.Engine;
 using Euphoria.Engine.Launch;
+
+Logger.EnableConsole();
 
 LaunchInfo info = LaunchInfo.Default("EuphoriaTest", new Version(1, 0, 0));
 
