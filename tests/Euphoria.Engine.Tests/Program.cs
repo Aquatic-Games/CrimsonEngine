@@ -1,6 +1,5 @@
 ﻿using Euphoria.Core;
 using Euphoria.Engine;
-using Euphoria.Engine.Launch;
 
 Logger.EnableConsole();
 

@@ -1,5 +1,4 @@
-﻿using Euphoria.Engine.Launch;
-using Euphoria.Graphics;
+﻿using Euphoria.Graphics;
 using Euphoria.Graphics.Vulkan;
 
 namespace Euphoria.Engine;
@@ -17,7 +16,7 @@ public class App : IDisposable
         Window = new Window(info.Window);
         Window.Close += Close;
 
-        Renderer = new VkRenderer();
+        Renderer = new VkRenderer(info.Renderer);
     }
 
     public void Run()
@@ -39,6 +38,7 @@ public class App : IDisposable
     
     public void Dispose()
     {
+        Renderer.Dispose();
         Window.Dispose();
     }
 }

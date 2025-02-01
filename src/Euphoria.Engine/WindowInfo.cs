@@ -1,6 +1,6 @@
 using Euphoria.Math;
 
-namespace Euphoria.Engine.Launch;
+namespace Euphoria.Engine;
 
 public struct WindowInfo
 {
