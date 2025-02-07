@@ -11,4 +11,9 @@
       <PackageReference Include="ppy.SDL3-CS" Version="2025.127.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Euphoria.Core\Euphoria.Core.csproj" />
+      <ProjectReference Include="..\Euphoria.Math\Euphoria.Math.csproj" />
+    </ItemGroup>
+
 </Project>
