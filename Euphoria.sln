@@ -20,8 +20,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Input", "src\Eupho
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Engine.Tests", "tests\Euphoria.Engine.Tests\Euphoria.Engine.Tests.csproj", "{411B0077-8B10-41B8-B7F4-5A0E6541C850}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Graphics.Vulkan", "src\Euphoria.Graphics.Vulkan\Euphoria.Graphics.Vulkan.csproj", "{E892BF9B-ABDE-4972-B1C9-29E315953140}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,10 +62,6 @@ Global
 		{411B0077-8B10-41B8-B7F4-5A0E6541C850}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{411B0077-8B10-41B8-B7F4-5A0E6541C850}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{411B0077-8B10-41B8-B7F4-5A0E6541C850}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E892BF9B-ABDE-4972-B1C9-29E315953140}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E892BF9B-ABDE-4972-B1C9-29E315953140}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E892BF9B-ABDE-4972-B1C9-29E315953140}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E892BF9B-ABDE-4972-B1C9-29E315953140}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DC68DCED-473A-4DAF-80D9-22B9E093D431} = {E844E99B-D674-48E8-8FB5-718E65F4AB19}

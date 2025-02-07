@@ -8,16 +8,16 @@ public sealed unsafe class Window : IDisposable
 {
     public event OnClose Close = delegate { };
 
-    private readonly SDL_Window* _window;
+    internal readonly SDL_Window* Handle;
     
     public Window(in WindowInfo info)
     {
         if (!SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO | SDL_InitFlags.SDL_INIT_EVENTS))
             throw new Exception($"Failed to initialize SDL: {SDL_GetError()}");
 
-        _window = SDL_CreateWindow(info.Title, info.Size.Width, info.Size.Height, SDL_WindowFlags.SDL_WINDOW_VULKAN);
+        Handle = SDL_CreateWindow(info.Title, info.Size.Width, info.Size.Height, 0);
 
-        if (_window == null)
+        if (Handle == null)
             throw new Exception($"Failed to create window: {SDL_GetError()}");
     }
 
@@ -37,7 +37,7 @@ public sealed unsafe class Window : IDisposable
 
     public void Dispose()
     {
-        SDL_DestroyWindow(_window);
+        SDL_DestroyWindow(Handle);
         SDL_Quit();
     }
 

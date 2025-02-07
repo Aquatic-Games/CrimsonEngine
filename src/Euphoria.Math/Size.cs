@@ -19,4 +19,7 @@ public record struct Size<T> where T : INumber<T>
         Width = width;
         Height = height;
     }
+
+    public Size<TOther> As<TOther>() where TOther : INumber<TOther>
+        => new Size<TOther>(TOther.CreateChecked(Width), TOther.CreateChecked(Height));
 }

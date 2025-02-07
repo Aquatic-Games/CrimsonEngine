@@ -10,7 +10,6 @@
     <ItemGroup>
       <ProjectReference Include="..\Euphoria.Audio\Euphoria.Audio.csproj" />
       <ProjectReference Include="..\Euphoria.Core\Euphoria.Core.csproj" />
-      <ProjectReference Include="..\Euphoria.Graphics.Vulkan\Euphoria.Graphics.Vulkan.csproj" />
       <ProjectReference Include="..\Euphoria.Graphics\Euphoria.Graphics.csproj" />
       <ProjectReference Include="..\Euphoria.Input\Euphoria.Input.csproj" />
       <ProjectReference Include="..\Euphoria.Math\Euphoria.Math.csproj" />

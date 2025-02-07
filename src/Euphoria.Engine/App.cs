@@ -1,5 +1,4 @@
 ﻿using Euphoria.Graphics;
-using Euphoria.Graphics.Vulkan;
 
 namespace Euphoria.Engine;
 
@@ -11,12 +10,12 @@ public class App : IDisposable
 
     public bool IsAlive;
     
-    public App(in LaunchInfo info)
+    public unsafe App(in LaunchInfo info)
     {
         Window = new Window(info.Window);
         Window.Close += Close;
 
-        Renderer = new VkRenderer(info.Renderer);
+        Renderer = new Renderer(Window.Handle, info.Renderer);
     }
 
     public void Run()
@@ -27,7 +26,7 @@ public class App : IDisposable
         {
             Window.ProcessEvents();
             
-            Renderer.Present();
+            Renderer.Render();
         }
     }
 
