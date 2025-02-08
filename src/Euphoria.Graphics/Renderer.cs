@@ -8,6 +8,9 @@ public unsafe class Renderer : IDisposable
 {
     private readonly SDL_Window* _window;
     private readonly SDL_GPUDevice* _device;
+
+    // TODO: This should be a UI renderer.
+    public readonly TextureBatcher TextureBatcher;
     
     public Renderer(SDL_Window* window, in RendererInfo info)
     {
@@ -17,6 +20,8 @@ public unsafe class Renderer : IDisposable
             "Create GPU device");
 
         Check(SDL_ClaimWindowForGPUDevice(_device, window), "Claim window for device");
+
+        TextureBatcher = new TextureBatcher(_device);
     }
     
     public void Render()
@@ -48,6 +53,8 @@ public unsafe class Renderer : IDisposable
 
     public void Dispose()
     {
+        TextureBatcher.Dispose();
+        
         SDL_ReleaseWindowFromGPUDevice(_device, _window);
         SDL_DestroyGPUDevice(_device);
     }
