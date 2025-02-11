@@ -116,6 +116,14 @@ public readonly struct Vector2T<T> :
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static explicit operator System.Numerics.Vector2(in Vector2T<T> vector)
+        => new System.Numerics.Vector2(float.CreateChecked(vector.X), float.CreateChecked(vector.Y));
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static explicit operator Vector2T<T>(in System.Numerics.Vector2 vector)
+        => new Vector2T<T>(T.CreateChecked(vector.X), T.CreateChecked(vector.Y));
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public string ToString(string? format, IFormatProvider? formatProvider)
     {
         FormattableString formattable = $"{nameof(X)}: {X}, {nameof(Y)}: {Y}";

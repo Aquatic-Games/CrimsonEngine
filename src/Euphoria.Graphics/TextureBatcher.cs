@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Euphoria.Math;
 using grabs;
 using grabs.Core;
@@ -175,21 +176,84 @@ public unsafe class TextureBatcher : IDisposable
         _drawList.Add(new DrawItem(topLeft, topRight, bottomLeft, bottomRight, tint));
     }
 
-    internal void RenderDrawList(SDL_GPUCommandBuffer* cb, SDL_GPURenderPass* pass, Size<uint> renderSize)
+    internal void RenderDrawList(SDL_GPUCommandBuffer* cb, SDL_GPUTexture* texture, Size<uint> renderSize)
     {
-        SDL_BindGPUGraphicsPipeline(pass, _pipeline);
-
         CameraMatrices matrices =
             new CameraMatrices(Matrix4x4.CreateOrthographicOffCenter(0, renderSize.Width, renderSize.Height, 0, -1, 1),
                 Matrix4x4.Identity);
         SDL_PushGPUVertexUniformData(cb, 0, new IntPtr(&matrices), (uint) sizeof(CameraMatrices));
 
+        uint numDraws = 0;
         foreach (DrawItem item in _drawList)
         {
+            if (numDraws >= MaxBatches)
+                Flush(pass, numDraws);
             
+            uint vOffset = numDraws * NumVertices;
+            uint iOffset = numDraws * NumIndices;
+
+            _vertices[vOffset + 0] = new Vertex((Vector2T<float>) item.TopLeft, new Vector2T<float>(0, 0), item.Tint);
+            _vertices[vOffset + 1] = new Vertex((Vector2T<float>) item.TopRight, new Vector2T<float>(1, 0), item.Tint);
+            _vertices[vOffset + 2] = new Vertex((Vector2T<float>) item.BottomRight, new Vector2T<float>(1, 1), item.Tint);
+            _vertices[vOffset + 3] = new Vertex((Vector2T<float>) item.BottomLeft, new Vector2T<float>(0, 1), item.Tint);
+
+            _indices[iOffset + 0] = (ushort) (0 + vOffset);
+            _indices[iOffset + 1] = (ushort) (1 + vOffset);
+            _indices[iOffset + 2] = (ushort) (3 + vOffset);
+            _indices[iOffset + 3] = (ushort) (1 + vOffset);
+            _indices[iOffset + 4] = (ushort) (2 + vOffset);
+            _indices[iOffset + 5] = (ushort) (3 + vOffset);
+
+            numDraws++;
         }
         
+        Flush(cb, texture, numDraws);
+        
         _drawList.Clear();
+    }
+
+    private void Flush(SDL_GPUCommandBuffer* cb, SDL_GPUTexture* texture, uint numDraws)
+    {
+        if (numDraws == 0)
+            return;
+
+        void* map = (void*) SDL_MapGPUTransferBuffer(_device, _transferBuffer, true);
+
+        uint numVertexBytes = numDraws * NumVertices * Vertex.SizeInBytes;
+        uint numIndexBytes = numDraws * NumIndices * sizeof(ushort);
+        
+        fixed (Vertex* pVertices = _vertices)
+            Unsafe.CopyBlock(map, pVertices, numVertexBytes);
+        
+        fixed (ushort* pIndices = _indices)
+            Unsafe.CopyBlock((byte*) map + numVertexBytes, pIndices, numIndexBytes);
+        
+        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(cb);
+        
+        UploadTransferBuffer(copyPass, _transferBuffer, _vertexBuffer, numVertexBytes, 0);
+        UploadTransferBuffer(copyPass, _transferBuffer, _indexBuffer, numIndexBytes, numVertexBytes);
+        
+        SDL_EndGPUCopyPass(copyPass);
+        
+        SDL_BeginGPURenderPass(cb, )
+
+        SDL_BindGPUGraphicsPipeline(pass, _pipeline);
+
+        SDL_GPUBufferBinding vertexBinding = new SDL_GPUBufferBinding()
+        {
+            offset = 0,
+            buffer = _vertexBuffer
+        };
+        SDL_BindGPUVertexBuffers(pass, 0, &vertexBinding, 1);
+
+        SDL_GPUBufferBinding indexBinding = new SDL_GPUBufferBinding()
+        {
+            offset = 0,
+            buffer = _indexBuffer
+        };
+        SDL_BindGPUIndexBuffer(pass, &indexBinding, SDL_GPUIndexElementSize.SDL_GPU_INDEXELEMENTSIZE_16BIT);
+
+        SDL_DrawGPUIndexedPrimitives(pass, numDraws * NumIndices, 1, 0, 0, 0);
     }
     
     public void Dispose()
@@ -202,18 +266,20 @@ public unsafe class TextureBatcher : IDisposable
 
     private readonly struct Vertex
     {
-        public readonly Vector2 Position;
+        public readonly Vector2T<float> Position;
 
-        public readonly Vector2 TexCoord;
+        public readonly Vector2T<float> TexCoord;
 
         public readonly Color Tint;
 
-        public Vertex(Vector2 position, Vector2 texCoord, Color tint)
+        public Vertex(Vector2T<float> position, Vector2T<float> texCoord, Color tint)
         {
             Position = position;
             TexCoord = texCoord;
             Tint = tint;
         }
+
+        public const uint SizeInBytes = 32;
     }
 
     private readonly ref struct CameraMatrices

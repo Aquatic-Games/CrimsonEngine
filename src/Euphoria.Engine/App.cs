@@ -1,4 +1,6 @@
-﻿using Euphoria.Graphics;
+﻿using System.Numerics;
+using Euphoria.Graphics;
+using Euphoria.Math;
 
 namespace Euphoria.Engine;
 
@@ -25,6 +27,8 @@ public class App : IDisposable
         while (IsAlive)
         {
             Window.ProcessEvents();
+            
+            Renderer.TextureBatcher.Draw(new Vector2(0, 0), new Vector2(100, 0), new Vector2(0, 100), new Vector2(100, 100), new Color(1.0f, 1.0f, 1.0f));
             
             Renderer.Render();
         }

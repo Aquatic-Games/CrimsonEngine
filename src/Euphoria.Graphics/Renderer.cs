@@ -1,4 +1,5 @@
-﻿using SDL;
+﻿using Euphoria.Math;
+using SDL;
 using static Euphoria.Graphics.SdlUtil;
 using static SDL.SDL3;
 
@@ -45,6 +46,19 @@ public unsafe class Renderer : IDisposable
         };
 
         SDL_GPURenderPass* pass = Check(SDL_BeginGPURenderPass(cb, &targetInfo, 1, null), "Begin render pass");
+        
+        SDL_GPUViewport viewport = new SDL_GPUViewport()
+        {
+            x = 0,
+            y = 0,
+            w = width,
+            h = height,
+            min_depth = 0.0f,
+            max_depth = 1.0f
+        };
+        SDL_SetGPUViewport(pass, &viewport);
+        
+        TextureBatcher.RenderDrawList(cb, pass, new Size<uint>(width, height));
         
         SDL_EndGPURenderPass(pass);
 
