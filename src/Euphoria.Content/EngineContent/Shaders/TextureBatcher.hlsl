@@ -20,7 +20,7 @@ struct PSOutput
     float4 Color: SV_Target0;
 };
 
-cbuffer ProjectionMatrices : register(b0)
+cbuffer ProjectionMatrices : register(b0, space1)
 {
     float4x4 Projection;
     float4x4 Transform;

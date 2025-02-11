@@ -58,9 +58,9 @@ public unsafe class Renderer : IDisposable
         };
         SDL_SetGPUViewport(pass, &viewport);
         
-        TextureBatcher.RenderDrawList(cb, pass, new Size<uint>(width, height));
-        
         SDL_EndGPURenderPass(pass);
+        
+        TextureBatcher.RenderDrawList(cb, swapchainTexture, new Size<uint>(width, height));
 
         Check(SDL_SubmitGPUCommandBuffer(cb), "Submit command buffer");
     }

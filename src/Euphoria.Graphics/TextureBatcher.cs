@@ -187,7 +187,7 @@ public unsafe class TextureBatcher : IDisposable
         foreach (DrawItem item in _drawList)
         {
             if (numDraws >= MaxBatches)
-                Flush(pass, numDraws);
+                Flush(cb, texture, numDraws);
             
             uint vOffset = numDraws * NumVertices;
             uint iOffset = numDraws * NumIndices;
@@ -234,8 +234,15 @@ public unsafe class TextureBatcher : IDisposable
         UploadTransferBuffer(copyPass, _transferBuffer, _indexBuffer, numIndexBytes, numVertexBytes);
         
         SDL_EndGPUCopyPass(copyPass);
-        
-        SDL_BeginGPURenderPass(cb, )
+
+        SDL_GPUColorTargetInfo targetInfo = new SDL_GPUColorTargetInfo()
+        {
+            texture = texture,
+            load_op = SDL_GPULoadOp.SDL_GPU_LOADOP_LOAD,
+            store_op = SDL_GPUStoreOp.SDL_GPU_STOREOP_STORE,
+        };
+
+        SDL_GPURenderPass* pass = Check(SDL_BeginGPURenderPass(cb, &targetInfo, 1, null), "Begin render pass");
 
         SDL_BindGPUGraphicsPipeline(pass, _pipeline);
 
@@ -254,6 +261,8 @@ public unsafe class TextureBatcher : IDisposable
         SDL_BindGPUIndexBuffer(pass, &indexBinding, SDL_GPUIndexElementSize.SDL_GPU_INDEXELEMENTSIZE_16BIT);
 
         SDL_DrawGPUIndexedPrimitives(pass, numDraws * NumIndices, 1, 0, 0, 0);
+        
+        SDL_EndGPURenderPass(pass);
     }
     
     public void Dispose()
