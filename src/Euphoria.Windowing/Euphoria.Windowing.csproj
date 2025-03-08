@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Euphoria.Math\Euphoria.Math.csproj" />
+    </ItemGroup>
+
 </Project>
