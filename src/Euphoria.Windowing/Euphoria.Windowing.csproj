@@ -4,10 +4,15 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Euphoria.Math\Euphoria.Math.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="ppy.SDL3-CS" Version="2025.220.0" />
     </ItemGroup>
 
 </Project>

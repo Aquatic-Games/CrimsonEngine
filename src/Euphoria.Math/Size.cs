@@ -4,14 +4,14 @@ namespace Euphoria.Math;
 
 public readonly record struct Size<T> where T : INumber<T>
 {
-    public readonly T X;
+    public readonly T Width;
 
-    public readonly T Y;
+    public readonly T Height;
 
-    public Size(T x, T y)
+    public Size(T width, T height)
     {
-        X = x;
-        Y = y;
+        Width = width;
+        Height = height;
     }
 
     public Size(T wh) : this(wh, wh) { }
