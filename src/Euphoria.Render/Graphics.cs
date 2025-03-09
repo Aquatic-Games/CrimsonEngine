@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Numerics;
 using Euphoria.Core;
 using Euphoria.Math;
+using Euphoria.Render.Renderers;
 using grabs.Core;
 using grabs.Graphics;
 using grabs.Graphics.D3D11;
@@ -19,6 +21,9 @@ public static class Graphics
     internal static Instance Instance = null!;
     internal static Device Device = null!;
     internal static CommandList CommandList = null!;
+
+    private static TextureBatcher _test;
+    private static Texture _texture;
     
     /// <summary>
     /// Create the graphics subsystem.
@@ -65,6 +70,9 @@ public static class Graphics
         _swapchain = Device.CreateSwapchain(in swapchainInfo);
 
         CommandList = Device.CreateCommandList();
+
+        _test = new TextureBatcher(Device, _swapchain.SwapchainFormat);
+        _texture = new Texture("/home/aqua/Pictures/DEBUG.png");
     }
 
     /// <summary>
@@ -74,6 +82,8 @@ public static class Graphics
     {
         Debug.Assert(Instance != null);
         
+        _texture.Dispose();
+        _test.Dispose();
         CommandList.Dispose();
         _swapchain.Dispose();
         Device.Dispose();
@@ -89,12 +99,17 @@ public static class Graphics
         GrabsTexture swapchainTexture = _swapchain.GetNextTexture();
         
         CommandList.Begin();
+        CommandList.SetViewport(new Viewport(0, 0, 1280, 720));
 
         RenderPassInfo passInfo = new()
         {
             ColorAttachments = [new ColorAttachmentInfo(swapchainTexture, new ColorF(1.0f, 0.5f, 0.25f))]
         };
         CommandList.BeginRenderPass(in passInfo);
+        
+        _test.Draw(_texture, new Vector2(0, 0), new Vector2(100, 0), new Vector2(0, 100), new Vector2(100, 100));
+        _test.DispatchDrawQueue(CommandList, Matrix4x4.CreateOrthographicOffCenter(0, 1280, 720, 0, -1, 1), Matrix4x4.Identity);
+        
         CommandList.EndRenderPass();
         
         CommandList.End();
