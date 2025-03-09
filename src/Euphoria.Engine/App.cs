@@ -12,6 +12,7 @@ public static class App
 {
     private static string _appName;
     private static bool _isRunning;
+    private static GlobalApp _globalApp;
 
     /// <summary>
     /// The app name.
@@ -24,17 +25,24 @@ public static class App
     /// </summary>
     public static bool IsRunning => _isRunning;
 
+    /// <summary>
+    /// The global application instance.
+    /// </summary>
+    public static GlobalApp GlobalApp => _globalApp;
+
     static App()
     {
         _appName = "";
         _isRunning = false;
+        _globalApp = null!;
     }
     
     /// <summary>
     /// Run the application.
     /// </summary>
     /// <param name="options">The <see cref="AppOptions"/> to use on startup.</param>
-    public static void Run(in AppOptions options)
+    /// <param name="globalApp">A <see cref="Euphoria.Engine.GlobalApp"/> instance, if any.</param>
+    public static void Run(in AppOptions options, GlobalApp? globalApp = null)
     {
         Debug.Assert(_isRunning == false);
         
@@ -44,6 +52,7 @@ public static class App
         Logger.Info($"    Version: {options.Version}");
         
         _appName = options.Name;
+        _globalApp = globalApp ?? new GlobalApp();
         
         Logger.Debug("Creating window.");
         Surface.Create(in options.Window);
@@ -53,17 +62,24 @@ public static class App
         Graphics.Create(Surface.Info, Surface.Size);
         
         _isRunning = true;
+        
+        Logger.Debug("Initializing user code.");
+        _globalApp.Initialize();
 
         Logger.Debug("Entering main loop.");
         while (_isRunning)
         {
             Events.ProcessEvents();
             
+            _globalApp.Update(1.0f / 60.0f);
+            _globalApp.Draw();
+            
             Graphics.Render();
         }
         
         Logger.Info("Cleaning up.");
         
+        _globalApp.Dispose();
         Graphics.Destroy();
         Surface.Destroy();
     }

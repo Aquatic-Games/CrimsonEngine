@@ -1,4 +1,5 @@
 global using GrabsTexture = grabs.Graphics.Texture;
+using Euphoria.Core;
 using Euphoria.Math;
 using grabs.Core;
 using grabs.Graphics;
@@ -25,6 +26,7 @@ public class Texture : IDisposable
         TextureInfo info = TextureInfo.Texture2D(new Size2D((uint) size.Width, (uint) size.Height), format,
             TextureUsage.Sampled);
 
+        Logger.Trace("Creating texture.");
         TextureHandle = device.CreateTexture<byte>(in info, data.AsSpan());
     }
 

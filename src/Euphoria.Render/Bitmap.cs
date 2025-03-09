@@ -1,3 +1,4 @@
+using Euphoria.Core;
 using Euphoria.Math;
 using grabs.Graphics;
 using StbImageSharp;
@@ -30,6 +31,8 @@ public class Bitmap
     /// <param name="path">The path to load from.</param>
     public Bitmap(string path)
     {
+        Logger.Trace($"Loading bitmap from path \"{path}\".");
+        
         using FileStream stream = File.OpenRead(path); 
         ImageResult result = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
         Size = new Size<int>(result.Width, result.Height);
