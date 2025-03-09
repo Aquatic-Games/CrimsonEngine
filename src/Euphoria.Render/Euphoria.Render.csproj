@@ -4,12 +4,17 @@
       <ProjectReference Include="..\..\lib\grabs\src\grabs.Graphics.D3D11\grabs.Graphics.D3D11.csproj" />
       <ProjectReference Include="..\..\lib\grabs\src\grabs.Graphics.Vulkan\grabs.Graphics.Vulkan.csproj" />
       <ProjectReference Include="..\..\lib\grabs\src\grabs.Graphics\grabs.Graphics.csproj" />
+      <ProjectReference Include="..\..\lib\grabs\src\grabs.ShaderCompiler\grabs.ShaderCompiler.csproj" />
       <ProjectReference Include="..\Euphoria.Core\Euphoria.Core.csproj" />
       <ProjectReference Include="..\Euphoria.Math\Euphoria.Math.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="StbImageSharp" Version="2.30.15" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Shaders\**\*" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
 </Project>
