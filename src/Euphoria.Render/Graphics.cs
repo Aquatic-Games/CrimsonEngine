@@ -86,8 +86,20 @@ public static class Graphics
     /// </summary>
     public static void Render()
     {
-        Texture swapchainTexture = _swapchain.GetNextTexture();
+        GrabsTexture swapchainTexture = _swapchain.GetNextTexture();
         
+        CommandList.Begin();
+
+        RenderPassInfo passInfo = new()
+        {
+            ColorAttachments = [new ColorAttachmentInfo(swapchainTexture, new ColorF(1.0f, 0.5f, 0.25f))]
+        };
+        CommandList.BeginRenderPass(in passInfo);
+        CommandList.EndRenderPass();
+        
+        CommandList.End();
+        
+        Device.ExecuteCommandList(CommandList);
         _swapchain.Present();
     }
 }
