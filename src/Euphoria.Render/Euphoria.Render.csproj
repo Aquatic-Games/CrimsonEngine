@@ -6,4 +6,11 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\lib\grabs\src\grabs.Graphics.D3D11\grabs.Graphics.D3D11.csproj" />
+      <ProjectReference Include="..\..\lib\grabs\src\grabs.Graphics.Vulkan\grabs.Graphics.Vulkan.csproj" />
+      <ProjectReference Include="..\..\lib\grabs\src\grabs.Graphics\grabs.Graphics.csproj" />
+      <ProjectReference Include="..\Euphoria.Core\Euphoria.Core.csproj" />
+    </ItemGroup>
+
 </Project>

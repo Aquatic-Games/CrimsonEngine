@@ -1,5 +1,6 @@
 ﻿using Euphoria.Core;
 using Euphoria.Math;
+using grabs.Graphics;
 using SDL;
 using static SDL.SDL3;
 
@@ -19,6 +20,48 @@ public static unsafe class Window
             return new Size<int>(w, h);
         }
         set => SDL_SetWindowSize(_window, value.Width, value.Height);
+    }
+    
+    public static SurfaceInfo SurfaceInfo
+    {
+        get
+        {
+            SurfaceInfo info;
+            SDL_PropertiesID props = SDL_GetWindowProperties(_window);
+            
+            if (OperatingSystem.IsWindows())
+            {
+                nint hinstance = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_INSTANCE_POINTER, 0);
+                nint hwnd = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, 0);
+
+                info = SurfaceInfo.Windows(hinstance, hwnd);
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                string driver = SDL_GetCurrentVideoDriver()!;
+
+                if (driver == "wayland")
+                {
+                    nint display = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER, 0);
+                    nint surface = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, 0);
+
+                    info = SurfaceInfo.Wayland(display, surface);
+                }
+                else if (driver == "x11")
+                {
+                    nint display = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_X11_DISPLAY_POINTER, 0);
+                    nint window = (nint) SDL_GetNumberProperty(props, SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
+
+                    info = SurfaceInfo.Xlib(display, window);
+                }
+                else
+                    throw new PlatformNotSupportedException();
+            }
+            else
+                throw new PlatformNotSupportedException();
+
+            return info;
+        }
     }
 
     public static void Create(in WindowOptions options)
