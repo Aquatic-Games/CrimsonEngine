@@ -1,4 +1,5 @@
-﻿using Euphoria.Math;
+﻿using Euphoria.Core;
+using Euphoria.Math;
 using SDL;
 using static SDL.SDL3;
 
@@ -22,9 +23,11 @@ public static unsafe class Window
 
     public static void Create(in WindowOptions options)
     {
+        Logger.Trace("Initializing SDL.");
         if (!SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
             throw new Exception($"Failed to initialize SDL: {SDL_GetError()}");
 
+        Logger.Trace("Creating window.");
         _window = SDL_CreateWindow(options.Title, options.Size.Width, options.Size.Height, 0);
 
         if (_window == null)
