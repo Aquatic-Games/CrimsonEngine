@@ -1,16 +1,27 @@
 ﻿using System.Diagnostics;
 using Euphoria.Core;
+using Euphoria.Render;
 using Euphoria.Windowing;
 
 namespace Euphoria.Engine;
 
+/// <summary>
+/// The main application instance that runs Euphoria engine.
+/// </summary>
 public static class App
 {
     private static string _appName;
     private static bool _isRunning;
 
+    /// <summary>
+    /// The app name.
+    /// </summary>
     public static string Name => _appName;
     
+    /// <summary>
+    /// Is the app running? If false, the subsystems may not be initialized.
+    /// You should only use engine features when this value is true.
+    /// </summary>
     public static bool IsRunning => _isRunning;
 
     static App()
@@ -19,6 +30,10 @@ public static class App
         _isRunning = false;
     }
     
+    /// <summary>
+    /// Run the application.
+    /// </summary>
+    /// <param name="options">The <see cref="AppOptions"/> to use on startup.</param>
     public static void Run(in AppOptions options)
     {
         Debug.Assert(_isRunning == false);
@@ -31,8 +46,11 @@ public static class App
         _appName = options.Name;
         
         Logger.Debug("Creating window.");
-        Window.Create(in options.Window);
+        Surface.Create(in options.Window);
         Events.WindowClose += Close;
+        
+        Logger.Debug("Initializing graphics subsystem.");
+        Graphics.Create(Surface.Info, Surface.Size);
         
         _isRunning = true;
 
@@ -40,13 +58,19 @@ public static class App
         while (_isRunning)
         {
             Events.ProcessEvents();
+            
+            Graphics.Render();
         }
         
         Logger.Info("Cleaning up.");
         
-        Window.Destroy();
+        Graphics.Destroy();
+        Surface.Destroy();
     }
 
+    /// <summary>
+    /// Close the app.
+    /// </summary>
     public static void Close()
     {
         Debug.Assert(_isRunning == true);

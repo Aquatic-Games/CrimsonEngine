@@ -6,10 +6,16 @@ using static SDL.SDL3;
 
 namespace Euphoria.Windowing;
 
-public static unsafe class Window
+/// <summary>
+/// The primary application surface that is being rendered to.
+/// </summary>
+public static unsafe class Surface
 {
     private static SDL_Window* _window;
 
+    /// <summary>
+    /// The surface's size, in pixels.
+    /// </summary>
     public static Size<int> Size
     {
         get
@@ -22,7 +28,11 @@ public static unsafe class Window
         set => SDL_SetWindowSize(_window, value.Width, value.Height);
     }
     
-    public static SurfaceInfo SurfaceInfo
+    /// <summary>
+    /// The underlying handle(s) to the surface, typically provided by the window manager.
+    /// </summary>
+    /// <exception cref="PlatformNotSupportedException">Thrown if the current platform does not support the surface.</exception>
+    public static SurfaceInfo Info
     {
         get
         {
@@ -64,6 +74,11 @@ public static unsafe class Window
         }
     }
 
+    /// <summary>
+    /// Create the <see cref="Surface"/> with the given options.
+    /// </summary>
+    /// <param name="options">The <see cref="WindowOptions"/> to use when creating this surface.</param>
+    /// <exception cref="Exception">Thrown if the surface failed to create.</exception>
     public static void Create(in WindowOptions options)
     {
         Logger.Trace("Initializing SDL.");
@@ -77,6 +92,9 @@ public static unsafe class Window
             throw new Exception($"Failed to create window: {SDL_GetError()}");
     }
 
+    /// <summary>
+    /// Destroy the surface.
+    /// </summary>
     public static void Destroy()
     {
         SDL_DestroyWindow(_window);
