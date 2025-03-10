@@ -17,13 +17,12 @@ public static class Graphics
 {
     private static Surface _surface = null!;
     private static Swapchain _swapchain = null!;
+
+    private static TextureBatcher _uiBatcher;
     
     internal static Instance Instance = null!;
     internal static Device Device = null!;
     internal static CommandList CommandList = null!;
-
-    private static TextureBatcher _test;
-    private static Texture _texture;
     
     /// <summary>
     /// Create the graphics subsystem.
@@ -71,8 +70,7 @@ public static class Graphics
 
         CommandList = Device.CreateCommandList();
 
-        _test = new TextureBatcher(Device, _swapchain.SwapchainFormat);
-        _texture = new Texture("/home/aqua/Pictures/DEBUG.png");
+        _uiBatcher = new TextureBatcher(Device, _swapchain.SwapchainFormat);
     }
 
     /// <summary>
@@ -81,9 +79,9 @@ public static class Graphics
     public static void Destroy()
     {
         Debug.Assert(Instance != null);
+
+        _uiBatcher.Dispose();
         
-        _texture.Dispose();
-        _test.Dispose();
         CommandList.Dispose();
         _swapchain.Dispose();
         Device.Dispose();
@@ -92,14 +90,25 @@ public static class Graphics
     }
 
     /// <summary>
+    /// Draw an image to the screen.
+    /// </summary>
+    /// <param name="texture">The texture to use as the image.</param>
+    /// <param name="position">The position, in pixels.</param>
+    public static void DrawImage(Texture texture, in Vector2 position)
+    {
+        _uiBatcher.Draw(texture, in position);
+    }
+
+    /// <summary>
     /// Render and present to the surface.
     /// </summary>
     public static void Render()
     {
         GrabsTexture swapchainTexture = _swapchain.GetNextTexture();
+        Size2D swapchainSize = swapchainTexture.Size;
         
         CommandList.Begin();
-        CommandList.SetViewport(new Viewport(0, 0, 1280, 720));
+        CommandList.SetViewport(new Viewport(0, 0, swapchainSize.Width, swapchainSize.Height));
 
         RenderPassInfo passInfo = new()
         {
@@ -107,10 +116,31 @@ public static class Graphics
         };
         CommandList.BeginRenderPass(in passInfo);
         
-        _test.Draw(_texture, new Vector2(0, 0), new Vector2(100, 0), new Vector2(0, 100), new Vector2(100, 100));
-        _test.DispatchDrawQueue(CommandList, Matrix4x4.CreateOrthographicOffCenter(0, 1280, 720, 0, -1, 1), Matrix4x4.Identity);
-        
         CommandList.EndRenderPass();
+
+        // ----- UI Pass -----
+        
+        RenderPassInfo uiPass = new()
+        {
+            ColorAttachments =
+            [
+                new ColorAttachmentInfo()
+                {
+                    Texture = swapchainTexture,
+                    LoadOp = LoadOp.Load
+                }
+            ]
+        };
+        CommandList.BeginRenderPass(in uiPass);
+
+        Matrix4x4 projection =
+            Matrix4x4.CreateOrthographicOffCenter(0, swapchainSize.Width, swapchainSize.Height, 0, -1, 1);
+        Matrix4x4 transform = Matrix4x4.Identity;
+            
+        _uiBatcher.DispatchDrawQueue(CommandList, projection, transform);
+        CommandList.EndRenderPass();
+        
+        // ----- End UI Pass -----
         
         CommandList.End();
         

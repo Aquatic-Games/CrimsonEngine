@@ -13,6 +13,8 @@ public class Texture : IDisposable
 {
     internal GrabsTexture TextureHandle;
 
+    public readonly Size<int> Size;
+
     /// <summary>
     /// Create a <see cref="Texture"/>.
     /// </summary>
@@ -21,6 +23,8 @@ public class Texture : IDisposable
     /// <param name="format">The <see cref="Format"/> of the texture.</param>
     public Texture(in Size<int> size, byte[] data, Format format = Format.R8G8B8A8_UNorm)
     {
+        Size = size;
+        
         Device device = Graphics.Device;
 
         TextureInfo info = TextureInfo.Texture2D(new Size2D((uint) size.Width, (uint) size.Height), format,

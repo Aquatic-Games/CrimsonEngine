@@ -92,6 +92,18 @@ internal class TextureBatcher : IDisposable
         _drawQueue.Add(new DrawItem(texture, topLeft, topRight, bottomLeft, bottomRight));
     }
 
+    public void Draw(Texture texture, in Vector2 position)
+    {
+        Size<int> texSize = texture.Size;
+
+        Vector2 topLeft = position;
+        Vector2 topRight = position with { X = position.X + texSize.Width };
+        Vector2 bottomLeft = position with { Y = position.Y + texSize.Height };
+        Vector2 bottomRight = position + new Vector2(texSize.Width, texSize.Height);
+        
+        _drawQueue.Add(new DrawItem(texture, topLeft, topRight, bottomLeft, bottomRight));
+    }
+
     public void DispatchDrawQueue(CommandList cl, Matrix4x4 projection, Matrix4x4 transform)
     {
         GrabsUtils.CopyData(_cMap.DataPtr, new CameraMatrices(projection, transform));
@@ -104,7 +116,10 @@ internal class TextureBatcher : IDisposable
         foreach (DrawItem draw in _drawQueue)
         {
             if (numDraws >= MaxBatches || texture != draw.Texture)
+            {
                 Flush(cl, numDraws, texture);
+                numDraws = 0;
+            }
 
             texture = draw.Texture;
 

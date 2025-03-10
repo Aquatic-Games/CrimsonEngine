@@ -44,7 +44,7 @@ PSOutput PSMain(const in VSOutput input)
 {
     PSOutput output;
 
-    output.Color = Texture.Sample(State, input.TexCoord);
+    output.Color = Texture.Sample(State, input.TexCoord) * input.Tint;
     
     return output;
 }
