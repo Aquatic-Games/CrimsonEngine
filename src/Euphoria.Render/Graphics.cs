@@ -48,8 +48,8 @@ public static class Graphics
         };
         
         // TODO: Enable D3D11 when it actually works properly
-        //if (OperatingSystem.IsWindows())
-        //    Instance.RegisterBackend<D3D11Backend>();
+        if (OperatingSystem.IsWindows())
+            Instance.RegisterBackend<D3D11Backend>();
         Instance.RegisterBackend<VulkanBackend>();
 
         InstanceInfo instanceInfo = new InstanceInfo("Euphoria", true);

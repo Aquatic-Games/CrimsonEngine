@@ -30,9 +30,9 @@ internal class TextureBatcher : IDisposable
     private readonly Buffer _indexBuffer;
     private readonly Buffer _constantBuffer;
 
-    private readonly MappedData _vMap;
-    private readonly MappedData _iMap;
-    private readonly MappedData _cMap;
+    private MappedData _vMap;
+    private MappedData _iMap;
+    private MappedData _cMap;
 
     private readonly DescriptorLayout _layout;
     private readonly Pipeline _pipeline;
@@ -48,9 +48,9 @@ internal class TextureBatcher : IDisposable
         _indexBuffer = device.CreateBuffer(new BufferInfo(BufferType.Index, MaxIndices * sizeof(uint), BufferUsage.Dynamic));
         _constantBuffer = device.CreateBuffer(new BufferInfo(BufferType.Constant, CameraMatrices.SizeInBytes, BufferUsage.Dynamic));
 
-        _vMap = device.MapResource(_vertexBuffer, MapMode.Write);
-        _iMap = device.MapResource(_indexBuffer, MapMode.Write);
-        _cMap = device.MapResource(_constantBuffer, MapMode.Write);
+        //_vMap = device.MapResource(_vertexBuffer, MapMode.Write);
+        //_iMap = device.MapResource(_indexBuffer, MapMode.Write);
+        //_cMap = device.MapResource(_constantBuffer, MapMode.Write);
 
         DescriptorLayoutInfo cbLayoutInfo = new()
         {
@@ -106,9 +106,9 @@ internal class TextureBatcher : IDisposable
 
     public void DispatchDrawQueue(CommandList cl, Matrix4x4 projection, Matrix4x4 transform)
     {
+        _cMap = Graphics.Device.MapResource(_constantBuffer, MapMode.Write);
         GrabsUtils.CopyData(_cMap.DataPtr, new CameraMatrices(projection, transform));
-        
-        cl.SetPipeline(_pipeline);
+        Graphics.Device.UnmapResource(_constantBuffer);
 
         uint numDraws = 0;
         Texture? texture = null;
@@ -156,8 +156,12 @@ internal class TextureBatcher : IDisposable
         
         // Only copy what we need over, instead of the entire array, which can speed this process up considerably.
         // TODO: GrabsUtils.CopyData with built-in slice feature.
+        _vMap = Graphics.Device.MapResource(_vertexBuffer, MapMode.Write);
         GrabsUtils.CopyData<Vertex>(_vMap.DataPtr, _vertices.AsSpan()[..(int) (numDraws * NumVertices)]);
+        Graphics.Device.UnmapResource(_vertexBuffer);
+        _iMap = Graphics.Device.MapResource(_indexBuffer, MapMode.Write);
         GrabsUtils.CopyData<uint>(_iMap.DataPtr, _indices.AsSpan()[..(int) (numDraws * NumIndices)]);
+        Graphics.Device.UnmapResource(_indexBuffer);
 
         // TODO: Vulkan does not support multiple push descriptors. This is a big problem.
         cl.PushDescriptors(0, _pipeline,
@@ -165,6 +169,8 @@ internal class TextureBatcher : IDisposable
             new Descriptor(0, DescriptorType.ConstantBuffer, buffer: _constantBuffer),
             new Descriptor(1, DescriptorType.Texture, texture: texture.TextureHandle)
         ]);
+        
+        cl.SetPipeline(_pipeline);
         
         cl.SetVertexBuffer(0, _vertexBuffer);
         cl.SetIndexBuffer(_indexBuffer, Format.R32_UInt);
