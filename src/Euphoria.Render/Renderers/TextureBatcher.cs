@@ -13,7 +13,7 @@ namespace Euphoria.Render.Renderers;
 /// </summary>
 internal class TextureBatcher : IDisposable
 {
-    public const uint MaxBatches = 4096;
+    public const uint MaxBatches = 1 << 16;
 
     private const uint NumVertices = 4;
     private const uint NumIndices = 6;
@@ -21,6 +21,8 @@ internal class TextureBatcher : IDisposable
     private const uint MaxVertices = NumVertices * MaxBatches;
     private const uint MaxIndices = NumIndices * MaxBatches;
 
+    private readonly Device _device;
+    
     private readonly List<DrawItem> _drawQueue;
 
     private readonly Vertex[] _vertices;
@@ -28,36 +30,27 @@ internal class TextureBatcher : IDisposable
 
     private readonly Buffer _vertexBuffer;
     private readonly Buffer _indexBuffer;
-    private readonly Buffer _constantBuffer;
-
-    private MappedData _vMap;
-    private MappedData _iMap;
-    private MappedData _cMap;
 
     private readonly DescriptorLayout _layout;
     private readonly Pipeline _pipeline;
     
     public TextureBatcher(Device device, Format outFormat)
     {
+        _device = device;
+        
         _drawQueue = new List<DrawItem>();
         
         _vertices = new Vertex[MaxVertices];
         _indices = new uint[MaxIndices];
         
-        _vertexBuffer = device.CreateBuffer(new BufferInfo(BufferType.Vertex, MaxVertices * Vertex.SizeInBytes, BufferUsage.Dynamic));
-        _indexBuffer = device.CreateBuffer(new BufferInfo(BufferType.Index, MaxIndices * sizeof(uint), BufferUsage.Dynamic));
-        _constantBuffer = device.CreateBuffer(new BufferInfo(BufferType.Constant, CameraMatrices.SizeInBytes, BufferUsage.Dynamic));
-
-        //_vMap = device.MapResource(_vertexBuffer, MapMode.Write);
-        //_iMap = device.MapResource(_indexBuffer, MapMode.Write);
-        //_cMap = device.MapResource(_constantBuffer, MapMode.Write);
+        _vertexBuffer = device.CreateBuffer(new BufferInfo(BufferUsage.Vertex | BufferUsage.MapWrite, MaxVertices * Vertex.SizeInBytes));
+        _indexBuffer = device.CreateBuffer(new BufferInfo(BufferUsage.Index | BufferUsage.MapWrite, MaxIndices * sizeof(uint)));
 
         DescriptorLayoutInfo cbLayoutInfo = new()
         {
             Bindings =
             [
-                new DescriptorBinding(0, DescriptorType.ConstantBuffer, ShaderStage.Vertex),
-                new DescriptorBinding(1, DescriptorType.Texture, ShaderStage.Pixel)
+                new DescriptorBinding(0, DescriptorType.Texture, ShaderStage.Pixel)
             ]
         };
         _layout = device.CreateDescriptorLayout(in cbLayoutInfo);
@@ -70,14 +63,14 @@ internal class TextureBatcher : IDisposable
             VertexShader = vShader,
             PixelShader = pShader,
             ColorAttachmentFormats = [outFormat],
-            VertexBuffers = [new VertexBufferInfo(0, Vertex.SizeInBytes)],
             InputLayout =
             [
                 new InputElement(Format.R32G32_Float, 0, 0), // Position
                 new InputElement(Format.R32G32_Float, 8, 0), // TexCoord
                 new InputElement(Format.R32G32B32A32_Float, 16, 0) // Tint
             ],
-            Descriptors = [_layout]
+            Descriptors = [_layout],
+            Constants = [new ConstantLayout(ShaderStage.Vertex, 0, CameraMatrices.SizeInBytes)]
         };
 
         _pipeline = device.CreatePipeline(in pipelineInfo);
@@ -106,25 +99,25 @@ internal class TextureBatcher : IDisposable
 
     public void DispatchDrawQueue(CommandList cl, Matrix4x4 projection, Matrix4x4 transform)
     {
-        _cMap = Graphics.Device.MapResource(_constantBuffer, MapMode.Write);
-        GrabsUtils.CopyData(_cMap.DataPtr, new CameraMatrices(projection, transform));
-        Graphics.Device.UnmapResource(_constantBuffer);
-
+        cl.PushConstant(_pipeline, ShaderStage.Vertex, 0, new CameraMatrices(projection, transform));
+        
         uint numDraws = 0;
+        uint offset = 0;
         Texture? texture = null;
 
         foreach (DrawItem draw in _drawQueue)
         {
             if (numDraws >= MaxBatches || texture != draw.Texture)
             {
-                Flush(cl, numDraws, texture);
+                Flush(cl, numDraws, offset, texture);
+                offset += numDraws;
                 numDraws = 0;
             }
 
             texture = draw.Texture;
 
-            uint vOffset = numDraws * NumVertices;
-            uint iOffset = numDraws * NumIndices;
+            uint vOffset = (offset + numDraws) * NumVertices;
+            uint iOffset = (offset + numDraws) * NumIndices;
 
             _vertices[vOffset + 0] = new Vertex(draw.TopLeft, new Vector2(0, 0), Vector4.One);
             _vertices[vOffset + 1] = new Vertex(draw.TopRight, new Vector2(1, 0), Vector4.One);
@@ -141,48 +134,47 @@ internal class TextureBatcher : IDisposable
             numDraws++;
         }
         
-        Flush(cl, numDraws, texture);
+        Flush(cl, numDraws, offset, texture);
         
         _drawQueue.Clear();
     }
 
-    private void Flush(CommandList cl, uint numDraws, Texture? texture)
+    private void Flush(CommandList cl, uint numDraws, uint offset, Texture? texture)
     {
         // Don't bother drawing unless there's stuff to draw.
         if (numDraws == 0)
             return;
         
         Debug.Assert(texture != null);
-        
-        // Only copy what we need over, instead of the entire array, which can speed this process up considerably.
-        // TODO: GrabsUtils.CopyData with built-in slice feature.
-        _vMap = Graphics.Device.MapResource(_vertexBuffer, MapMode.Write);
-        GrabsUtils.CopyData<Vertex>(_vMap.DataPtr, _vertices.AsSpan()[..(int) (numDraws * NumVertices)]);
-        Graphics.Device.UnmapResource(_vertexBuffer);
-        _iMap = Graphics.Device.MapResource(_indexBuffer, MapMode.Write);
-        GrabsUtils.CopyData<uint>(_iMap.DataPtr, _indices.AsSpan()[..(int) (numDraws * NumIndices)]);
-        Graphics.Device.UnmapResource(_indexBuffer);
+
+        MappedData vMap = _device.MapResource(_vertexBuffer);
+        GrabsUtils.CopyData<Vertex>(vMap.DataPtr, offset * NumVertices * Vertex.SizeInBytes,
+            _vertices.AsSpan((int) (offset * NumVertices), (int) (numDraws * NumVertices)));
+        _device.UnmapResource(_vertexBuffer);
+
+        MappedData iMap = _device.MapResource(_indexBuffer);
+        GrabsUtils.CopyData<uint>(iMap.DataPtr, offset * NumIndices * sizeof(uint),
+            _indices.AsSpan((int) (offset * NumIndices), (int) (numDraws * NumIndices)));
+        _device.UnmapResource(_indexBuffer);
 
         // TODO: Vulkan does not support multiple push descriptors. This is a big problem.
         cl.PushDescriptors(0, _pipeline,
         [
-            new Descriptor(0, DescriptorType.ConstantBuffer, buffer: _constantBuffer),
-            new Descriptor(1, DescriptorType.Texture, texture: texture.TextureHandle)
+            new Descriptor(0, DescriptorType.Texture, texture: texture.TextureHandle)
         ]);
         
         cl.SetPipeline(_pipeline);
         
-        cl.SetVertexBuffer(0, _vertexBuffer);
+        cl.SetVertexBuffer(0, _vertexBuffer, Vertex.SizeInBytes);
         cl.SetIndexBuffer(_indexBuffer, Format.R32_UInt);
         
-        cl.DrawIndexed(numDraws * NumIndices);
+        cl.DrawIndexed(numDraws * NumIndices, offset * NumIndices,0);
     }
     
     public void Dispose()
     {
         _pipeline.Dispose();
         _layout.Dispose();
-        _constantBuffer.Dispose();
         _indexBuffer.Dispose();
         _vertexBuffer.Dispose();
     }

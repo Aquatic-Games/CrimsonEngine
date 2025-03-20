@@ -20,20 +20,22 @@ struct PSOutput
     float4 Color: SV_Target0;
 };
 
-cbuffer CameraMatrices : register(b0, space0)
+struct CameraMatrices
 {
     float4x4 Projection;
     float4x4 Transform;
-}
+};
 
-Texture2D Texture : register(t1, space0);
-SamplerState State : register(s1, space0);
+[[vk::push_constant]] CameraMatrices Matrices;
+
+Texture2D Texture : register(t0, space0);
+SamplerState State : register(s0, space0);
 
 VSOutput VSMain(const in VSInput input)
 {
     VSOutput output;
 
-    output.Position = mul(Projection, mul(Transform, float4(input.Position, 0.0, 1.0)));
+    output.Position = mul(Matrices.Projection, mul(Matrices.Transform, float4(input.Position, 0.0, 1.0)));
     output.TexCoord = input.TexCoord;
     output.Tint = input.Tint;
     
