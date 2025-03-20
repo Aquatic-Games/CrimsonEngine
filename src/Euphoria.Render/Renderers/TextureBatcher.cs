@@ -13,7 +13,7 @@ namespace Euphoria.Render.Renderers;
 /// </summary>
 internal class TextureBatcher : IDisposable
 {
-    public const uint MaxBatches = 1 << 16;
+    public const uint MaxBatches = 4096;
 
     private const uint NumVertices = 4;
     private const uint NumIndices = 6;
@@ -43,8 +43,8 @@ internal class TextureBatcher : IDisposable
         _vertices = new Vertex[MaxVertices];
         _indices = new uint[MaxIndices];
         
-        _vertexBuffer = device.CreateBuffer(new BufferInfo(BufferUsage.Vertex | BufferUsage.MapWrite, MaxVertices * Vertex.SizeInBytes));
-        _indexBuffer = device.CreateBuffer(new BufferInfo(BufferUsage.Index | BufferUsage.MapWrite, MaxIndices * sizeof(uint)));
+        _vertexBuffer = device.CreateBuffer(new BufferInfo(BufferUsage.Vertex | BufferUsage.Dynamic, MaxVertices * Vertex.SizeInBytes));
+        _indexBuffer = device.CreateBuffer(new BufferInfo(BufferUsage.Index | BufferUsage.Dynamic, MaxIndices * sizeof(uint)));
 
         DescriptorLayoutInfo cbLayoutInfo = new()
         {
@@ -102,22 +102,20 @@ internal class TextureBatcher : IDisposable
         cl.PushConstant(_pipeline, ShaderStage.Vertex, 0, new CameraMatrices(projection, transform));
         
         uint numDraws = 0;
-        uint offset = 0;
         Texture? texture = null;
 
         foreach (DrawItem draw in _drawQueue)
         {
             if (numDraws >= MaxBatches || texture != draw.Texture)
             {
-                Flush(cl, numDraws, offset, texture);
-                offset += numDraws;
+                Flush(cl, numDraws, texture);
                 numDraws = 0;
             }
 
             texture = draw.Texture;
 
-            uint vOffset = (offset + numDraws) * NumVertices;
-            uint iOffset = (offset + numDraws) * NumIndices;
+            uint vOffset = numDraws * NumVertices;
+            uint iOffset = numDraws * NumIndices;
 
             _vertices[vOffset + 0] = new Vertex(draw.TopLeft, new Vector2(0, 0), Vector4.One);
             _vertices[vOffset + 1] = new Vertex(draw.TopRight, new Vector2(1, 0), Vector4.One);
@@ -134,12 +132,12 @@ internal class TextureBatcher : IDisposable
             numDraws++;
         }
         
-        Flush(cl, numDraws, offset, texture);
+        Flush(cl, numDraws, texture);
         
         _drawQueue.Clear();
     }
 
-    private void Flush(CommandList cl, uint numDraws, uint offset, Texture? texture)
+    private void Flush(CommandList cl, uint numDraws, Texture? texture)
     {
         // Don't bother drawing unless there's stuff to draw.
         if (numDraws == 0)
@@ -147,15 +145,8 @@ internal class TextureBatcher : IDisposable
         
         Debug.Assert(texture != null);
 
-        MappedData vMap = _device.MapResource(_vertexBuffer);
-        GrabsUtils.CopyData<Vertex>(vMap.DataPtr, offset * NumVertices * Vertex.SizeInBytes,
-            _vertices.AsSpan((int) (offset * NumVertices), (int) (numDraws * NumVertices)));
-        _device.UnmapResource(_vertexBuffer);
-
-        MappedData iMap = _device.MapResource(_indexBuffer);
-        GrabsUtils.CopyData<uint>(iMap.DataPtr, offset * NumIndices * sizeof(uint),
-            _indices.AsSpan((int) (offset * NumIndices), (int) (numDraws * NumIndices)));
-        _device.UnmapResource(_indexBuffer);
+        cl.UpdateBuffer<Vertex>(_vertexBuffer, _vertices.AsSpan(0, (int) (numDraws * NumVertices)));
+        cl.UpdateBuffer<uint>(_indexBuffer, _indices.AsSpan(0, (int) (numDraws * NumIndices)));
 
         // TODO: Vulkan does not support multiple push descriptors. This is a big problem.
         cl.PushDescriptors(0, _pipeline,
@@ -168,7 +159,7 @@ internal class TextureBatcher : IDisposable
         cl.SetVertexBuffer(0, _vertexBuffer, Vertex.SizeInBytes);
         cl.SetIndexBuffer(_indexBuffer, Format.R32_UInt);
         
-        cl.DrawIndexed(numDraws * NumIndices, offset * NumIndices,0);
+        cl.DrawIndexed(numDraws * NumIndices);
     }
     
     public void Dispose()
