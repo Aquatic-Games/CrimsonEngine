@@ -27,9 +27,10 @@ public static class Graphics
     /// <summary>
     /// Create the graphics subsystem.
     /// </summary>
+    /// <param name="appName">The application name.</param>
     /// <param name="info">The <see cref="SurfaceInfo"/> to use when creating the subsystem.</param>
     /// <param name="size">The size of the swapchain.</param>
-    public static void Create(in SurfaceInfo info, Size<int> size)
+    public static void Create(string appName, in SurfaceInfo info, Size<int> size)
     {
         Debug.Assert(Instance == null);
         
@@ -38,7 +39,7 @@ public static class Graphics
             Logger.Severity eSeverity = severity switch
             {
                 GrabsLog.Severity.Verbose => Logger.Severity.Trace,
-                GrabsLog.Severity.Info => Logger.Severity.Debug,
+                GrabsLog.Severity.Info => Logger.Severity.Trace,
                 GrabsLog.Severity.Warning => Logger.Severity.Warning,
                 GrabsLog.Severity.Error => Logger.Severity.Error,
                 _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null)
@@ -52,11 +53,13 @@ public static class Graphics
             Instance.RegisterBackend<D3D11Backend>();
         Instance.RegisterBackend<VulkanBackend>();
 
-        InstanceInfo instanceInfo = new InstanceInfo("Euphoria", true);
+        InstanceInfo instanceInfo = new InstanceInfo(appName, true);
 
         Instance = Instance.Create(in instanceInfo);
         _surface = Instance.CreateSurface(in info);
         Device = Instance.CreateDevice(_surface);
+        
+        Logger.Info($"Using adapter: {Device.Adapter}");
 
         SwapchainInfo swapchainInfo = new SwapchainInfo()
         {

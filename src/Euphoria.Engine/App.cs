@@ -59,7 +59,7 @@ public static class App
         Events.WindowClose += Close;
         
         Logger.Debug("Initializing graphics subsystem.");
-        Graphics.Create(Surface.Info, Surface.Size);
+        Graphics.Create(_appName, Surface.Info, Surface.Size);
         
         _isRunning = true;
         
