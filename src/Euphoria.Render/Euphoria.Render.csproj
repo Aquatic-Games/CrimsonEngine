@@ -9,6 +9,13 @@
       <PackageReference Include="StbImageSharp" Version="2.30.15" />
       <PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
     </ItemGroup>
+    
+    <ItemGroup>
+        <Compile Remove="Utils/ShaderUtils.cs" />
+        <Compile Remove="Texture.cs" />
+        <Compile Remove="Bitmap.cs" />
+        <Compile Remove="Renderers/TextureBatcher.cs" />
+    </ItemGroup>
 
     <ItemGroup>
       <None Include="Shaders\**\*" CopyToOutputDirectory="PreserveNewest" />

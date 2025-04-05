@@ -1,8 +1,8 @@
 ﻿using Euphoria.Core;
 using Euphoria.Math;
-using grabs.Graphics;
-using SDL;
-using static SDL.SDL3;
+using Euphoria.Render;
+using Silk.NET.SDL;
+using static Euphoria.Windowing.SdlUtils;
 
 namespace Euphoria.Windowing;
 
@@ -11,7 +11,7 @@ namespace Euphoria.Windowing;
 /// </summary>
 public static unsafe class Surface
 {
-    private static SDL_Window* _window;
+    private static Window* _window;
 
     /// <summary>
     /// The surface's size, in pixels.
@@ -21,11 +21,11 @@ public static unsafe class Surface
         get
         {
             int w, h;
-            SDL_GetWindowSizeInPixels(_window, &w, &h);
+            SDL.GetWindowSizeInPixels(_window, &w, &h);
 
             return new Size<int>(w, h);
         }
-        set => SDL_SetWindowSize(_window, value.Width, value.Height);
+        set => SDL.SetWindowSize(_window, value.Width, value.Height);
     }
     
     /// <summary>
@@ -36,7 +36,7 @@ public static unsafe class Surface
     {
         get
         {
-            SurfaceInfo info;
+            /*SurfaceInfo info;
             SDL_PropertiesID props = SDL_GetWindowProperties(_window);
             
             if (OperatingSystem.IsWindows())
@@ -44,7 +44,8 @@ public static unsafe class Surface
                 nint hinstance = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_INSTANCE_POINTER, 0);
                 nint hwnd = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, 0);
 
-                info = SurfaceInfo.Windows(hinstance, hwnd);
+                //info = SurfaceInfo.Windows(hinstance, hwnd);
+                info = new SurfaceInfo(hwnd);
             }
             else if (OperatingSystem.IsLinux())
             {
@@ -70,6 +71,23 @@ public static unsafe class Surface
             else
                 throw new PlatformNotSupportedException();
 
+            return info;*/
+
+            SurfaceInfo info;
+
+            if (OperatingSystem.IsWindows())
+            {
+                SysWMInfo wmInfo = new SysWMInfo();
+                SDL.GetVersion(&wmInfo.Version);
+                SDL.GetWindowWMInfo(_window, &wmInfo);
+
+                info = new SurfaceInfo(wmInfo.Info.Win.Hwnd);
+            }
+            else
+            {
+                info = new SurfaceInfo((nint) _window);
+            }
+
             return info;
         }
     }
@@ -82,14 +100,20 @@ public static unsafe class Surface
     public static void Create(in WindowOptions options)
     {
         Logger.Trace("Initializing SDL.");
-        if (!SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
-            throw new Exception($"Failed to initialize SDL: {SDL_GetError()}");
+        if (SDL.Init(Sdl.InitVideo) < 0)
+            throw new Exception($"Failed to initialize SDL: {SDL.GetErrorS()}");
 
+        WindowFlags flags = 0;
+
+        if (!OperatingSystem.IsWindows())
+            flags |= WindowFlags.Vulkan;
+        
         Logger.Trace("Creating window.");
-        _window = SDL_CreateWindow(options.Title, options.Size.Width, options.Size.Height, 0);
+        _window = SDL.CreateWindow(options.Title, Sdl.WindowposCentered, Sdl.WindowposCentered, options.Size.Width,
+            options.Size.Height, (uint) flags);
 
         if (_window == null)
-            throw new Exception($"Failed to create window: {SDL_GetError()}");
+            throw new Exception($"Failed to create window: {SDL.GetErrorS()}");
     }
 
     /// <summary>
@@ -97,7 +121,7 @@ public static unsafe class Surface
     /// </summary>
     public static void Destroy()
     {
-        SDL_DestroyWindow(_window);
-        SDL_Quit();
+        SDL.DestroyWindow(_window);
+        SDL.Quit();
     }
 }

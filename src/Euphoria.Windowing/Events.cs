@@ -1,5 +1,5 @@
-using SDL;
-using static SDL.SDL3;
+using Silk.NET.SDL;
+using static Euphoria.Windowing.SdlUtils;
 
 namespace Euphoria.Windowing;
 
@@ -18,14 +18,22 @@ public static class Events
     /// </summary>
     public static unsafe void ProcessEvents()
     {
-        SDL_Event sdlEvent;
-        while (SDL_PollEvent(&sdlEvent))
+        Event sdlEvent;
+        while (SDL.PollEvent(&sdlEvent) != 0)
         {
-            switch (sdlEvent.Type)
+            switch ((EventType) sdlEvent.Type)
             {
-                case SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-                    WindowClose();
+                case EventType.Windowevent:
+                {
+                    switch ((WindowEventID) sdlEvent.Window.Event)
+                    {
+                        case WindowEventID.Close:
+                            WindowClose();
+                            break;
+                    }
+                    
                     break;
+                }
             }
         }
     }
