@@ -1,6 +1,5 @@
 using Euphoria.Core;
 using Euphoria.Math;
-using grabs.Graphics;
 using StbImageSharp;
 
 namespace Euphoria.Render;
@@ -23,7 +22,7 @@ public class Bitmap
     /// <summary>
     /// The format.
     /// </summary>
-    public readonly Format Format;
+    public readonly PixelFormat Format;
 
     /// <summary>
     /// Load a bitmap from the given path.
@@ -37,6 +36,6 @@ public class Bitmap
         ImageResult result = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
         Size = new Size<int>(result.Width, result.Height);
         Data = result.Data;
-        Format = Format.R8G8B8A8_UNorm;
+        Format = PixelFormat.RGBA8;
     }
 }

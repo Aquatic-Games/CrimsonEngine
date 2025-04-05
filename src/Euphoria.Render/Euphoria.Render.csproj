@@ -12,8 +12,6 @@
     
     <ItemGroup>
         <Compile Remove="Utils/ShaderUtils.cs" />
-        <Compile Remove="Texture.cs" />
-        <Compile Remove="Bitmap.cs" />
         <Compile Remove="Renderers/TextureBatcher.cs" />
     </ItemGroup>
 

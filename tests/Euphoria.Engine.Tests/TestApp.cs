@@ -6,8 +6,8 @@ namespace Euphoria.Engine.Tests;
 
 public class TestApp : GlobalApp
 {
-    /*private Texture _texture = null!;
-    private Texture _texture2 = null!;*/
+    private Texture _texture = null!;
+    private Texture _texture2 = null!;
 
     private float _value = 0;
     
@@ -15,8 +15,8 @@ public class TestApp : GlobalApp
     {
         base.Initialize();
 
-        /*_texture = new Texture("/home/aqua/Pictures/awesomeface.png");
-        _texture2 = new Texture("/home/aqua/Pictures/BAGELMIP.png");*/
+        _texture = new Texture("/home/aqua/Pictures/awesomeface.png");
+        _texture2 = new Texture("/home/aqua/Pictures/BAGELMIP.png");
     }
 
     public override void Update(float dt)
@@ -38,8 +38,8 @@ public class TestApp : GlobalApp
 
     public override void Dispose()
     {
-        /*_texture2.Dispose();
-        _texture.Dispose();*/
+        _texture2.Dispose();
+        _texture.Dispose();
         
         base.Dispose();
     }
