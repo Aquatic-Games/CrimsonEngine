@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-#
+# 
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Engine", "src\Euphoria.Engine\Euphoria.Engine.csproj", "{E2EF81F3-894A-46C3-B4C4-2CA2A2DFA0EB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Core", "src\Euphoria.Core\Euphoria.Core.csproj", "{AFEB0C8E-E65C-4935-B2F1-2AFFE3DA51CB}"
@@ -22,22 +22,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{4DB13778-0F69-4B82-A065-32546F54500F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Euphoria.Engine.Tests", "tests\Euphoria.Engine.Tests\Euphoria.Engine.Tests.csproj", "{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "grabs", "grabs", "{9BCB446E-B9FB-4436-8A9A-E76C09BF7E10}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grabs.Core", "lib\grabs\src\grabs.Core\grabs.Core.csproj", "{C4390F8C-D269-4B9A-8969-6A62B9550FD6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grabs.Graphics", "lib\grabs\src\grabs.Graphics\grabs.Graphics.csproj", "{9A9AB802-BE9E-4D67-8A2F-6073C99889BC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grabs.Graphics.D3D11", "lib\grabs\src\grabs.Graphics.D3D11\grabs.Graphics.D3D11.csproj", "{B73070D7-EE27-4CE8-A6B7-2BAB51B8CEB8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grabs.Graphics.Vulkan", "lib\grabs\src\grabs.Graphics.Vulkan\grabs.Graphics.Vulkan.csproj", "{247FFE5C-16BC-4609-A184-B2EBBAAFD2BA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grabs.ShaderCompiler", "lib\grabs\src\grabs.ShaderCompiler\grabs.ShaderCompiler.csproj", "{18E0C016-CFAB-4C77-8550-2AFB1D7B2626}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grabs.VulkanMemoryAllocator", "lib\grabs\src\grabs.VulkanMemoryAllocator\grabs.VulkanMemoryAllocator.csproj", "{5940E60A-7564-46F2-A1C9-DF66855E4A41}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grabs.SpirvTools", "lib\grabs\src\grabs.SpirvTools\grabs.SpirvTools.csproj", "{B77F1201-DD6C-4D21-B112-FB59A5ED5EA4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,43 +69,8 @@ Global
 		{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C4390F8C-D269-4B9A-8969-6A62B9550FD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C4390F8C-D269-4B9A-8969-6A62B9550FD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C4390F8C-D269-4B9A-8969-6A62B9550FD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C4390F8C-D269-4B9A-8969-6A62B9550FD6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9A9AB802-BE9E-4D67-8A2F-6073C99889BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9A9AB802-BE9E-4D67-8A2F-6073C99889BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9A9AB802-BE9E-4D67-8A2F-6073C99889BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9A9AB802-BE9E-4D67-8A2F-6073C99889BC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B73070D7-EE27-4CE8-A6B7-2BAB51B8CEB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B73070D7-EE27-4CE8-A6B7-2BAB51B8CEB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B73070D7-EE27-4CE8-A6B7-2BAB51B8CEB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B73070D7-EE27-4CE8-A6B7-2BAB51B8CEB8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{247FFE5C-16BC-4609-A184-B2EBBAAFD2BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{247FFE5C-16BC-4609-A184-B2EBBAAFD2BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{247FFE5C-16BC-4609-A184-B2EBBAAFD2BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{247FFE5C-16BC-4609-A184-B2EBBAAFD2BA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{18E0C016-CFAB-4C77-8550-2AFB1D7B2626}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{18E0C016-CFAB-4C77-8550-2AFB1D7B2626}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{18E0C016-CFAB-4C77-8550-2AFB1D7B2626}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{18E0C016-CFAB-4C77-8550-2AFB1D7B2626}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5940E60A-7564-46F2-A1C9-DF66855E4A41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5940E60A-7564-46F2-A1C9-DF66855E4A41}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5940E60A-7564-46F2-A1C9-DF66855E4A41}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5940E60A-7564-46F2-A1C9-DF66855E4A41}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B77F1201-DD6C-4D21-B112-FB59A5ED5EA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B77F1201-DD6C-4D21-B112-FB59A5ED5EA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B77F1201-DD6C-4D21-B112-FB59A5ED5EA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B77F1201-DD6C-4D21-B112-FB59A5ED5EA4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A} = {4DB13778-0F69-4B82-A065-32546F54500F}
-		{C4390F8C-D269-4B9A-8969-6A62B9550FD6} = {9BCB446E-B9FB-4436-8A9A-E76C09BF7E10}
-		{9A9AB802-BE9E-4D67-8A2F-6073C99889BC} = {9BCB446E-B9FB-4436-8A9A-E76C09BF7E10}
-		{B73070D7-EE27-4CE8-A6B7-2BAB51B8CEB8} = {9BCB446E-B9FB-4436-8A9A-E76C09BF7E10}
-		{247FFE5C-16BC-4609-A184-B2EBBAAFD2BA} = {9BCB446E-B9FB-4436-8A9A-E76C09BF7E10}
-		{18E0C016-CFAB-4C77-8550-2AFB1D7B2626} = {9BCB446E-B9FB-4436-8A9A-E76C09BF7E10}
-		{5940E60A-7564-46F2-A1C9-DF66855E4A41} = {9BCB446E-B9FB-4436-8A9A-E76C09BF7E10}
-		{B77F1201-DD6C-4D21-B112-FB59A5ED5EA4} = {9BCB446E-B9FB-4436-8A9A-E76C09BF7E10}
 	EndGlobalSection
 EndGlobal
