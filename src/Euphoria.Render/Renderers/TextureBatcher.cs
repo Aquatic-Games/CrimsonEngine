@@ -75,6 +75,17 @@ internal class TextureBatcher : IDisposable
         CameraMatrices matrices = new CameraMatrices(projection, transform);
         UnsafeUtilities.Write(cameraRes.DataPointer, ref matrices);
         context.Unmap(_cameraBuffer);
+        
+        context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
+        context.IASetInputLayout(_inputLayout);
+        
+        context.VSSetShader(_vertexShader);
+        context.PSSetShader(_pixelShader);
+        
+        context.IASetVertexBuffer(0, _vertexBuffer, Vertex.SizeInBytes);
+        context.IASetIndexBuffer(_indexBuffer, Format.R32_UInt, 0);
+        
+        context.VSSetConstantBuffer(0, _cameraBuffer);
 
         uint numDraws = 0;
         Texture? texture = null;
@@ -127,16 +138,6 @@ internal class TextureBatcher : IDisposable
         UnsafeUtilities.Write(iMap.DataPointer, _indices, 0, (int) (numDraws * NumIndices * sizeof(uint)));
         context.Unmap(_indexBuffer);
         
-        context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
-        context.IASetInputLayout(_inputLayout);
-        
-        context.VSSetShader(_vertexShader);
-        context.PSSetShader(_pixelShader);
-        
-        context.IASetVertexBuffer(0, _vertexBuffer, Vertex.SizeInBytes);
-        context.IASetIndexBuffer(_indexBuffer, Format.R32_UInt, 0);
-        
-        context.VSSetConstantBuffer(0, _cameraBuffer);
         context.PSSetShaderResource(0, texture.ResourceView);
         
         context.DrawIndexed(numDraws * NumIndices, 0, 0);

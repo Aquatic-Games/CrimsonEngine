@@ -14,11 +14,13 @@ namespace Euphoria.Render;
 /// </summary>
 public static class Graphics
 {
-    private static IDXGISwapChain _swapchain;
-    private static ID3D11Texture2D _swapchainTexture;
-    private static ID3D11RenderTargetView _swapchainTarget;
+    private static IDXGISwapChain _swapchain = null!;
+    private static ID3D11Texture2D _swapchainTexture = null!;
+    private static ID3D11RenderTargetView _swapchainTarget = null!;
 
-    private static TextureBatcher _uiBatcher;
+    private static Size<int> _swapchainSize;
+    
+    private static TextureBatcher _uiBatcher = null!;
     
     internal static ID3D11Device Device = null!;
     internal static ID3D11DeviceContext Context = null!;
@@ -32,6 +34,8 @@ public static class Graphics
     public static void Create(string appName, in SurfaceInfo info, Size<int> size)
     {
         Debug.Assert(Device == null);
+
+        _swapchainSize = size;
 
         SwapChainDescription swapchainDesc = new()
         {
@@ -98,10 +102,12 @@ public static class Graphics
         Context.OMSetRenderTargets(_swapchainTarget);
         Context.ClearRenderTargetView(_swapchainTarget, new Color4(1.0f, 0.5f, 0.25f));
 
-        Context.RSSetViewport(0, 0, 1280, 720);
+        Context.RSSetViewport(0, 0, _swapchainSize.Width, _swapchainSize.Height);
+
+        Matrix4x4 projection =
+            Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
         
-        _uiBatcher.DispatchDrawQueue(Context, Matrix4x4.CreateOrthographicOffCenter(0, 1280, 720, 0, -1, 1),
-            Matrix4x4.Identity);
+        _uiBatcher.DispatchDrawQueue(Context, projection, Matrix4x4.Identity);
         
         _swapchain.Present(1);
     }
