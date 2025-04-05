@@ -32,8 +32,8 @@ public class TestApp : GlobalApp
     {
         base.Draw();
         
-        /*Graphics.DrawImage(_texture, new Vector2(0, 0));
-        Graphics.DrawImage(_texture2, new Vector2(float.Sin(_value) * 400 + 400, 0));*/
+        Graphics.DrawImage(_texture, new Vector2(0, 0));
+        Graphics.DrawImage(_texture2, new Vector2(float.Sin(_value) * 400 + 400, 0));
     }
 
     public override void Dispose()
