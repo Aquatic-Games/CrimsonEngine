@@ -14,4 +14,8 @@
       <None Include="Shaders\**\*.fxc" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ClCompile Include="Shaders\Deferred\GBuffer.hlsl" />
+    </ItemGroup>
+
 </Project>

@@ -13,6 +13,11 @@ internal class DeferredRenderer : IDisposable
     {
         _albedoTarget = new D3D11Target(device, Format.R32G32B32A32_Float, size);
     }
+
+    public void Render(ID3D11DeviceContext context)
+    {
+        
+    }
     
     public void Dispose()
     {
