@@ -2,6 +2,7 @@
 using System.Numerics;
 using Euphoria.Math;
 using Euphoria.Render.Renderers;
+using Euphoria.Render.Renderers.Structs;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
@@ -21,7 +22,7 @@ public static class Graphics
     private static Size<int> _swapchainSize;
     
     private static TextureBatcher _uiBatcher = null!;
-    private static DeferredRenderer _deferredRenderer;
+    private static DeferredRenderer _deferredRenderer = null!;
     
     internal static ID3D11Device Device = null!;
     internal static ID3D11DeviceContext Context = null!;
@@ -81,6 +82,16 @@ public static class Graphics
     }
 
     /// <summary>
+    /// Draw a <see cref="Renderable"/> to the screen using the built-in renderers.
+    /// </summary>
+    /// <param name="renderable">The <see cref="Renderable"/> to draw.</param>
+    /// <param name="worldMatrix">The world matrix.</param>
+    public static void DrawRenderable(Renderable renderable, Matrix4x4 worldMatrix)
+    {
+        _deferredRenderer.AddToQueue(renderable, worldMatrix);
+    }
+
+    /// <summary>
     /// Draw an image to the screen.
     /// </summary>
     /// <param name="texture">The texture to use as the image.</param>
@@ -106,6 +117,15 @@ public static class Graphics
         Context.ClearRenderTargetView(_swapchainTarget, new Color4(1.0f, 0.5f, 0.25f));
 
         Context.RSSetViewport(0, 0, _swapchainSize.Width, _swapchainSize.Height);
+
+        CameraMatrices matrices = new CameraMatrices()
+        {
+            Projection = Matrix4x4.CreatePerspectiveFieldOfView(float.DegreesToRadians(45),
+                _swapchainSize.Width / (float) _swapchainSize.Height, 0.1f, 100f),
+            View = Matrix4x4.CreateLookAt(new Vector3(0, 0, 3), Vector3.Zero, Vector3.UnitY)
+        };
+        
+        _deferredRenderer.Render(Context, matrices);
 
         Matrix4x4 projection =
             Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);

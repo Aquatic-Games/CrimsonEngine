@@ -13,4 +13,10 @@ internal struct WorldRenderable
         Renderable = renderable;
         WorldMatrix = worldMatrix;
     }
+
+    public void Deconstruct(out Renderable renderable, out Matrix4x4 matrix)
+    {
+        renderable = Renderable;
+        matrix = WorldMatrix;
+    }
 }

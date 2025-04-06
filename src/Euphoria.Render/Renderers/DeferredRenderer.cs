@@ -2,8 +2,10 @@ using System.Numerics;
 using Euphoria.Math;
 using Euphoria.Render.Renderers.Structs;
 using Euphoria.Render.Utils;
+using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
+using Vortice.Mathematics;
 
 namespace Euphoria.Render.Renderers;
 
@@ -14,6 +16,9 @@ internal class DeferredRenderer : IDisposable
     private readonly ID3D11VertexShader _gbufferVtx;
     private readonly ID3D11PixelShader _gBufferPxl;
     private readonly ID3D11InputLayout _gBufferLayout;
+
+    private readonly ID3D11Buffer _cameraBuffer;
+    private readonly ID3D11Buffer _worldBuffer;
 
     private readonly List<WorldRenderable> _drawQueue;
     
@@ -34,6 +39,11 @@ internal class DeferredRenderer : IDisposable
 
         _gBufferLayout = device.CreateInputLayout(gBufferElements, vtxCode!);
 
+        _cameraBuffer = device.CreateBuffer(CameraMatrices.SizeInBytes, BindFlags.ConstantBuffer, ResourceUsage.Dynamic,
+            CpuAccessFlags.Write);
+        
+        _worldBuffer = device.CreateBuffer(64, BindFlags.ConstantBuffer, ResourceUsage.Dynamic, CpuAccessFlags.Write);
+
         _drawQueue = [];
     }
 
@@ -44,11 +54,45 @@ internal class DeferredRenderer : IDisposable
 
     public void Render(ID3D11DeviceContext context, CameraMatrices camera)
     {
+        context.UpdateBuffer(_cameraBuffer, camera);
         
+        #region GBuffer Pass
+        
+        Span<ID3D11RenderTargetView> targets = [_albedoTarget.RenderTarget];
+        context.OMSetRenderTargets(targets);
+        
+        context.ClearRenderTargetView(_albedoTarget.RenderTarget, new Color4(0.0f, 0.0f, 0.0f, 0.0f));
+
+        foreach ((Renderable renderable, Matrix4x4 world) in _drawQueue)
+        {
+            // TODO: This is inefficient. Ideally have a large buffer with offsets.
+            //       When GRABS is implemented use push constants.
+            context.UpdateBuffer(_worldBuffer, world);
+            context.VSSetConstantBuffer(0, _cameraBuffer);
+            context.VSSetConstantBuffer(2, _worldBuffer);
+            
+            context.VSSetShader(_gbufferVtx);
+            context.PSSetShader(_gBufferPxl);
+            
+            context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
+            context.IASetInputLayout(_gBufferLayout);
+            
+            context.IASetVertexBuffer(0, renderable.VertexBuffer, Vertex.SizeInBytes);
+            context.IASetIndexBuffer(renderable.IndexBuffer, Format.R32_UInt, 0);
+            
+            context.DrawIndexed(renderable.NumIndices, 0, 0);
+        }
+        
+        #endregion
+        
+        // TODO: Multi camera support.
+        _drawQueue.Clear();
     }
     
     public void Dispose()
     {
+        _worldBuffer.Dispose();
+        _cameraBuffer.Dispose();
         _gBufferLayout.Dispose();
         _gBufferPxl.Dispose();
         _gbufferVtx.Dispose();

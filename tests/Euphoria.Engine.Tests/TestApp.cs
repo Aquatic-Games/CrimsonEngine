@@ -6,41 +6,46 @@ namespace Euphoria.Engine.Tests;
 
 public class TestApp : GlobalApp
 {
-    private Texture _texture = null!;
-    private Texture _texture2 = null!;
-
-    private float _value = 0;
+    private Renderable _renderable;
     
     public override void Initialize()
     {
         base.Initialize();
 
-        _texture = new Texture("/home/aqua/Pictures/awesomeface.png");
-        _texture2 = new Texture("/home/aqua/Pictures/BAGELMIP.png");
+        Vertex[] vertices =
+        [
+            new Vertex(new Vector3(-0.5f, -0.5f, 0.0f), new Vector2(0, 0), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
+            new Vertex(new Vector3(-0.5f, +0.5f, 0.0f), new Vector2(0, 1), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
+            new Vertex(new Vector3(+0.5f, +0.5f, 0.0f), new Vector2(1, 1), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
+            new Vertex(new Vector3(+0.5f, -0.5f, 0.0f), new Vector2(1, 0), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
+        ];
+
+        uint[] indices =
+        [
+            0, 1, 3,
+            1, 2, 3
+        ];
+
+        Mesh mesh = new Mesh(vertices, indices);
+        _renderable = new Renderable(mesh);
     }
 
     public override void Update(float dt)
     {
         base.Update(dt);
-
-        _value += dt;
-        while (_value >= MathF.PI * 2)
-            _value -= MathF.PI * 2;
     }
 
     public override void Draw()
     {
         base.Draw();
         
-        Graphics.DrawImage(_texture, new Vector2(0, 0));
-        Graphics.DrawImage(_texture2, new Vector2(float.Sin(_value) * 400 + 400, 0));
+        Graphics.DrawRenderable(_renderable, Matrix4x4.Identity);
     }
 
     public override void Dispose()
     {
-        _texture2.Dispose();
-        _texture.Dispose();
-        
         base.Dispose();
+        
+        _renderable.Dispose();
     }
 }

@@ -27,11 +27,16 @@ cbuffer CameraBuffer : register(b0)
     Camera gCamera;
 }
 
+cbuffer WorldMatrix : register(b2)
+{
+    float4x4 World;
+}
+
 VSOutput VSMain(const in VSInput input)
 {
     VSOutput output;
 
-    output.Position = mul(gCamera.Projection, mul(gCamera.View, float4(input.Position, 1.0)));
+    output.Position = mul(gCamera.Projection, mul(gCamera.View, mul(World, float4(input.Position, 1.0))));
     output.TexCoord = input.TexCoord;
     
     return output;
