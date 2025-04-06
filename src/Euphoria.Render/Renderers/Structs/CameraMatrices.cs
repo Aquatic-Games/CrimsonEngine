@@ -5,7 +5,7 @@ namespace Euphoria.Render.Renderers.Structs;
 /// <summary>
 /// A set of camera matrices passed to a shader.
 /// </summary>
-public struct CameraMatrices
+internal struct CameraMatrices
 {
     public const uint SizeInBytes = 128;
     

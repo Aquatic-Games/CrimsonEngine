@@ -7,11 +7,11 @@ namespace Euphoria.Render.Utils;
 
 internal class D3D11Target : IDisposable
 {
-    public ID3D11Texture2D Texture;
+    public readonly ID3D11Texture2D Texture;
     
-    public ID3D11ShaderResourceView ResourceView;
+    public readonly ID3D11ShaderResourceView ResourceView;
 
-    public ID3D11RenderTargetView RenderTarget;
+    public readonly ID3D11RenderTargetView RenderTarget;
 
     public D3D11Target(ID3D11Device device, Format format, Size<int> size)
     {
@@ -20,7 +20,7 @@ internal class D3D11Target : IDisposable
             Width = (uint) size.Width,
             Height = (uint) size.Height,
             Format = format,
-            BindFlags = BindFlags.RenderTarget,
+            BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
             ArraySize = 1,
             MipLevels = 1,
             SampleDescription = new SampleDescription(1, 0),

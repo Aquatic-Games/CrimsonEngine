@@ -70,6 +70,7 @@ public static class Graphics
     {
         Debug.Assert(Device != null);
         
+        _deferredRenderer.Dispose();
         _uiBatcher.Dispose();
 
         _swapchainTarget.Dispose();
