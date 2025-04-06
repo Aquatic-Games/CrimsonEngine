@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ClCompile Include="Shaders\Deferred\DeferredPass.hlsl" />
       <ClCompile Include="Shaders\Deferred\GBuffer.hlsl" />
     </ItemGroup>
 

@@ -114,7 +114,7 @@ public static class Graphics
     public static void Render()
     {
         Context.OMSetRenderTargets(_swapchainTarget);
-        Context.ClearRenderTargetView(_swapchainTarget, new Color4(1.0f, 0.5f, 0.25f));
+        Context.ClearRenderTargetView(_swapchainTarget, new Color4(0.0f, 0.0f, 0.0f));
 
         Context.RSSetViewport(0, 0, _swapchainSize.Width, _swapchainSize.Height);
 
@@ -125,7 +125,7 @@ public static class Graphics
             View = Matrix4x4.CreateLookAt(new Vector3(0, 0, 3), Vector3.Zero, Vector3.UnitY)
         };
         
-        _deferredRenderer.Render(Context, matrices);
+        _deferredRenderer.Render(Context, _swapchainTarget, matrices);
 
         Matrix4x4 projection =
             Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);

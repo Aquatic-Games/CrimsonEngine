@@ -19,6 +19,12 @@ internal class DeferredRenderer : IDisposable
     private readonly ID3D11PixelShader _gBufferPxl;
     private readonly ID3D11InputLayout _gBufferLayout;
 
+    private readonly ID3D11DepthStencilState _depthState;
+
+    private readonly ID3D11VertexShader _passVtx;
+    private readonly ID3D11PixelShader _passPxl;
+    private readonly ID3D11DepthStencilState _passDepthState;
+
     private readonly ID3D11Buffer _cameraBuffer;
     private readonly ID3D11Buffer _worldBuffer;
 
@@ -43,6 +49,17 @@ internal class DeferredRenderer : IDisposable
 
         _gBufferLayout = device.CreateInputLayout(gBufferElements, vtxCode!);
 
+        _depthState = device.CreateDepthStencilState(DepthStencilDescription.Default);
+        
+        ShaderUtils.LoadGraphicsShader(device, "Deferred/DeferredPass", out _passVtx!, out _passPxl!, out _);
+
+        _passDepthState = device.CreateDepthStencilState(new DepthStencilDescription()
+        {
+            DepthEnable = true,
+            DepthWriteMask = DepthWriteMask.Zero,
+            DepthFunc = ComparisonFunction.Less
+        });
+
         _cameraBuffer = device.CreateBuffer(CameraMatrices.SizeInBytes, BindFlags.ConstantBuffer, ResourceUsage.Dynamic,
             CpuAccessFlags.Write);
         
@@ -56,7 +73,7 @@ internal class DeferredRenderer : IDisposable
         _drawQueue.Add(new WorldRenderable(renderable, worldMatrix));
     }
 
-    public void Render(ID3D11DeviceContext context, CameraMatrices camera)
+    public void Render(ID3D11DeviceContext context, ID3D11RenderTargetView renderTarget, CameraMatrices camera)
     {
         context.UpdateBuffer(_cameraBuffer, camera);
         
@@ -77,6 +94,8 @@ internal class DeferredRenderer : IDisposable
         context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
         context.IASetInputLayout(_gBufferLayout);
         
+        context.OMSetDepthStencilState(_depthState);
+        
         foreach ((Renderable renderable, Matrix4x4 world) in _drawQueue)
         {
             // TODO: This is inefficient. Ideally have a large buffer with offsets.
@@ -90,6 +109,20 @@ internal class DeferredRenderer : IDisposable
         }
         
         #endregion
+
+        #region Lighting Pass
+
+        context.OMSetRenderTargets(renderTarget, _depthTarget.DepthTarget);
+        
+        context.VSSetShader(_passVtx);
+        context.PSSetShader(_passPxl);
+        context.OMSetDepthStencilState(_passDepthState);
+        
+        context.PSSetShaderResource(0, _albedoTarget.ResourceView!);
+        
+        context.Draw(6, 0);
+
+        #endregion
         
         // TODO: Multi camera support.
         _drawQueue.Clear();
@@ -99,6 +132,10 @@ internal class DeferredRenderer : IDisposable
     {
         _worldBuffer.Dispose();
         _cameraBuffer.Dispose();
+        _passDepthState.Dispose();
+        _passPxl.Dispose();
+        _passVtx.Dispose();
+        _depthState.Dispose();
         _gBufferLayout.Dispose();
         _gBufferPxl.Dispose();
         _gbufferVtx.Dispose();
