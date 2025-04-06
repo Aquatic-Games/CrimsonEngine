@@ -21,6 +21,7 @@ public static class Graphics
     private static Size<int> _swapchainSize;
     
     private static TextureBatcher _uiBatcher = null!;
+    private static DeferredRenderer _deferredRenderer;
     
     internal static ID3D11Device Device = null!;
     internal static ID3D11DeviceContext Context = null!;
@@ -59,6 +60,7 @@ public static class Graphics
         _swapchainTarget = Device.CreateRenderTargetView(_swapchainTexture);
 
         _uiBatcher = new TextureBatcher(Device);
+        _deferredRenderer = new DeferredRenderer(Device, size);
     }
 
     /// <summary>
