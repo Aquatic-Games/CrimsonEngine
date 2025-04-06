@@ -11,6 +11,8 @@ namespace Euphoria.Render.Renderers;
 
 internal class DeferredRenderer : IDisposable
 {
+    private readonly D3D11Target _depthTarget;
+    
     private readonly D3D11Target _albedoTarget;
 
     private readonly ID3D11VertexShader _gbufferVtx;
@@ -24,6 +26,8 @@ internal class DeferredRenderer : IDisposable
     
     public DeferredRenderer(ID3D11Device device, Size<int> size)
     {
+        _depthTarget = new D3D11Target(device, Format.D32_Float, size);
+        
         _albedoTarget = new D3D11Target(device, Format.R32G32B32A32_Float, size);
 
         ShaderUtils.LoadGraphicsShader(device, "Deferred/GBuffer", out _gbufferVtx!, out _gBufferPxl!,
@@ -58,24 +62,26 @@ internal class DeferredRenderer : IDisposable
         
         #region GBuffer Pass
         
-        Span<ID3D11RenderTargetView> targets = [_albedoTarget.RenderTarget];
-        context.OMSetRenderTargets(targets);
+        Span<ID3D11RenderTargetView> targets = [_albedoTarget.RenderTarget!];
+        context.OMSetRenderTargets(targets, _depthTarget.DepthTarget!);
         
         context.ClearRenderTargetView(_albedoTarget.RenderTarget, new Color4(0.0f, 0.0f, 0.0f, 0.0f));
+        context.ClearDepthStencilView(_depthTarget.DepthTarget, DepthStencilClearFlags.Depth, 1, 0);
 
+        context.VSSetConstantBuffer(0, _cameraBuffer);
+        context.VSSetConstantBuffer(2, _worldBuffer);
+            
+        context.VSSetShader(_gbufferVtx);
+        context.PSSetShader(_gBufferPxl);
+            
+        context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
+        context.IASetInputLayout(_gBufferLayout);
+        
         foreach ((Renderable renderable, Matrix4x4 world) in _drawQueue)
         {
             // TODO: This is inefficient. Ideally have a large buffer with offsets.
             //       When GRABS is implemented use push constants.
             context.UpdateBuffer(_worldBuffer, world);
-            context.VSSetConstantBuffer(0, _cameraBuffer);
-            context.VSSetConstantBuffer(2, _worldBuffer);
-            
-            context.VSSetShader(_gbufferVtx);
-            context.PSSetShader(_gBufferPxl);
-            
-            context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
-            context.IASetInputLayout(_gBufferLayout);
             
             context.IASetVertexBuffer(0, renderable.VertexBuffer, Vertex.SizeInBytes);
             context.IASetIndexBuffer(renderable.IndexBuffer, Format.R32_UInt, 0);
@@ -97,5 +103,6 @@ internal class DeferredRenderer : IDisposable
         _gBufferPxl.Dispose();
         _gbufferVtx.Dispose();
         _albedoTarget.Dispose();
+        _depthTarget.Dispose();
     }
 }
