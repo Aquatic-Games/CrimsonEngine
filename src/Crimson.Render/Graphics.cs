@@ -13,19 +13,19 @@ namespace Crimson.Render;
 /// <summary>
 /// The graphics subsystem, containing everything used to render.
 /// </summary>
-public static class Graphics
+public sealed class Graphics : IDisposable
 {
-    private static IDXGISwapChain _swapchain = null!;
-    private static ID3D11Texture2D _swapchainTexture = null!;
-    private static ID3D11RenderTargetView _swapchainTarget = null!;
+    private readonly IDXGISwapChain _swapchain;
+    private ID3D11Texture2D _swapchainTexture;
+    private ID3D11RenderTargetView _swapchainTarget;
 
-    private static Size<int> _swapchainSize;
+    private Size<int> _swapchainSize;
     
-    private static TextureBatcher _uiBatcher = null!;
-    private static DeferredRenderer _deferredRenderer = null!;
+    private readonly TextureBatcher _uiBatcher;
+    private readonly DeferredRenderer _deferredRenderer;
     
-    internal static ID3D11Device Device = null!;
-    internal static ID3D11DeviceContext Context = null!;
+    internal readonly ID3D11Device Device;
+    internal readonly ID3D11DeviceContext Context;
     
     /// <summary>
     /// Create the graphics subsystem.
@@ -33,10 +33,8 @@ public static class Graphics
     /// <param name="appName">The application name.</param>
     /// <param name="info">The <see cref="SurfaceInfo"/> to use when creating the subsystem.</param>
     /// <param name="size">The size of the swapchain.</param>
-    public static void Create(string appName, in SurfaceInfo info, Size<int> size)
+    public Graphics(string appName, in SurfaceInfo info, Size<int> size)
     {
-        Debug.Assert(Device == null);
-
         _swapchainSize = size;
 
         SwapChainDescription swapchainDesc = new()
@@ -67,10 +65,8 @@ public static class Graphics
     /// <summary>
     /// Destroy the graphics subsystem.
     /// </summary>
-    public static void Destroy()
+    public void Dispose()
     {
-        Debug.Assert(Device != null);
-        
         _deferredRenderer.Dispose();
         _uiBatcher.Dispose();
 
@@ -81,12 +77,42 @@ public static class Graphics
         Device.Dispose();
     }
 
+    public Renderable CreateRenderable(Mesh mesh)
+    {
+        return new Renderable(Device, mesh);
+    }
+
+    /// <summary>
+    /// Create a <see cref="Texture"/>.
+    /// </summary>
+    /// <param name="size">The size, in pixels.</param>
+    /// <param name="data">The data.</param>
+    /// <param name="format">The <see cref="PixelFormat"/> of the texture.</param>
+    public Texture CreateTexture(in Size<int> size, byte[] data, PixelFormat format = PixelFormat.RGBA8)
+    {
+        return new Texture(Device, Context, in size, data, format);
+    }
+
+    /// <summary>
+    /// Create a <see cref="Texture"/> from the given bitmap.
+    /// </summary>
+    /// <param name="bitmap">The <see cref="Bitmap"/> to use.</param>
+    public Texture CreateTexture(Bitmap bitmap)
+        => CreateTexture(bitmap.Size, bitmap.Data, bitmap.Format);
+
+    /// <summary>
+    /// Create a <see cref="Texture"/> from the given path. 
+    /// </summary>
+    /// <param name="path">The path to load from.</param>
+    public Texture CreateTexture(string path)
+        => CreateTexture(new Bitmap(path));
+
     /// <summary>
     /// Draw a <see cref="Renderable"/> to the screen using the built-in renderers.
     /// </summary>
     /// <param name="renderable">The <see cref="Renderable"/> to draw.</param>
     /// <param name="worldMatrix">The world matrix.</param>
-    public static void DrawRenderable(Renderable renderable, Matrix4x4 worldMatrix)
+    public void DrawRenderable(Renderable renderable, Matrix4x4 worldMatrix)
     {
         _deferredRenderer.AddToQueue(renderable, worldMatrix);
     }
@@ -96,7 +122,7 @@ public static class Graphics
     /// </summary>
     /// <param name="texture">The texture to use as the image.</param>
     /// <param name="position">The position, in pixels.</param>
-    public static void DrawImage(Texture texture, in Vector2 position)
+    public void DrawImage(Texture texture, in Vector2 position)
     {
         Size<int> size = texture.Size;
         
@@ -111,7 +137,7 @@ public static class Graphics
     /// <summary>
     /// Render and present to the surface.
     /// </summary>
-    public static void Render()
+    public void Render()
     {
         Context.OMSetRenderTargets(_swapchainTarget);
         Context.ClearRenderTargetView(_swapchainTarget, new Color4(0.0f, 0.0f, 0.0f));

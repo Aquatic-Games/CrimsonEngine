@@ -14,6 +14,8 @@ public static class App
     private static bool _isRunning;
     private static GlobalApp _globalApp;
 
+    private static Graphics _graphics;
+
     /// <summary>
     /// The app name.
     /// </summary>
@@ -29,6 +31,8 @@ public static class App
     /// The global application instance.
     /// </summary>
     public static GlobalApp GlobalApp => _globalApp;
+
+    public static Graphics Graphics => _graphics;
 
     static App()
     {
@@ -59,7 +63,7 @@ public static class App
         Events.WindowClose += Close;
         
         Logger.Debug("Initializing graphics subsystem.");
-        Graphics.Create(_appName, Surface.Info, Surface.Size);
+        _graphics = new Graphics(_appName, Surface.Info, Surface.Size);
         
         _isRunning = true;
         
@@ -80,7 +84,7 @@ public static class App
         Logger.Info("Cleaning up.");
         
         _globalApp.Dispose();
-        Graphics.Destroy();
+        _graphics.Dispose();
         Surface.Destroy();
     }
 

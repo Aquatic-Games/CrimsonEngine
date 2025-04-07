@@ -12,10 +12,8 @@ public class Renderable : IDisposable
 
     public Material Material;
 
-    public Renderable(Mesh mesh)
+    internal Renderable(ID3D11Device device, Mesh mesh)
     {
-        ID3D11Device device = Graphics.Device;
-
         VertexBuffer = device.CreateBuffer(mesh.Vertices, BindFlags.VertexBuffer);
         IndexBuffer = device.CreateBuffer(mesh.Indices, BindFlags.IndexBuffer);
         
