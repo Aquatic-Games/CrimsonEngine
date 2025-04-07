@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
+      <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="StbImageSharp" Version="2.30.15" />
+      <PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Shaders\**\*.fxc" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ClCompile Include="Shaders\Deferred\DeferredPass.hlsl" />
+      <ClCompile Include="Shaders\Deferred\GBuffer.hlsl" />
+    </ItemGroup>
+
+</Project>

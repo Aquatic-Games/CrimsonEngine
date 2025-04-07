@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
+      <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
+      <ProjectReference Include="..\Crimson.Render\Crimson.Render.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Silk.NET.SDL" Version="2.22.0" />
+    </ItemGroup>
+
+</Project>
