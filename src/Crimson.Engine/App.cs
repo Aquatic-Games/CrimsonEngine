@@ -14,6 +14,7 @@ public static class App
     private static bool _isRunning;
     private static GlobalApp _globalApp;
 
+    private static Surface _surface;
     private static Graphics _graphics;
 
     /// <summary>
@@ -32,6 +33,8 @@ public static class App
     /// </summary>
     public static GlobalApp GlobalApp => _globalApp;
 
+    public static Surface Surface => _surface;
+
     public static Graphics Graphics => _graphics;
 
     static App()
@@ -39,6 +42,8 @@ public static class App
         _appName = "";
         _isRunning = false;
         _globalApp = null!;
+        _surface = null!;
+        _graphics = null!;
     }
     
     /// <summary>
@@ -59,7 +64,7 @@ public static class App
         _globalApp = globalApp ?? new GlobalApp();
         
         Logger.Debug("Creating window.");
-        Surface.Create(in options.Window);
+        _surface = new Surface(in options.Window);
         Events.WindowClose += Close;
         
         Logger.Debug("Initializing graphics subsystem.");
@@ -85,7 +90,7 @@ public static class App
         
         _globalApp.Dispose();
         _graphics.Dispose();
-        Surface.Destroy();
+        _surface.Dispose();
     }
 
     /// <summary>

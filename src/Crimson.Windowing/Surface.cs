@@ -9,14 +9,14 @@ namespace Crimson.Windowing;
 /// <summary>
 /// The primary application surface that is being rendered to.
 /// </summary>
-public static unsafe class Surface
+public sealed unsafe class Surface : IDisposable
 {
-    private static Window* _window;
+    private Window* _window;
 
     /// <summary>
     /// The surface's size, in pixels.
     /// </summary>
-    public static Size<int> Size
+    public Size<int> Size
     {
         get
         {
@@ -32,7 +32,7 @@ public static unsafe class Surface
     /// The underlying handle(s) to the surface, typically provided by the window manager.
     /// </summary>
     /// <exception cref="PlatformNotSupportedException">Thrown if the current platform does not support the surface.</exception>
-    public static SurfaceInfo Info
+    public SurfaceInfo Info
     {
         get
         {
@@ -97,7 +97,7 @@ public static unsafe class Surface
     /// </summary>
     /// <param name="options">The <see cref="WindowOptions"/> to use when creating this surface.</param>
     /// <exception cref="Exception">Thrown if the surface failed to create.</exception>
-    public static void Create(in WindowOptions options)
+    public Surface(in WindowOptions options)
     {
         Logger.Trace("Initializing SDL.");
         if (SDL.Init(Sdl.InitVideo) < 0)
@@ -119,7 +119,7 @@ public static unsafe class Surface
     /// <summary>
     /// Destroy the surface.
     /// </summary>
-    public static void Destroy()
+    public void Dispose()
     {
         SDL.DestroyWindow(_window);
         SDL.Quit();
