@@ -14,13 +14,14 @@ public class TestApp : GlobalApp
         base.Initialize();
 
         Graphics graphics = App.Graphics;
+        graphics.Camera.ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(-1, 1, 3), Vector3.Zero, Vector3.UnitY);
 
         Vertex[] vertices =
         [
-            new Vertex(new Vector3(-0.5f, -0.5f, 0.0f), new Vector2(0, 0), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
-            new Vertex(new Vector3(-0.5f, +0.5f, 0.0f), new Vector2(0, 1), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
-            new Vertex(new Vector3(+0.5f, +0.5f, 0.0f), new Vector2(1, 1), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
-            new Vertex(new Vector3(+0.5f, -0.5f, 0.0f), new Vector2(1, 0), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
+            new Vertex(new Vector3(-0.5f, -0.5f, 0.0f), new Vector2(0, 1), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
+            new Vertex(new Vector3(-0.5f, +0.5f, 0.0f), new Vector2(0, 0), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
+            new Vertex(new Vector3(+0.5f, +0.5f, 0.0f), new Vector2(1, 0), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
+            new Vertex(new Vector3(+0.5f, -0.5f, 0.0f), new Vector2(1, 1), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
         ];
 
         uint[] indices =

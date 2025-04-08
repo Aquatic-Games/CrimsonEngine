@@ -26,6 +26,8 @@ public sealed class Graphics : IDisposable
     
     internal readonly ID3D11Device Device;
     internal readonly ID3D11DeviceContext Context;
+
+    public Camera Camera;
     
     /// <summary>
     /// Create the graphics subsystem.
@@ -60,6 +62,13 @@ public sealed class Graphics : IDisposable
 
         _uiBatcher = new TextureBatcher(Device);
         _deferredRenderer = new DeferredRenderer(Device, size);
+
+        Camera = new Camera()
+        {
+            ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(float.DegreesToRadians(45),
+                _swapchainSize.Width / (float)_swapchainSize.Height, 0.1f, 100f),
+            ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(0, 0, 3), Vector3.Zero, Vector3.UnitY)
+        };
     }
 
     /// <summary>
@@ -77,6 +86,11 @@ public sealed class Graphics : IDisposable
         Device.Dispose();
     }
 
+    /// <summary>
+    /// Create a <see cref="Renderable"/> that can be drawn.
+    /// </summary>
+    /// <param name="mesh">The mesh to use.</param>
+    /// <returns>The created <see cref="Renderable"/>.</returns>
     public Renderable CreateRenderable(Mesh mesh)
     {
         return new Renderable(Device, mesh);
@@ -143,15 +157,8 @@ public sealed class Graphics : IDisposable
         Context.ClearRenderTargetView(_swapchainTarget, new Color4(0.0f, 0.0f, 0.0f));
 
         Context.RSSetViewport(0, 0, _swapchainSize.Width, _swapchainSize.Height);
-
-        CameraMatrices matrices = new CameraMatrices()
-        {
-            Projection = Matrix4x4.CreatePerspectiveFieldOfView(float.DegreesToRadians(45),
-                _swapchainSize.Width / (float) _swapchainSize.Height, 0.1f, 100f),
-            View = Matrix4x4.CreateLookAt(new Vector3(0, 0, 3), Vector3.Zero, Vector3.UnitY)
-        };
         
-        _deferredRenderer.Render(Context, _swapchainTarget, matrices);
+        _deferredRenderer.Render(Context, _swapchainTarget, Camera.Matrices);
 
         Matrix4x4 projection =
             Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
