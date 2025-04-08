@@ -29,7 +29,7 @@ public class TestApp : GlobalApp
             1, 2, 3
         ];
 
-        Mesh mesh = new Mesh(vertices, indices, new Material(graphics.CreateTexture("/home/aqua/Pictures/BAGELMIP.png")));
+        Mesh mesh = new Mesh(vertices, indices, new Material(graphics.CreateTexture("C:/Users/aqua/Pictures/BAGELMIP.png")));
         _renderable = graphics.CreateRenderable(mesh);
     }
 

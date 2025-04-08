@@ -32,7 +32,7 @@ internal class DeferredRenderer : IDisposable
     
     public DeferredRenderer(ID3D11Device device, Size<int> size)
     {
-        _depthTarget = new D3D11Target(device, Format.D32_Float, size);
+        _depthTarget = new D3D11Target(device, Format.D32_Float, size, false);
         
         _albedoTarget = new D3D11Target(device, Format.R32G32B32A32_Float, size);
 
