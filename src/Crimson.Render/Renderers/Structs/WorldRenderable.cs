@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace Crimson.Render.Renderers.Structs;
 
-internal struct WorldRenderable
+internal readonly struct WorldRenderable
 {
     public readonly Renderable Renderable;
 

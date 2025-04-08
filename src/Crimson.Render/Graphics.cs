@@ -96,6 +96,11 @@ public sealed class Graphics : IDisposable
         return new Renderable(Device, mesh);
     }
 
+    public Material CreateMaterial(in MaterialDefinition definition)
+    {
+        return new Material(in definition);
+    }
+
     /// <summary>
     /// Create a <see cref="Texture"/>.
     /// </summary>

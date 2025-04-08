@@ -8,6 +8,8 @@ namespace Crimson.Engine.Tests;
 public class TestApp : GlobalApp
 {
     private Renderable _renderable;
+
+    private float _rotation;
     
     public override void Initialize()
     {
@@ -30,20 +32,26 @@ public class TestApp : GlobalApp
             1, 2, 3
         ];
 
-        Mesh mesh = new Mesh(vertices, indices, new Material(graphics.CreateTexture("C:/Users/aqua/Pictures/BAGELMIP.png")));
+        Material material =
+            graphics.CreateMaterial(
+                new MaterialDefinition(graphics.CreateTexture("C:/Users/aqua/Pictures/BAGELMIP.png")));
+
+        Mesh mesh = new Mesh(vertices, indices, material);
         _renderable = graphics.CreateRenderable(mesh);
     }
 
     public override void Update(float dt)
     {
         base.Update(dt);
+
+        _rotation += dt;
     }
 
     public override void Draw()
     {
         base.Draw();
         
-        App.Graphics.DrawRenderable(_renderable, Matrix4x4.Identity);
+        App.Graphics.DrawRenderable(_renderable, Matrix4x4.CreateRotationY(_rotation));
     }
 
     public override void Dispose()
