@@ -2,9 +2,9 @@
 using Crimson.Math;
 using Crimson.Render;
 using Silk.NET.SDL;
-using static Crimson.Windowing.SdlUtils;
+using static Crimson.Platform.SdlUtils;
 
-namespace Crimson.Windowing;
+namespace Crimson.Platform;
 
 /// <summary>
 /// The primary application surface that is being rendered to.
@@ -122,6 +122,5 @@ public sealed unsafe class Surface : IDisposable
     public void Dispose()
     {
         SDL.DestroyWindow(_window);
-        SDL.Quit();
     }
 }

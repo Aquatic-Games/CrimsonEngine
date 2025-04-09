@@ -1,4 +1,4 @@
-using Crimson.Windowing;
+using Crimson.Platform;
 using Version = Crimson.Core.Version;
 
 namespace Crimson.Engine;

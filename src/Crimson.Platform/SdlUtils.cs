@@ -1,6 +1,6 @@
 using Silk.NET.SDL;
 
-namespace Crimson.Windowing;
+namespace Crimson.Platform;
 
 internal class SdlUtils
 {

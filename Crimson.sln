@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Render", "src\Crims
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Math", "src\Crimson.Math\Crimson.Math.csproj", "{A3A0AD9F-3D12-4E46-9144-24CAFCF47606}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Windowing", "src\Crimson.Windowing\Crimson.Windowing.csproj", "{9EA7C3C4-321E-4A12-B70F-A485DFD6DFB2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Platform", "src\Crimson.Platform\Crimson.Platform.csproj", "{9EA7C3C4-321E-4A12-B70F-A485DFD6DFB2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Input", "src\Crimson.Input\Crimson.Input.csproj", "{F2967026-CDF9-4DB3-A71A-6301B4CEBD2E}"
 EndProject

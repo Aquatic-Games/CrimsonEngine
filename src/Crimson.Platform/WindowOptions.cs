@@ -1,6 +1,6 @@
 using Crimson.Math;
 
-namespace Crimson.Windowing;
+namespace Crimson.Platform;
 
 /// <summary>
 /// Describes how a <see cref="Surface"/> should be created for desktop platforms.

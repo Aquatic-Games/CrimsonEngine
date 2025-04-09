@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Crimson.Core;
 using Crimson.Render;
-using Crimson.Windowing;
+using Crimson.Platform;
 
 namespace Crimson.Engine;
 
@@ -14,6 +14,7 @@ public static class App
     private static bool _isRunning;
     private static GlobalApp _globalApp;
 
+    private static EventsManager _events;
     private static Surface _surface;
     private static Graphics _graphics;
 
@@ -34,7 +35,12 @@ public static class App
     public static GlobalApp GlobalApp => _globalApp;
 
     /// <summary>
-    /// The app's <see cref="Crimson.Windowing.Surface"/>.
+    /// The app's <see cref="EventsManager"/>.
+    /// </summary>
+    public static EventsManager Events => _events;
+
+    /// <summary>
+    /// The app's <see cref="Crimson.Platform.Surface"/>.
     /// </summary>
     public static Surface Surface => _surface;
 
@@ -48,6 +54,7 @@ public static class App
         _appName = "";
         _isRunning = false;
         _globalApp = null!;
+        _events = null!;
         _surface = null!;
         _graphics = null!;
     }
@@ -69,9 +76,12 @@ public static class App
         _appName = options.Name;
         _globalApp = globalApp ?? new GlobalApp();
         
+        Logger.Debug("Initializing events manager.");
+        _events = new EventsManager();
+        
         Logger.Debug("Creating window.");
         _surface = new Surface(in options.Window);
-        Events.WindowClose += Close;
+        _events.WindowClose += Close;
         
         Logger.Debug("Initializing graphics subsystem.");
         _graphics = new Graphics(_appName, Surface.Info, Surface.Size);
@@ -84,7 +94,7 @@ public static class App
         Logger.Debug("Entering main loop.");
         while (_isRunning)
         {
-            Events.ProcessEvents();
+            _events.ProcessEvents();
             
             _globalApp.Update(1.0f / 60.0f);
             _globalApp.Draw();
@@ -97,6 +107,7 @@ public static class App
         _globalApp.Dispose();
         _graphics.Dispose();
         _surface.Dispose();
+        _events.Dispose();
     }
 
     /// <summary>
