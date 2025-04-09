@@ -2,6 +2,8 @@ using System.Numerics;
 using Crimson.Engine;
 using Crimson.Math;
 using Crimson.Render;
+using Crimson.Render.Primitives;
+using Plane = Crimson.Render.Primitives.Plane;
 
 namespace Crimson.Engine.Tests;
 
@@ -18,25 +20,11 @@ public class TestApp : GlobalApp
         Graphics graphics = App.Graphics;
         graphics.Camera.ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(-1, 1, 3), Vector3.Zero, Vector3.UnitY);
 
-        Vertex[] vertices =
-        [
-            new Vertex(new Vector3(-0.5f, -0.5f, 0.0f), new Vector2(0, 1), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
-            new Vertex(new Vector3(-0.5f, +0.5f, 0.0f), new Vector2(0, 0), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
-            new Vertex(new Vector3(+0.5f, +0.5f, 0.0f), new Vector2(1, 0), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
-            new Vertex(new Vector3(+0.5f, -0.5f, 0.0f), new Vector2(1, 1), new Color(1.0f, 1.0f, 1.0f), Vector3.Zero),
-        ];
-
-        uint[] indices =
-        [
-            0, 1, 3,
-            1, 2, 3
-        ];
-
         Material material =
             graphics.CreateMaterial(
                 new MaterialDefinition(graphics.CreateTexture("C:/Users/aqua/Pictures/BAGELMIP.png")));
 
-        Mesh mesh = new Mesh(vertices, indices, material);
+        Mesh mesh = Mesh.FromPrimitive(new Cube(), material);
         _renderable = graphics.CreateRenderable(mesh);
     }
 

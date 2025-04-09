@@ -1,3 +1,5 @@
+using Crimson.Render.Primitives;
+
 namespace Crimson.Render;
 
 public class Mesh
@@ -13,5 +15,10 @@ public class Mesh
         Vertices = vertices;
         Indices = indices;
         Material = material;
+    }
+
+    public static Mesh FromPrimitive(IPrimitive primitive, Material material)
+    {
+        return new Mesh(primitive.Vertices, primitive.Indices, material);
     }
 }
