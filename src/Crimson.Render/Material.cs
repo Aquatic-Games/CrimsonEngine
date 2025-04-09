@@ -7,7 +7,12 @@ public class Material : IDisposable
 {
     public Texture Albedo;
 
-    internal Material(ref readonly MaterialDefinition definition)
+    /// <summary>
+    /// Create a <see cref="Material"/> from the given definition.
+    /// </summary>
+    /// <param name="graphics">A <see cref="Graphics"/> instance.</param>
+    /// <param name="definition">The <see cref="MaterialDefinition"/> that describes how the material should be created.</param>
+    public Material(Graphics graphics, in MaterialDefinition definition)
     {
         Albedo = definition.Albedo;
     }

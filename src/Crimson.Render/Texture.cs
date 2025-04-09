@@ -15,11 +15,24 @@ public class Texture : IDisposable
     internal ID3D11Texture2D TextureHandle;
     internal ID3D11ShaderResourceView ResourceView;
 
+    /// <summary>
+    /// The texture's size in pixels.
+    /// </summary>
     public readonly Size<int> Size;
     
-    internal Texture(ID3D11Device device, ID3D11DeviceContext context, in Size<int> size, byte[] data, PixelFormat format)
+    /// <summary>
+    /// Create a <see cref="Texture"/>.
+    /// </summary>
+    /// <param name="graphics">A <see cref="Graphics"/> instance.</param>
+    /// <param name="size">The size, in pixels.</param>
+    /// <param name="data">The data.</param>
+    /// <param name="format">The <see cref="PixelFormat"/> of the texture.</param>
+    public Texture(Graphics graphics, in Size<int> size, byte[] data, PixelFormat format)
     {
         Size = size;
+
+        ID3D11Device device = graphics.Device;
+        ID3D11DeviceContext context = graphics.Context;
         
         Format fmt = format switch
         {
@@ -68,6 +81,20 @@ public class Texture : IDisposable
         Logger.Trace("Generating mipmaps.");
         context.GenerateMips(ResourceView);
     }
+
+    /// <summary>
+    /// Create a <see cref="Texture"/> from the given bitmap.
+    /// </summary>
+    /// <param name="graphics">A <see cref="Graphics"/> instance.</param>
+    /// <param name="bitmap">The <see cref="Bitmap"/> to use.</param>
+    public Texture(Graphics graphics, Bitmap bitmap) : this(graphics, bitmap.Size, bitmap.Data, bitmap.Format) { }
+
+    /// <summary>
+    /// Create a <see cref="Texture"/> from the given path. 
+    /// </summary>
+    /// <param name="graphics">A <see cref="Graphics"/> instance.</param>
+    /// <param name="path">The path to load from.</param>
+    public Texture(Graphics graphics, string path) : this(graphics, new Bitmap(path)) { }
 
     /// <summary>
     /// Dispose of this <see cref="Texture"/>.

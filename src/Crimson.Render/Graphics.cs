@@ -27,6 +27,9 @@ public sealed class Graphics : IDisposable
     internal readonly ID3D11Device Device;
     internal readonly ID3D11DeviceContext Context;
 
+    /// <summary>
+    /// The 3D <see cref="Crimson.Render.Camera"/> that will be used when drawing.
+    /// </summary>
     public Camera Camera;
     
     /// <summary>
@@ -85,51 +88,6 @@ public sealed class Graphics : IDisposable
         Context.Dispose();
         Device.Dispose();
     }
-
-    /// <summary>
-    /// Create a <see cref="Renderable"/> that can be drawn.
-    /// </summary>
-    /// <param name="mesh">The mesh to use.</param>
-    /// <returns>The created <see cref="Renderable"/>.</returns>
-    public Renderable CreateRenderable(Mesh mesh)
-    {
-        return new Renderable(Device, mesh);
-    }
-
-    /// <summary>
-    /// Create a <see cref="Material"/> from the given definition.
-    /// </summary>
-    /// <param name="definition">The <see cref="MaterialDefinition"/> that describes how the material should be created.</param>
-    /// <returns>The created <see cref="Material"/>.</returns>
-    public Material CreateMaterial(in MaterialDefinition definition)
-    {
-        return new Material(in definition);
-    }
-
-    /// <summary>
-    /// Create a <see cref="Texture"/>.
-    /// </summary>
-    /// <param name="size">The size, in pixels.</param>
-    /// <param name="data">The data.</param>
-    /// <param name="format">The <see cref="PixelFormat"/> of the texture.</param>
-    public Texture CreateTexture(in Size<int> size, byte[] data, PixelFormat format = PixelFormat.RGBA8)
-    {
-        return new Texture(Device, Context, in size, data, format);
-    }
-
-    /// <summary>
-    /// Create a <see cref="Texture"/> from the given bitmap.
-    /// </summary>
-    /// <param name="bitmap">The <see cref="Bitmap"/> to use.</param>
-    public Texture CreateTexture(Bitmap bitmap)
-        => CreateTexture(bitmap.Size, bitmap.Data, bitmap.Format);
-
-    /// <summary>
-    /// Create a <see cref="Texture"/> from the given path. 
-    /// </summary>
-    /// <param name="path">The path to load from.</param>
-    public Texture CreateTexture(string path)
-        => CreateTexture(new Bitmap(path));
 
     /// <summary>
     /// Draw a <see cref="Renderable"/> to the screen using the built-in renderers.

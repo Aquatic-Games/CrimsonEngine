@@ -19,8 +19,15 @@ public class Renderable : IDisposable
     /// </summary>
     public Material Material;
 
-    internal Renderable(ID3D11Device device, Mesh mesh)
+    /// <summary>
+    /// Create a <see cref="Renderable"/> that can be drawn.
+    /// </summary>
+    /// <param name="graphics">A <see cref="Graphics"/> instance.</param>
+    /// <param name="mesh">The mesh to use.</param>
+    public Renderable(Graphics graphics, Mesh mesh)
     {
+        ID3D11Device device = graphics.Device;
+        
         VertexBuffer = device.CreateBuffer(mesh.Vertices, BindFlags.VertexBuffer);
         IndexBuffer = device.CreateBuffer(mesh.Indices, BindFlags.IndexBuffer);
         

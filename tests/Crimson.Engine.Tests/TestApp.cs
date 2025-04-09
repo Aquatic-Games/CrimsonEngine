@@ -20,12 +20,11 @@ public class TestApp : GlobalApp
         Graphics graphics = App.Graphics;
         graphics.Camera.ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(-1, 1, 3), Vector3.Zero, Vector3.UnitY);
 
-        Material material =
-            graphics.CreateMaterial(
-                new MaterialDefinition(graphics.CreateTexture("C:/Users/aqua/Pictures/BAGELMIP.png")));
+        Material material = new Material(graphics,
+            new MaterialDefinition(new Texture(graphics, "C:/Users/aqua/Pictures/BAGELMIP.png")));
 
         Mesh mesh = Mesh.FromPrimitive(new Cube(), material);
-        _renderable = graphics.CreateRenderable(mesh);
+        _renderable = new Renderable(graphics, mesh);
     }
 
     public override void Update(float dt)
