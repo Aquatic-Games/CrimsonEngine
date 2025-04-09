@@ -2,6 +2,10 @@ using Vortice.Direct3D11;
 
 namespace Crimson.Render;
 
+/// <summary>
+/// A renderable is a GPU object that can be drawn to the screen. All rendering done by the main 3D renderer will use a
+/// renderable.
+/// </summary>
 public class Renderable : IDisposable
 {
     internal readonly ID3D11Buffer VertexBuffer;
@@ -10,6 +14,9 @@ public class Renderable : IDisposable
 
     internal readonly uint NumIndices;
 
+    /// <summary>
+    /// The <see cref="Crimson.Render.Material"/> of this renderable.
+    /// </summary>
     public Material Material;
 
     internal Renderable(ID3D11Device device, Mesh mesh)
@@ -22,6 +29,9 @@ public class Renderable : IDisposable
         Material = mesh.Material;
     }
     
+    /// <summary>
+    /// Dispose of this <see cref="Renderable"/>.
+    /// </summary>
     public void Dispose()
     {
         IndexBuffer.Dispose();

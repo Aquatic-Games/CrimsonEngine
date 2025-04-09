@@ -1,11 +1,12 @@
 namespace Crimson.Render;
 
-public readonly struct SurfaceInfo
+/// <summary>
+/// Describes the underlying windowing information for a surface.
+/// </summary>
+public readonly struct SurfaceInfo(IntPtr nativeHandle)
 {
-    public readonly nint NativeHandle;
-
-    public SurfaceInfo(IntPtr nativeHandle)
-    {
-        NativeHandle = nativeHandle;
-    }
+    /// <summary>
+    /// The native handle to the surface.
+    /// </summary>
+    public readonly nint NativeHandle = nativeHandle;
 }

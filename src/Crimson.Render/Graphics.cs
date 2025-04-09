@@ -96,6 +96,11 @@ public sealed class Graphics : IDisposable
         return new Renderable(Device, mesh);
     }
 
+    /// <summary>
+    /// Create a <see cref="Material"/> from the given definition.
+    /// </summary>
+    /// <param name="definition">The <see cref="MaterialDefinition"/> that describes how the material should be created.</param>
+    /// <returns>The created <see cref="Material"/>.</returns>
     public Material CreateMaterial(in MaterialDefinition definition)
     {
         return new Material(in definition);

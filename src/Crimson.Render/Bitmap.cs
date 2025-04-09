@@ -20,7 +20,7 @@ public class Bitmap
     public readonly byte[] Data;
 
     /// <summary>
-    /// The format.
+    /// The pixel format.
     /// </summary>
     public readonly PixelFormat Format;
 

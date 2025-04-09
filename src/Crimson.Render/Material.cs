@@ -12,6 +12,9 @@ public class Material : IDisposable
         Albedo = definition.Albedo;
     }
 
+    /// <summary>
+    /// Dispose of this <see cref="Material"/>.
+    /// </summary>
     public void Dispose()
     {
         

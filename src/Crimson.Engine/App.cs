@@ -33,8 +33,14 @@ public static class App
     /// </summary>
     public static GlobalApp GlobalApp => _globalApp;
 
+    /// <summary>
+    /// The app's <see cref="Crimson.Windowing.Surface"/>.
+    /// </summary>
     public static Surface Surface => _surface;
 
+    /// <summary>
+    /// The app's <see cref="Crimson.Render.Graphics"/> instance.
+    /// </summary>
     public static Graphics Graphics => _graphics;
 
     static App()
@@ -83,7 +89,7 @@ public static class App
             _globalApp.Update(1.0f / 60.0f);
             _globalApp.Draw();
             
-            Graphics.Render();
+            _graphics.Render();
         }
         
         Logger.Info("Cleaning up.");

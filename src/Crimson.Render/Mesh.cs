@@ -2,6 +2,9 @@ using Crimson.Render.Primitives;
 
 namespace Crimson.Render;
 
+/// <summary>
+/// A mesh contains vertices, indices, and a material, that can be drawn to the screen.
+/// </summary>
 public class Mesh
 {
     public Vertex[] Vertices;
