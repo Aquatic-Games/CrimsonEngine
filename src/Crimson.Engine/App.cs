@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using Crimson.Core;
-using Crimson.Engine.Scenes;
+using Crimson.Engine.Entities;
 using Crimson.Render;
 using Crimson.Platform;
 

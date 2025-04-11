@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace Crimson.Engine.Scenes;
+namespace Crimson.Engine.Entities;
 
 public struct Transform
 {
