@@ -10,17 +10,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="SharpGLTF.Core" Version="1.0.3" />
       <PackageReference Include="StbImageSharp" Version="2.30.15" />
       <PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
     </ItemGroup>
 
     <ItemGroup>
       <None Include="Shaders\**\*.fxc" CopyToOutputDirectory="PreserveNewest" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ClCompile Include="Shaders\Deferred\DeferredPass.hlsl" />
-      <ClCompile Include="Shaders\Deferred\GBuffer.hlsl" />
     </ItemGroup>
 
 </Project>

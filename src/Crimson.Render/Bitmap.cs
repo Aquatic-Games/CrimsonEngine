@@ -38,4 +38,12 @@ public class Bitmap
         Data = result.Data;
         Format = PixelFormat.RGBA8;
     }
+
+    public Bitmap(byte[] imageBytes)
+    {
+        ImageResult result = ImageResult.FromMemory(imageBytes, ColorComponents.RedGreenBlueAlpha);
+        Size = new Size<int>(result.Width, result.Height);
+        Data = result.Data;
+        Format = PixelFormat.RGBA8;
+    }
 }

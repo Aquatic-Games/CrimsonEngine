@@ -15,6 +15,7 @@ struct PSOutput
 SamplerState Sampler : register(s0);
 
 Texture2D Albedo : register(t0);
+Texture2D Position : register(t1);
 
 VSOutput VSMain(const uint vertexId: SV_VertexID)
 {
@@ -49,7 +50,7 @@ PSOutput PSMain(const in VSOutput input)
 {
     PSOutput output;
 
-    float4 albedo = Albedo.Sample(Sampler, input.TexCoord);
+    const float4 albedo = Albedo.Sample(Sampler, input.TexCoord);
 
     output.Color = float4(albedo.rgb, 1.0);
     

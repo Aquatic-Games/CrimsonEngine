@@ -21,9 +21,12 @@ public class TestApp : GlobalApp
         graphics.Camera.ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(-1, 1, 3), Vector3.Zero, Vector3.UnitY);
 
         Material material = new Material(graphics,
-            new MaterialDefinition(new Texture(graphics, "C:/Users/aqua/Pictures/BAGELMIP.png")));
+            new MaterialDefinition(new Texture(graphics, "/home/aqua/Pictures/BAGELMIP.png")));
 
-        Mesh mesh = Mesh.FromPrimitive(new Cube(), material);
+        Model model = Model.FromGltf(graphics, "/home/aqua/Documents/test.glb");
+        
+        //Mesh mesh = Mesh.FromPrimitive(new Cube(), material);
+        Mesh mesh = model.Meshes[0];
         _renderable = new Renderable(graphics, mesh);
     }
 

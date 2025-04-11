@@ -1,3 +1,5 @@
+using Vortice.Direct3D11;
+
 namespace Crimson.Render;
 
 /// <summary>
@@ -5,6 +7,8 @@ namespace Crimson.Render;
 /// </summary>
 public class Material : IDisposable
 {
+    internal ID3D11RasterizerState RasterizerState;
+    
     public Texture Albedo;
 
     /// <summary>
@@ -15,6 +19,9 @@ public class Material : IDisposable
     public Material(Graphics graphics, in MaterialDefinition definition)
     {
         Albedo = definition.Albedo;
+
+        RasterizerState =
+            graphics.Device.CreateRasterizerState(RasterizerDescription.CullBack);
     }
 
     /// <summary>
@@ -22,6 +29,6 @@ public class Material : IDisposable
     /// </summary>
     public void Dispose()
     {
-        
+        RasterizerState.Dispose();
     }
 }

@@ -14,6 +14,7 @@ internal class DeferredRenderer : IDisposable
     private readonly D3D11Target _depthTarget;
     
     private readonly D3D11Target _albedoTarget;
+    private readonly D3D11Target _positionTarget;
 
     private readonly ID3D11VertexShader _gbufferVtx;
     private readonly ID3D11PixelShader _gBufferPxl;
@@ -35,6 +36,7 @@ internal class DeferredRenderer : IDisposable
         _depthTarget = new D3D11Target(device, Format.D32_Float, size, false);
         
         _albedoTarget = new D3D11Target(device, Format.R32G32B32A32_Float, size);
+        _positionTarget = new D3D11Target(device, Format.R32G32B32A32_Float, size);
 
         ShaderUtils.LoadGraphicsShader(device, "Deferred/GBuffer", out _gbufferVtx!, out _gBufferPxl!,
             out byte[] vtxCode);
@@ -79,10 +81,11 @@ internal class DeferredRenderer : IDisposable
         
         #region GBuffer Pass
         
-        Span<ID3D11RenderTargetView> targets = [_albedoTarget.RenderTarget!];
+        Span<ID3D11RenderTargetView> targets = [_albedoTarget.RenderTarget!, _positionTarget.RenderTarget!];
         context.OMSetRenderTargets(targets, _depthTarget.DepthTarget!);
         
         context.ClearRenderTargetView(_albedoTarget.RenderTarget, new Color4(0.0f, 0.0f, 0.0f, 0.0f));
+        context.ClearRenderTargetView(_positionTarget.RenderTarget, new Color4(0.0f, 0.0f, 0.0f, 0.0f));
         context.ClearDepthStencilView(_depthTarget.DepthTarget, DepthStencilClearFlags.Depth, 1, 0);
 
         context.VSSetConstantBuffer(0, _cameraBuffer);
@@ -101,6 +104,8 @@ internal class DeferredRenderer : IDisposable
             // TODO: This is inefficient. Ideally have a large buffer with offsets.
             //       When GRABS is implemented use push constants.
             context.UpdateBuffer(_worldBuffer, world);
+            
+            context.RSSetState(renderable.Material.RasterizerState);
             
             context.PSSetShaderResource(0, renderable.Material.Albedo.ResourceView);
             
@@ -121,6 +126,7 @@ internal class DeferredRenderer : IDisposable
         context.OMSetDepthStencilState(_passDepthState);
         
         context.PSSetShaderResource(0, _albedoTarget.ResourceView!);
+        context.PSSetShaderResource(1, _positionTarget.ResourceView!);
         
         context.Draw(6, 0);
 

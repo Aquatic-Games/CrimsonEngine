@@ -15,11 +15,13 @@ struct VSOutput
 {
     float4 Position: SV_Position;
     float2 TexCoord: TEXCOORD0;
+    float3 WorldSpace: POSITION0;
 };
 
 struct PSOutput
 {
     float4 Albedo: SV_Target0;
+    float4 Position: SV_Target1;
 };
 
 cbuffer CameraBuffer : register(b0)
@@ -40,7 +42,8 @@ VSOutput VSMain(const in VSInput input)
 {
     VSOutput output;
 
-    output.Position = mul(gCamera.Projection, mul(gCamera.View, mul(World, float4(input.Position, 1.0))));
+    output.WorldSpace = mul(World, float4(input.Position, 1.0)).xyz;
+    output.Position = mul(gCamera.Projection, mul(gCamera.View, float4(output.WorldSpace, 1.0)));
     output.TexCoord = input.TexCoord;
     
     return output;
@@ -50,9 +53,10 @@ PSOutput PSMain(const in VSOutput input)
 {
     PSOutput output;
 
-    float3 albedo = Albedo.Sample(Sampler, input.TexCoord).rgb;
+    const float3 albedo = Albedo.Sample(Sampler, input.TexCoord).rgb;
 
     output.Albedo = float4(albedo, 1.0);
+    output.Position = float4(input.WorldSpace, 1.0);
     
     return output;
 }
