@@ -11,15 +11,26 @@ public class GlobalApp : IDisposable
     public virtual void Initialize() { }
 
     /// <summary>
-    /// Called once per frame. Put application logic in here.
+    /// Called once per frame, before scene update.
     /// </summary>
     /// <param name="dt">The delta time since the last frame.</param>
-    public virtual void Update(float dt) { }
+    public virtual void PreUpdate(float dt) { }
 
     /// <summary>
-    /// Called once per frame. Put rendering logic in here.
+    /// Called once per frame, after scene update.
     /// </summary>
-    public virtual void Draw() { }
+    /// <param name="dt"></param>
+    public virtual void PostUpdate(float dt) { }
+
+    /// <summary>
+    /// Called once per frame, before scene draw.
+    /// </summary>
+    public virtual void PreDraw() { }
+
+    /// <summary>
+    /// Called once per frame, after scene draw.
+    /// </summary>
+    public virtual void PostDraw() { }
 
     /// <summary>
     /// Dispose of this <see cref="GlobalApp"/>.

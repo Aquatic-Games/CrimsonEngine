@@ -21,25 +21,25 @@ public class TestApp : GlobalApp
         graphics.Camera.ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(-1, 1, 3), Vector3.Zero, Vector3.UnitY);
 
         Material material = new Material(graphics,
-            new MaterialDefinition(new Texture(graphics, "C:/Users/aqua/Pictures/BAGELMIP.png")));
+            new MaterialDefinition(new Texture(graphics, "/home/aqua/Pictures/BAGELMIP.png")));
 
-        Model model = Model.FromGltf(graphics, "C:/Users/aqua/Documents/test.glb");
+        Model model = Model.FromGltf(graphics, "/home/aqua/Documents/test.glb");
         
         //Mesh mesh = Mesh.FromPrimitive(new Cube(), material);
         Mesh mesh = model.Meshes[0];
         _renderable = new Renderable(graphics, mesh);
     }
 
-    public override void Update(float dt)
+    public override void PreUpdate(float dt)
     {
-        base.Update(dt);
+        base.PreUpdate(dt);
 
         _rotation += dt;
     }
 
-    public override void Draw()
+    public override void PreDraw()
     {
-        base.Draw();
+        base.PreDraw();
         
         App.Graphics.DrawRenderable(_renderable, Matrix4x4.CreateRotationY(_rotation));
     }

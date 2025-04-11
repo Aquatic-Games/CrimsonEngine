@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Crimson.Core;
+using Crimson.Engine.Scenes;
 using Crimson.Render;
 using Crimson.Platform;
 
@@ -13,6 +14,8 @@ public static class App
     private static string _appName;
     private static bool _isRunning;
     private static GlobalApp _globalApp;
+    
+    private static Scene _currentScene;
 
     private static EventsManager _events;
     private static Surface _surface;
@@ -33,6 +36,11 @@ public static class App
     /// The global application instance.
     /// </summary>
     public static GlobalApp GlobalApp => _globalApp;
+    
+    /// <summary>
+    /// Get the currently active <see cref="Scene"/>.
+    /// </summary>
+    public static Scene ActiveScene => _currentScene;
 
     /// <summary>
     /// The app's <see cref="EventsManager"/>.
@@ -57,6 +65,7 @@ public static class App
         _events = null!;
         _surface = null!;
         _graphics = null!;
+        _currentScene = null!;
     }
     
     /// <summary>
@@ -64,7 +73,7 @@ public static class App
     /// </summary>
     /// <param name="options">The <see cref="AppOptions"/> to use on startup.</param>
     /// <param name="globalApp">A <see cref="Crimson.Engine.GlobalApp"/> instance, if any.</param>
-    public static void Run(in AppOptions options, GlobalApp? globalApp = null)
+    public static void Run(in AppOptions options, Scene scene, GlobalApp? globalApp = null)
     {
         Debug.Assert(_isRunning == false);
         
@@ -75,6 +84,7 @@ public static class App
         
         _appName = options.Name;
         _globalApp = globalApp ?? new GlobalApp();
+        _currentScene = scene;
         
         Logger.Debug("Initializing events manager.");
         _events = new EventsManager();
@@ -90,20 +100,29 @@ public static class App
         
         Logger.Debug("Initializing user code.");
         _globalApp.Initialize();
+        _currentScene.Initialize();
 
         Logger.Debug("Entering main loop.");
         while (_isRunning)
         {
             _events.ProcessEvents();
+
+            const float dt = 1.0f / 60.0f;
             
-            _globalApp.Update(1.0f / 60.0f);
-            _globalApp.Draw();
+            _globalApp.PreUpdate(dt);
+            _currentScene.Update(dt);
+            _globalApp.PostUpdate(dt);
+            
+            _globalApp.PreDraw();
+            _currentScene.Draw();
+            _globalApp.PostDraw();
             
             _graphics.Render();
         }
         
         Logger.Info("Cleaning up.");
         
+        _currentScene.Dispose();
         _globalApp.Dispose();
         _graphics.Dispose();
         _surface.Dispose();
