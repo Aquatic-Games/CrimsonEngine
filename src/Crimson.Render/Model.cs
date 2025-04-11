@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 using Crimson.Math;
 using SharpGLTF.Schema2;
@@ -46,13 +47,20 @@ public class Model
             {
                 IList<Vector3> positions = primitive.GetVertexAccessor("POSITION").AsVector3Array();
                 IList<Vector2> texCoords = primitive.GetVertexAccessor("TEXCOORD_0").AsVector2Array();
+                IList<Vector3> normals = primitive.GetVertexAccessor("NORMAL").AsVector3Array();
+                
+                Debug.Assert(texCoords.Count == positions.Count);
+                Debug.Assert(normals.Count == positions.Count);
                 
                 Vertex[] vertices = new Vertex[positions.Count];
 
                 for (int i = 0; i < positions.Count; i++)
-                    vertices[i] = new Vertex(positions[i], texCoords[i], Color.White, Vector3.Zero);
+                    vertices[i] = new Vertex(positions[i], texCoords[i], Color.White, normals[i]);
+
+                Material material = materialMap[primitive.Material];
+                uint[] indices = primitive.GetIndices().ToArray();
                 
-                meshes.Add(new Mesh(vertices, primitive.GetIndices().ToArray(), materialMap[primitive.Material]));
+                meshes.Add(new Mesh(vertices, indices, material));
             }
         }
 

@@ -25,6 +25,7 @@ internal class DeferredRenderer : IDisposable
     private readonly ID3D11VertexShader _passVtx;
     private readonly ID3D11PixelShader _passPxl;
     private readonly ID3D11DepthStencilState _passDepthState;
+    private readonly ID3D11RasterizerState _passRasterizerState;
 
     private readonly ID3D11Buffer _cameraBuffer;
     private readonly ID3D11Buffer _worldBuffer;
@@ -62,6 +63,8 @@ internal class DeferredRenderer : IDisposable
             DepthFunc = ComparisonFunction.Less
         });
 
+        _passRasterizerState = device.CreateRasterizerState(RasterizerDescription.CullBack);
+        
         _cameraBuffer = device.CreateBuffer(CameraMatrices.SizeInBytes, BindFlags.ConstantBuffer, ResourceUsage.Dynamic,
             CpuAccessFlags.Write);
         
@@ -124,6 +127,7 @@ internal class DeferredRenderer : IDisposable
         context.VSSetShader(_passVtx);
         context.PSSetShader(_passPxl);
         context.OMSetDepthStencilState(_passDepthState);
+        context.RSSetState(_passRasterizerState);
         
         context.PSSetShaderResource(0, _albedoTarget.ResourceView!);
         context.PSSetShaderResource(1, _positionTarget.ResourceView!);
@@ -140,6 +144,7 @@ internal class DeferredRenderer : IDisposable
     {
         _worldBuffer.Dispose();
         _cameraBuffer.Dispose();
+        _passRasterizerState.Dispose();
         _passDepthState.Dispose();
         _passPxl.Dispose();
         _passVtx.Dispose();

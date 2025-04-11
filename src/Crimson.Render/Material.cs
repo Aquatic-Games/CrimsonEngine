@@ -21,7 +21,7 @@ public class Material : IDisposable
         Albedo = definition.Albedo;
 
         RasterizerState =
-            graphics.Device.CreateRasterizerState(RasterizerDescription.CullBack);
+            graphics.Device.CreateRasterizerState(RasterizerDescription.CullBack with { FrontCounterClockwise = true });
     }
 
     /// <summary>
