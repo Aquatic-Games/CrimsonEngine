@@ -1,3 +1,4 @@
+using System.Numerics;
 using Silk.NET.SDL;
 using static Crimson.Platform.SdlUtils;
 
@@ -18,6 +19,8 @@ public class EventsManager : IDisposable
     public event OnKeyRepeat KeyRepeat = delegate { };
 
     public event OnKeyUp KeyUp = delegate { };
+
+    public event OnMouseMove MouseMove = delegate { };
 
     /// <summary>
     /// Create a new <see cref="EventsManager"/>.
@@ -49,6 +52,24 @@ public class EventsManager : IDisposable
                     
                     break;
                 }
+                
+                case EventType.Keydown:
+                {
+                    KeyDown(KeycodeToKey((KeyCode) sdlEvent.Key.Keysym.Sym));
+                    break;
+                }
+                case EventType.Keyup:
+                {
+                    KeyUp(KeycodeToKey((KeyCode) sdlEvent.Key.Keysym.Sym));
+                    break;
+                }
+
+                case EventType.Mousemotion:
+                {
+                    MouseMove(new Vector2(sdlEvent.Motion.X, sdlEvent.Motion.Y),
+                        new Vector2(sdlEvent.Motion.Xrel, sdlEvent.Motion.Yrel));
+                    break;
+                }
             }
         }
     }
@@ -72,4 +93,6 @@ public class EventsManager : IDisposable
     public delegate void OnKeyRepeat(Key key);
 
     public delegate void OnKeyUp(Key key);
+
+    public delegate void OnMouseMove(Vector2 position, Vector2 delta);
 }

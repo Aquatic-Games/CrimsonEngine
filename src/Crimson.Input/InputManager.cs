@@ -1,3 +1,4 @@
+using System.Numerics;
 using Crimson.Platform;
 
 namespace Crimson.Input;
@@ -6,6 +7,13 @@ public class InputManager
 {
     private readonly HashSet<Key> _keysDown;
     private readonly HashSet<Key> _keysPressed;
+
+    private Vector2 _mousePosition;
+    private Vector2 _mouseDelta;
+
+    public Vector2 MousePosition => _mousePosition;
+
+    public Vector2 MouseDelta => _mouseDelta;
     
     public InputManager(EventsManager events)
     {
@@ -14,6 +22,7 @@ public class InputManager
         
         events.KeyDown += OnKeyDown;
         events.KeyUp += OnKeyUp;
+        events.MouseMove += OnMouseMove;
     }
 
     public bool IsKeyDown(Key key)
@@ -25,6 +34,7 @@ public class InputManager
     public void Update()
     {
         _keysPressed.Clear();
+        _mouseDelta = Vector2.Zero;
     }
     
     private void OnKeyDown(Key key)
@@ -37,5 +47,11 @@ public class InputManager
     {
         _keysDown.Remove(key);
         _keysPressed.Remove(key);
+    }
+    
+    private void OnMouseMove(Vector2 position, Vector2 delta)
+    {
+        _mousePosition = position;
+        _mouseDelta += delta;
     }
 }
