@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
+using Crimson.Core;
 using Crimson.Math;
 using Crimson.Render.Renderers;
 using Crimson.Render.Renderers.Structs;
@@ -31,6 +32,11 @@ public sealed class Graphics : IDisposable
     /// The 3D <see cref="Crimson.Render.Camera"/> that will be used when drawing.
     /// </summary>
     public Camera Camera;
+
+    /// <summary>
+    /// Get the render area size in pixels.
+    /// </summary>
+    public Size<int> RenderSize => _swapchainSize;
     
     /// <summary>
     /// Create the graphics subsystem.
@@ -57,13 +63,25 @@ public sealed class Graphics : IDisposable
         DeviceCreationFlags flags = DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport;
         FeatureLevel[] levels = [FeatureLevel.Level_11_1];
 
+        Logger.Trace("Creating D3D11 device.");
         D3D11.D3D11CreateDeviceAndSwapChain(null, DriverType.Hardware, flags, levels, swapchainDesc, out _swapchain!,
             out Device!, out _, out Context!).CheckError();
 
+        IDXGIAdapter adapter = Device.QueryInterface<IDXGIDevice>().GetAdapter();
+        AdapterDescription adapterDesc = adapter.Description;
+        
+        Logger.Info("Adapter:");
+        Logger.Info($"    Name: {adapterDesc.Description}");
+        Logger.Info($"    Memory: {adapterDesc.DedicatedVideoMemory / 1024 / 1024}MB");
+
+        Logger.Trace("Creating swapchain textures.");
         _swapchainTexture = _swapchain.GetBuffer<ID3D11Texture2D>(0);
         _swapchainTarget = Device.CreateRenderTargetView(_swapchainTexture);
 
+        Logger.Trace("Creating texture batcher.");
         _uiBatcher = new TextureBatcher(Device);
+        
+        Logger.Trace("Creating deferred renderer.");
         _deferredRenderer = new DeferredRenderer(Device, size);
 
         Camera = new Camera()

@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using Crimson.Engine.Entities.Components;
 
 namespace Crimson.Engine.Entities;
 
@@ -8,11 +10,15 @@ public abstract class Scene : IDisposable
     private readonly Dictionary<string, Entity> _entitiesMap;
     private bool _isInitialized;
 
+    public Camera Camera => (Camera) GetEntity("Camera");
+
     protected Scene()
     {
         _entities = [];
         _entitiesMap = [];
         _isInitialized = false;
+        
+        AddEntity(new Camera("Camera", 75, 0.1f, 100f));
     }
     
     /// <summary>
@@ -39,6 +45,19 @@ public abstract class Scene : IDisposable
     {
         if (!TryAddEntity(entity))
             throw new Exception($"An entity with name '{entity.Name}' has already been added to the scene.");
+    }
+
+    public bool TryGetEntity(string name, [NotNullWhen(true)] out Entity? entity)
+    {
+        return _entitiesMap.TryGetValue(name, out entity);
+    }
+
+    public Entity GetEntity(string name)
+    {
+        if (!TryGetEntity(name, out Entity? entity))
+            throw new Exception($"Entity with name '{name}' has not been added to the scene.");
+
+        return entity;
     }
 
     /// <summary>
