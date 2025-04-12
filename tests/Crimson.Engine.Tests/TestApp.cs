@@ -2,6 +2,7 @@ using System.Numerics;
 using Crimson.Engine;
 using Crimson.Math;
 using Crimson.Render;
+using Crimson.Render.Materials;
 using Crimson.Render.Primitives;
 using Plane = Crimson.Render.Primitives.Plane;
 

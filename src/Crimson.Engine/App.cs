@@ -15,6 +15,8 @@ public static class App
     private static string _appName;
     private static bool _isRunning;
     private static GlobalApp _globalApp;
+
+    private static Stopwatch _deltaWatch;
     
     private static Scene _currentScene;
 
@@ -74,6 +76,7 @@ public static class App
         _graphics = null!;
         _currentScene = null!;
         _input = null!;
+        _deltaWatch = null!;
     }
     
     /// <summary>
@@ -107,6 +110,8 @@ public static class App
         Logger.Debug("Initializing input manager.");
         _input = new InputManager(_events);
         
+        _deltaWatch = Stopwatch.StartNew();
+        
         _isRunning = true;
         
         Logger.Debug("Initializing user code.");
@@ -119,7 +124,8 @@ public static class App
             _input.Update();
             _events.ProcessEvents();
 
-            const float dt = 1.0f / 60.0f;
+            float dt = (float) _deltaWatch.Elapsed.TotalSeconds;
+            _deltaWatch.Restart();
             
             _globalApp.PreUpdate(dt);
             _currentScene.Update(dt);

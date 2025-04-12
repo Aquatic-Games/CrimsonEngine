@@ -27,6 +27,12 @@ public sealed class Graphics : IDisposable
     
     internal readonly ID3D11Device Device;
     internal readonly ID3D11DeviceContext Context;
+    
+    public readonly Texture WhiteTexture;
+
+    public readonly Texture BlackTexture;
+
+    public readonly Texture NormalTexture;
 
     /// <summary>
     /// The 3D <see cref="Crimson.Render.Camera"/> that will be used when drawing.
@@ -84,6 +90,10 @@ public sealed class Graphics : IDisposable
         Logger.Trace("Creating deferred renderer.");
         _deferredRenderer = new DeferredRenderer(Device, size);
 
+        WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
+        BlackTexture = new Texture(this, new Size<int>(1), [0, 0, 0, 255], PixelFormat.RGBA8);
+        NormalTexture = new Texture(this, new Size<int>(1), [128, 128, 255, 255], PixelFormat.RGBA8);
+
         Camera = new Camera()
         {
             ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(float.DegreesToRadians(45),
@@ -97,6 +107,10 @@ public sealed class Graphics : IDisposable
     /// </summary>
     public void Dispose()
     {
+        NormalTexture.Dispose();
+        BlackTexture.Dispose();
+        WhiteTexture.Dispose();
+        
         _deferredRenderer.Dispose();
         _uiBatcher.Dispose();
 

@@ -4,7 +4,9 @@ using Crimson.Engine.Entities.Components;
 using Crimson.Input;
 using Crimson.Platform;
 using Crimson.Render;
+using Crimson.Render.Materials;
 using Crimson.Render.Primitives;
+using Plane = Crimson.Render.Primitives.Plane;
 
 namespace Crimson.Engine.Tests;
 
@@ -12,11 +14,15 @@ public class TestScene : Scene
 {
     public override void Initialize()
     {
-        Material material = new Material(App.Graphics,
-            new MaterialDefinition(new Texture(App.Graphics, "DEBUG.png")));
+        MaterialDefinition def = new(new Texture(App.Graphics, "DEBUG.png"))
+        {
+            RenderFace = RenderFace.Both
+        };
         
-        Entity test = new Entity("test", new Transform() { Scale = new Vector3(2, 1, 1), Origin = new Vector3(1, 0, 0) });
-        test.AddComponent(new MeshRenderer(Mesh.FromPrimitive(new Cube(), material)));
+        Material material = new Material(App.Graphics, in def);
+        
+        Entity test = new Entity("test", new Transform() { Scale = new Vector3(5, 1, 1), Origin = new Vector3(1, 0, 0) });
+        test.AddComponent(new MeshRenderer(Mesh.FromPrimitive(new Plane(), material)));
         test.AddComponent(new TestComponent());
         AddEntity(test);
 

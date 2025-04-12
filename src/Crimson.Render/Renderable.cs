@@ -1,3 +1,4 @@
+using Crimson.Render.Materials;
 using Vortice.Direct3D11;
 
 namespace Crimson.Render;
@@ -15,7 +16,7 @@ public class Renderable : IDisposable
     internal readonly uint NumIndices;
 
     /// <summary>
-    /// The <see cref="Crimson.Render.Material"/> of this renderable.
+    /// The <see cref="Materials.Material"/> of this renderable.
     /// </summary>
     public Material Material;
 

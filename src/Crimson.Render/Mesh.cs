@@ -1,3 +1,4 @@
+using Crimson.Render.Materials;
 using Crimson.Render.Primitives;
 
 namespace Crimson.Render;

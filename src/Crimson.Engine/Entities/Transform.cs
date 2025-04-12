@@ -20,6 +20,17 @@ public struct Transform
         Origin = Vector3.Zero;
     }
 
+    public Transform(Vector3 position) : this()
+    {
+        Position = position;
+    }
+
+    public Transform(Vector3 position, Quaternion rotation) : this()
+    {
+        Position = position;
+        Rotation = rotation;
+    }
+
     public Vector3 Forward => Vector3.Transform(-Vector3.UnitZ, Rotation);
 
     public Vector3 Backward => Vector3.Transform(Vector3.UnitZ, Rotation);
@@ -32,8 +43,8 @@ public struct Transform
 
     public Vector3 Left => Vector3.Transform(-Vector3.UnitX, Rotation);
 
-    public Matrix4x4 WorldMatrix => Matrix4x4.CreateTranslation(-Origin) *
-                                    Matrix4x4.CreateScale(Scale) *
+    public Matrix4x4 WorldMatrix => Matrix4x4.CreateScale(Scale) *
+                                    Matrix4x4.CreateTranslation(-Origin) *
                                     Matrix4x4.CreateFromQuaternion(Rotation) *
                                     Matrix4x4.CreateTranslation(Position);
 }

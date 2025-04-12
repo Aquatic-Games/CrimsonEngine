@@ -1,4 +1,5 @@
 ﻿using Crimson.Render;
+using Crimson.Render.Materials;
 
 namespace Crimson.Engine.Entities.Components;
 

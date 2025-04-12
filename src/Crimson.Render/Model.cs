@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Numerics;
 using Crimson.Math;
+using Crimson.Render.Materials;
 using SharpGLTF.Schema2;
+using Material = Crimson.Render.Materials.Material;
 
 namespace Crimson.Render;
 

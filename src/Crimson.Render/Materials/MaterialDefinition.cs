@@ -1,4 +1,4 @@
-﻿namespace Crimson.Render;
+﻿namespace Crimson.Render.Materials;
 
 /// <summary>
 /// Defines how a material will be created.
@@ -36,6 +36,16 @@ public struct MaterialDefinition
     public Texture? Emission;
 
     /// <summary>
+    /// The face(s) to render.
+    /// </summary>
+    public RenderFace RenderFace;
+
+    /// <summary>
+    /// The winding order of the front face.
+    /// </summary>
+    public WindingOrder WindingOrder;
+
+    /// <summary>
     /// Define a material with an albedo texture and the default values.
     /// </summary>
     /// <param name="albedo">The albedo texture.</param>
@@ -46,7 +56,7 @@ public struct MaterialDefinition
         Metallic = null;
         Roughness = null;
         Occlusion = null;
+        RenderFace = RenderFace.Front;
+        WindingOrder = WindingOrder.CounterClockwise;
     }
-    
-    
 }
