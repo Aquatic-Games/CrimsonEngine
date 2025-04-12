@@ -67,12 +67,12 @@ public sealed class Graphics : IDisposable
         D3D11.D3D11CreateDeviceAndSwapChain(null, DriverType.Hardware, flags, levels, swapchainDesc, out _swapchain!,
             out Device!, out _, out Context!).CheckError();
 
-        IDXGIAdapter adapter = Device.QueryInterface<IDXGIDevice>().GetAdapter();
+        /*IDXGIAdapter adapter = Device.QueryInterface<IDXGIDevice>().GetAdapter();
         AdapterDescription adapterDesc = adapter.Description;
         
         Logger.Info("Adapter:");
         Logger.Info($"    Name: {adapterDesc.Description}");
-        Logger.Info($"    Memory: {adapterDesc.DedicatedVideoMemory / 1024 / 1024}MB");
+        Logger.Info($"    Memory: {adapterDesc.DedicatedVideoMemory / 1024 / 1024}MB");*/
 
         Logger.Trace("Creating swapchain textures.");
         _swapchainTexture = _swapchain.GetBuffer<ID3D11Texture2D>(0);

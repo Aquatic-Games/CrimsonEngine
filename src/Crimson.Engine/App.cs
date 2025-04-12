@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Crimson.Core;
 using Crimson.Engine.Entities;
+using Crimson.Input;
 using Crimson.Render;
 using Crimson.Platform;
 
@@ -20,7 +21,8 @@ public static class App
     private static EventsManager _events;
     private static Surface _surface;
     private static Graphics _graphics;
-
+    private static InputManager _input;
+    
     /// <summary>
     /// The app name.
     /// </summary>
@@ -57,6 +59,11 @@ public static class App
     /// </summary>
     public static Graphics Graphics => _graphics;
 
+    /// <summary>
+    /// The app's <see cref="InputManager"/>.
+    /// </summary>
+    public static InputManager Input => _input;
+
     static App()
     {
         _appName = "";
@@ -66,6 +73,7 @@ public static class App
         _surface = null!;
         _graphics = null!;
         _currentScene = null!;
+        _input = null!;
     }
     
     /// <summary>
@@ -96,6 +104,9 @@ public static class App
         Logger.Debug("Initializing graphics subsystem.");
         _graphics = new Graphics(_appName, Surface.Info, Surface.Size);
         
+        Logger.Debug("Initializing input manager.");
+        _input = new InputManager(_events);
+        
         _isRunning = true;
         
         Logger.Debug("Initializing user code.");
@@ -105,6 +116,7 @@ public static class App
         Logger.Debug("Entering main loop.");
         while (_isRunning)
         {
+            _input.Update();
             _events.ProcessEvents();
 
             const float dt = 1.0f / 60.0f;

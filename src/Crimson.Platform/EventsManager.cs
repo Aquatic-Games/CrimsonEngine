@@ -13,6 +13,12 @@ public class EventsManager : IDisposable
     /// </summary>
     public event OnWindowClose WindowClose = delegate { };
 
+    public event OnKeyDown KeyDown = delegate { };
+
+    public event OnKeyRepeat KeyRepeat = delegate { };
+
+    public event OnKeyUp KeyUp = delegate { };
+
     /// <summary>
     /// Create a new <see cref="EventsManager"/>.
     /// </summary>
@@ -59,4 +65,11 @@ public class EventsManager : IDisposable
     /// A delegate that is used in the <see cref="Events.WindowClose"/> event.
     /// </summary>
     public delegate void OnWindowClose();
+
+    
+    public delegate void OnKeyDown(Key key);
+
+    public delegate void OnKeyRepeat(Key key);
+
+    public delegate void OnKeyUp(Key key);
 }
