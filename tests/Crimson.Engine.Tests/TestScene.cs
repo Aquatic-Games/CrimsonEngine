@@ -14,6 +14,9 @@ public class TestScene : Scene
 {
     public override void Initialize()
     {
+        App.FpsLimit = 30;
+        App.Graphics.VSync = true;
+        
         MaterialDefinition def = new(new Texture(App.Graphics, "DEBUG.png"))
         {
             RenderFace = RenderFace.Both

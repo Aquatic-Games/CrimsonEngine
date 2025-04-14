@@ -17,6 +17,7 @@ public static class App
     private static GlobalApp _globalApp;
 
     private static Stopwatch _deltaWatch;
+    private static double _targetDelta;
     
     private static Scene _currentScene;
 
@@ -35,6 +36,16 @@ public static class App
     /// You should only use engine features when this value is true.
     /// </summary>
     public static bool IsRunning => _isRunning;
+
+    /// <summary>
+    /// Set the FPS limit for the application. A value of 0 will disable the limit, however the FPS may still be limited
+    /// by other factors (VSync, Compositor, etc.)
+    /// </summary>
+    public static uint FpsLimit
+    {
+        get => (uint) (1.0 / _targetDelta);
+        set => _targetDelta = value == 0 ? 0 : 1.0 / value;
+    }
 
     /// <summary>
     /// The global application instance.
@@ -77,12 +88,14 @@ public static class App
         _currentScene = null!;
         _input = null!;
         _deltaWatch = null!;
+        FpsLimit = 0;
     }
     
     /// <summary>
     /// Run the application.
     /// </summary>
     /// <param name="options">The <see cref="AppOptions"/> to use on startup.</param>
+    /// <param name="scene">The initial scene to load.</param>
     /// <param name="globalApp">A <see cref="Crimson.Engine.GlobalApp"/> instance, if any.</param>
     public static void Run(in AppOptions options, Scene scene, GlobalApp? globalApp = null)
     {
@@ -121,6 +134,9 @@ public static class App
         Logger.Debug("Entering main loop.");
         while (_isRunning)
         {
+            if (_deltaWatch.Elapsed.TotalSeconds < _targetDelta && !Graphics.VSync)
+                continue;
+            
             _input.Update();
             _events.ProcessEvents();
 

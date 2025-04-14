@@ -20,6 +20,7 @@ public sealed class Graphics : IDisposable
     private ID3D11Texture2D _swapchainTexture;
     private ID3D11RenderTargetView _swapchainTarget;
 
+    private uint _targetSwapInterval;
     private Size<int> _swapchainSize;
     
     private readonly TextureBatcher _uiBatcher;
@@ -43,6 +44,15 @@ public sealed class Graphics : IDisposable
     /// Get the render area size in pixels.
     /// </summary>
     public Size<int> RenderSize => _swapchainSize;
+
+    /// <summary>
+    /// Enable/disable vertical sync.
+    /// </summary>
+    public bool VSync
+    {
+        get => _targetSwapInterval == 1;
+        set => _targetSwapInterval = value ? 1u : 0u;
+    }
     
     /// <summary>
     /// Create the graphics subsystem.
@@ -53,6 +63,7 @@ public sealed class Graphics : IDisposable
     public Graphics(string appName, in SurfaceInfo info, Size<int> size)
     {
         _swapchainSize = size;
+        VSync = true;
 
         SwapChainDescription swapchainDesc = new()
         {
@@ -165,6 +176,6 @@ public sealed class Graphics : IDisposable
         
         _uiBatcher.DispatchDrawQueue(Context, projection, Matrix4x4.Identity);
         
-        _swapchain.Present(1);
+        _swapchain.Present(_targetSwapInterval);
     }
 }
