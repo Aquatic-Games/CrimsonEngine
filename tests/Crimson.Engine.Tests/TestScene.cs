@@ -24,20 +24,16 @@ public class TestScene : Scene
         };
         
         Material material = new Material(App.Graphics, in def);
-        
-        Entity test = new Entity("test", new Transform() { Scale = new Vector3(5, 1, 1), Origin = new Vector3(1, 0, 0) });
-        test.AddComponent(new MeshRenderer(Mesh.FromPrimitive(new Plane(), material)));
-        test.AddComponent(new TestComponent());
-        AddEntity(test);
 
-        Entity test2 = new Entity("test2", new Transform() { Position = new Vector3(-2, 0, 0) });
-        test2.AddComponent(new Rigidbody(new BoxShape(new Vector3(0.5f))));
-        test2.AddComponent(new MeshRenderer(Mesh.FromPrimitive(new Cube(), material)));
-        AddEntity(test2);
-        
-        Entity test3 = new Entity("test3", new Transform() { Position = new Vector3(2, 0, 0) });
-        test3.AddComponent(new MeshRenderer(Mesh.FromPrimitive(new Cube(), material)));
-        AddEntity(test3);
+        Entity staticCube = new Entity("StaticCube", new Transform(new Vector3(0, -5, 0)));
+        staticCube.AddComponent(new Rigidbody(new BoxShape(new Vector3(0.5f)), 0));
+        staticCube.AddComponent(new MeshRenderer(Mesh.FromPrimitive(new Cube(), material)));
+        AddEntity(staticCube);
+
+        Entity dynamicCube = new Entity("DynamicCube");
+        dynamicCube.AddComponent(new Rigidbody(new BoxShape(new Vector3(0.5f)), 1));
+        dynamicCube.AddComponent(new MeshRenderer(Mesh.FromPrimitive(new Cube(), material)));
+        AddEntity(dynamicCube);
         
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());

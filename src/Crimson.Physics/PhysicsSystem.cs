@@ -61,12 +61,29 @@ public class PhysicsSystem : IDisposable
         Debug.Assert(error == PhysicsUpdateError.None);
     }
 
-    public Body CreateDynamicBody(Shape shape, Vector3 position, Quaternion rotation)
+    public Body CreateDynamicBody(Shape shape, Vector3 position, Quaternion rotation, float mass)
     {
-        Body body = Physics.BodyInterface.CreateBody(new BodyCreationSettings(shape, position, rotation,
-            MotionType.Dynamic, Layers.Moving));
+        BodyCreationSettings bodySettings = new BodyCreationSettings(shape, position, rotation, MotionType.Dynamic, Layers.Moving)
+        {
+            MassPropertiesOverride = new MassProperties() { Mass = mass },
+            OverrideMassProperties = OverrideMassProperties.CalculateInertia,
+            Restitution = 0.2f
+        };
+        
+        Body body = Physics.BodyInterface.CreateBody(bodySettings);
         
         Physics.BodyInterface.AddBody(body, Activation.Activate);
+
+        return body;
+    }
+
+    public Body CreateStaticBody(Shape shape, Vector3 position, Quaternion rotation)
+    {
+        BodyCreationSettings bodySettings =
+            new BodyCreationSettings(shape, position, rotation, MotionType.Static, Layers.NonMoving);
+
+        Body body = Physics.BodyInterface.CreateBody(bodySettings);
+        Physics.BodyInterface.AddBody(body, Activation.DontActivate);
 
         return body;
     }
