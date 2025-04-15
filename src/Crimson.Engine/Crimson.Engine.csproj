@@ -7,6 +7,7 @@
       <ProjectReference Include="..\Crimson.Data\Crimson.Data.csproj" />
       <ProjectReference Include="..\Crimson.Input\Crimson.Input.csproj" />
       <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
+      <ProjectReference Include="..\Crimson.Physics\Crimson.Physics.csproj" />
       <ProjectReference Include="..\Crimson.Render\Crimson.Render.csproj" />
       <ProjectReference Include="..\Crimson.Platform\Crimson.Platform.csproj" />
     </ItemGroup>

@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{4DB13778
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Engine.Tests", "tests\Crimson.Engine.Tests\Crimson.Engine.Tests.csproj", "{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Physics", "src\Crimson.Physics\Crimson.Physics.csproj", "{18F8E918-B2FE-406C-B26C-03D94785C422}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18F8E918-B2FE-406C-B26C-03D94785C422}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18F8E918-B2FE-406C-B26C-03D94785C422}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18F8E918-B2FE-406C-B26C-03D94785C422}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18F8E918-B2FE-406C-B26C-03D94785C422}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A} = {4DB13778-0F69-4B82-A065-32546F54500F}

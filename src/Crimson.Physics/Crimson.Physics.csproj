@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="JoltPhysicsSharp" Version="2.16.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Structs\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
+    </ItemGroup>
+
+</Project>

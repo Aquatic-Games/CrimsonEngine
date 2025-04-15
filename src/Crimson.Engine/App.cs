@@ -2,6 +2,7 @@
 using Crimson.Core;
 using Crimson.Engine.Entities;
 using Crimson.Input;
+using Crimson.Physics;
 using Crimson.Render;
 using Crimson.Platform;
 
@@ -25,6 +26,7 @@ public static class App
     private static Surface _surface;
     private static Graphics _graphics;
     private static InputManager _input;
+    private static PhysicsSystem _physics;
     
     /// <summary>
     /// The app name.
@@ -77,6 +79,11 @@ public static class App
     /// </summary>
     public static InputManager Input => _input;
 
+    /// <summary>
+    /// The physics system.
+    /// </summary>
+    public static PhysicsSystem Physics => _physics;
+
     static App()
     {
         _appName = "";
@@ -88,6 +95,7 @@ public static class App
         _currentScene = null!;
         _input = null!;
         _deltaWatch = null!;
+        _physics = null!;
         FpsLimit = 0;
     }
     
@@ -123,6 +131,9 @@ public static class App
         Logger.Debug("Initializing input manager.");
         _input = new InputManager(_events);
         
+        Logger.Debug("Initializing physics system.");
+        _physics = new PhysicsSystem();
+        
         _deltaWatch = Stopwatch.StartNew();
         
         _isRunning = true;
@@ -144,6 +155,7 @@ public static class App
             _deltaWatch.Restart();
             
             _globalApp.PreUpdate(dt);
+            _physics.Step(1 / 60.0f);
             _currentScene.Update(dt);
             _globalApp.PostUpdate(dt);
             
@@ -158,6 +170,7 @@ public static class App
         
         _currentScene.Dispose();
         _globalApp.Dispose();
+        _physics.Dispose();
         _graphics.Dispose();
         _surface.Dispose();
         _events.Dispose();

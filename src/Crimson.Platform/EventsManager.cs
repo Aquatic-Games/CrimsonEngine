@@ -55,6 +55,8 @@ public class EventsManager : IDisposable
                 
                 case EventType.Keydown:
                 {
+                    if (sdlEvent.Key.Repeat != 0)
+                        break;
                     KeyDown(KeycodeToKey((KeyCode) sdlEvent.Key.Keysym.Sym));
                     break;
                 }
