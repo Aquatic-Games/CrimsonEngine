@@ -20,8 +20,8 @@ public sealed class Graphics : IDisposable
     private uint _targetSwapInterval;
     private Size<int> _swapchainSize;
     
-    /*private readonly TextureBatcher _uiBatcher;
-    private readonly DeferredRenderer _deferredRenderer;*/
+    private readonly TextureBatcher _uiBatcher;
+    /*private readonly DeferredRenderer _deferredRenderer;*/
     
     internal readonly Device Device;
     internal readonly CommandList CommandList;
@@ -87,10 +87,10 @@ public sealed class Graphics : IDisposable
 
         _swapchain = Device.CreateSwapchain(in swapchainInfo);
 
-        /*Logger.Trace("Creating texture batcher.");
-        _uiBatcher = new TextureBatcher(Device);
+        Logger.Trace("Creating texture batcher.");
+        _uiBatcher = new TextureBatcher(Device, _swapchain.SwapchainFormat);
         
-        Logger.Trace("Creating deferred renderer.");
+        /*Logger.Trace("Creating deferred renderer.");
         _deferredRenderer = new DeferredRenderer(Device, size);*/
 
         WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
@@ -114,8 +114,8 @@ public sealed class Graphics : IDisposable
         BlackTexture.Dispose();
         WhiteTexture.Dispose();
         
-        /*_deferredRenderer.Dispose();
-        _uiBatcher.Dispose();*/
+        /*_deferredRenderer.Dispose();*/
+        _uiBatcher.Dispose();
         
         _swapchain.Dispose();
         CommandList.Dispose();
@@ -134,7 +134,7 @@ public sealed class Graphics : IDisposable
         _deferredRenderer.AddToQueue(renderable, worldMatrix);
     }*/
 
-    /*/// <summary>
+    /// <summary>
     /// Draw an image to the screen.
     /// </summary>
     /// <param name="texture">The texture to use as the image.</param>
@@ -149,7 +149,7 @@ public sealed class Graphics : IDisposable
         Vector2 bottomRight = position + new Vector2(size.Width, size.Height);
 
         _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft, topRight, bottomLeft, bottomRight));
-    }*/
+    }
 
     /// <summary>
     /// Render and present to the surface.
@@ -159,14 +159,33 @@ public sealed class Graphics : IDisposable
         GrabsTexture swapchainTexture = _swapchain.GetNextTexture();
         
         CommandList.Begin();
+        CommandList.SetViewport(new Viewport(0, 0, _swapchainSize.Width, _swapchainSize.Height));
+        
         CommandList.BeginRenderPass(new RenderPassInfo(new ColorAttachmentInfo(swapchainTexture, new ColorF(1.0f, 0.5f, 0.25f))));
+        CommandList.EndRenderPass();
+
+        RenderPassInfo uiPass = new()
+        {
+            ColorAttachments =
+            [
+                new ColorAttachmentInfo()
+                {
+                    Texture = swapchainTexture,
+                    LoadOp = LoadOp.Load
+                }
+            ]
+        };
+        CommandList.BeginRenderPass(in uiPass);
+        
+        Matrix4x4 projection =
+            Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
+        
+        _uiBatcher.DispatchDrawQueue(CommandList, projection, Matrix4x4.Identity);
+        
         CommandList.EndRenderPass();
         CommandList.End();
         
         Device.ExecuteCommandList(CommandList);
-        
-        Matrix4x4 projection =
-            Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
         
         _swapchain.Present();
     }

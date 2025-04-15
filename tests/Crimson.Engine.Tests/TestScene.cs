@@ -12,10 +12,14 @@ namespace Crimson.Engine.Tests;
 
 public class TestScene : Scene
 {
+    private Texture _texture;
+    
     public override void Initialize()
     {
         App.FpsLimit = 30;
         App.Graphics.VSync = true;
+
+        _texture = new Texture(App.Graphics, "DEBUG.png");
         
         /*MaterialDefinition def = new(new Texture(App.Graphics, "DEBUG.png"))
         {
@@ -56,5 +60,12 @@ public class TestScene : Scene
         
         if (input.IsKeyPressed(Key.Escape))
             App.Close();
+    }
+
+    public override void Draw()
+    {
+        base.Draw();
+        
+        App.Graphics.DrawImage(_texture, new Vector2(0, 0));
     }
 }

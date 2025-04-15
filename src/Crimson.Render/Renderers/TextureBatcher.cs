@@ -3,10 +3,8 @@ using System.Numerics;
 using Crimson.Math;
 using Crimson.Render.Renderers.Structs;
 using Crimson.Render.Utils;
-using Vortice;
-using Vortice.Direct3D;
-using Vortice.Direct3D11;
-using Vortice.DXGI;
+using grabs.Graphics;
+using Buffer = grabs.Graphics.Buffer;
 
 namespace Crimson.Render.Renderers;
 
@@ -26,40 +24,51 @@ internal class TextureBatcher : IDisposable
     private readonly Vertex[] _vertices;
     private readonly uint[] _indices;
 
-    private readonly ID3D11Buffer _vertexBuffer;
-    private readonly ID3D11Buffer _indexBuffer;
-    private readonly ID3D11Buffer _cameraBuffer;
+    private readonly Buffer _vertexBuffer;
+    private readonly Buffer _indexBuffer;
 
-    private readonly ID3D11VertexShader _vertexShader;
-    private readonly ID3D11PixelShader _pixelShader;
-    private readonly ID3D11InputLayout _inputLayout;
+    private readonly DescriptorLayout _textureDescriptor;
+    
+    private readonly Pipeline _pipeline;
 
     private readonly List<Draw> _drawQueue;
     
-    public TextureBatcher(ID3D11Device device)
+    public TextureBatcher(Device device, Format pixelFormat)
     {
         _vertices = new Vertex[MaxVertices];
         _indices = new uint[MaxIndices];
 
-        _vertexBuffer = device.CreateBuffer(MaxVertices * Vertex.SizeInBytes, BindFlags.VertexBuffer,
-            ResourceUsage.Dynamic, CpuAccessFlags.Write);
+        _vertexBuffer = device.CreateBuffer(new BufferInfo(BufferUsage.Vertex | BufferUsage.Dynamic,
+            MaxVertices * Vertex.SizeInBytes));
 
-        _indexBuffer = device.CreateBuffer(MaxIndices * sizeof(uint), BindFlags.IndexBuffer, ResourceUsage.Dynamic,
-            CpuAccessFlags.Write);
+        _indexBuffer =
+            device.CreateBuffer(new BufferInfo(BufferUsage.Index | BufferUsage.Dynamic,
+                MaxIndices * sizeof(uint)));
 
-        _cameraBuffer = device.CreateBuffer(CameraMatrices.SizeInBytes, BindFlags.ConstantBuffer, ResourceUsage.Dynamic,
-            CpuAccessFlags.Write);
+        _textureDescriptor =
+            device.CreateDescriptorLayout(
+                new DescriptorLayoutInfo(new DescriptorBinding(0, DescriptorType.Texture, ShaderStage.Pixel)));
         
-        ShaderUtils.LoadGraphicsShader(device, "Texture", out _vertexShader!, out _pixelShader!, out byte[] bytecode);
+        ShaderUtils.LoadGraphicsShader(device, "Texture", out ShaderModule? vtxModule, out ShaderModule? pxlModule);
+        Debug.Assert(vtxModule != null);
+        Debug.Assert(pxlModule != null);
 
-        InputElementDescription[] elements =
-        [
-            new InputElementDescription("POSITION", 0, Format.R32G32_Float, 0, 0),
-            new InputElementDescription("TEXCOORD", 0, Format.R32G32_Float, 8, 0),
-            new InputElementDescription("COLOR", 0, Format.R32G32B32A32_Float, 16, 0)
-        ];
+        PipelineInfo pipelineInfo = new()
+        {
+            VertexShader = vtxModule,
+            PixelShader = pxlModule,
+            InputLayout =
+            [
+                new InputElement(Format.R32G32_Float, 0, 0), // Position
+                new InputElement(Format.R32G32_Float, 8, 0), // TexCoord
+                new InputElement(Format.R32G32B32A32_Float, 16, 0) // Tint
+            ],
+            ColorAttachmentFormats = [pixelFormat],
+            Descriptors = [_textureDescriptor],
+            Constants = [new ConstantLayout(ShaderStage.Vertex, 0, CameraMatrices.SizeInBytes)]
+        };
 
-        _inputLayout = device.CreateInputLayout(elements, bytecode!);
+        _pipeline = device.CreatePipeline(in pipelineInfo);
 
         _drawQueue = [];
     }
@@ -69,23 +78,15 @@ internal class TextureBatcher : IDisposable
         _drawQueue.Add(draw);
     }
 
-    public void DispatchDrawQueue(ID3D11DeviceContext context, Matrix4x4 projection, Matrix4x4 transform)
+    public void DispatchDrawQueue(CommandList cl, Matrix4x4 projection, Matrix4x4 transform)
     {
-        MappedSubresource cameraRes = context.Map(_cameraBuffer, MapMode.WriteDiscard);
         CameraMatrices matrices = new CameraMatrices(projection, transform);
-        UnsafeUtilities.Write(cameraRes.DataPointer, ref matrices);
-        context.Unmap(_cameraBuffer);
+        cl.PushConstant(_pipeline, ShaderStage.Vertex, 0, matrices);
         
-        context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
-        context.IASetInputLayout(_inputLayout);
+        cl.SetPipeline(_pipeline);
         
-        context.VSSetShader(_vertexShader);
-        context.PSSetShader(_pixelShader);
-        
-        context.IASetVertexBuffer(0, _vertexBuffer, Vertex.SizeInBytes);
-        context.IASetIndexBuffer(_indexBuffer, Format.R32_UInt, 0);
-        
-        context.VSSetConstantBuffer(0, _cameraBuffer);
+        cl.SetVertexBuffer(0, _vertexBuffer, Vertex.SizeInBytes);
+        cl.SetIndexBuffer(_indexBuffer, Format.R32_UInt);
 
         uint numDraws = 0;
         Texture? texture = null;
@@ -94,7 +95,7 @@ internal class TextureBatcher : IDisposable
         {
             if (draw.Texture != texture || numDraws >= MaxBatches)
             {
-                Flush(context, numDraws, texture);
+                Flush(cl, numDraws, texture);
                 numDraws = 0;
             }
 
@@ -118,11 +119,11 @@ internal class TextureBatcher : IDisposable
             numDraws++;
         }
         
-        Flush(context, numDraws, texture);
+        Flush(cl, numDraws, texture);
         _drawQueue.Clear();
     }
 
-    private void Flush(ID3D11DeviceContext context, uint numDraws, Texture? texture)
+    private void Flush(CommandList cl, uint numDraws, Texture? texture)
     {
         // Don't bother drawing unless there's stuff to draw.
         if (numDraws == 0)
@@ -130,26 +131,20 @@ internal class TextureBatcher : IDisposable
         
         Debug.Assert(texture != null);
 
-        MappedSubresource vMap = context.Map(_vertexBuffer, MapMode.WriteDiscard);
-        UnsafeUtilities.Write(vMap.DataPointer, _vertices, 0, (int) (numDraws * NumVertices * Vertex.SizeInBytes));
-        context.Unmap(_vertexBuffer);
+        cl.UpdateBuffer<Vertex>(_vertexBuffer,
+            _vertices.AsSpan(0, (int) (numDraws * NumVertices * Vertex.SizeInBytes)));
+        
+        cl.UpdateBuffer<uint>(_indexBuffer, _indices.AsSpan(0, (int) (numDraws * NumIndices * sizeof(uint))));
 
-        MappedSubresource iMap = context.Map(_indexBuffer, MapMode.WriteDiscard);
-        UnsafeUtilities.Write(iMap.DataPointer, _indices, 0, (int) (numDraws * NumIndices * sizeof(uint)));
-        context.Unmap(_indexBuffer);
+        cl.PushDescriptor(0, _pipeline, new Descriptor(0, DescriptorType.Texture, texture: texture.TextureHandle));
         
-        context.PSSetShaderResource(0, texture.ResourceView);
-        
-        context.DrawIndexed(numDraws * NumIndices, 0, 0);
+        cl.DrawIndexed(numDraws * NumIndices);
     }
     
     public void Dispose()
     {
-        _inputLayout.Dispose();
-        _pixelShader.Dispose();
-        _vertexShader.Dispose();
-        
-        _cameraBuffer.Dispose();
+        _pipeline.Dispose();
+        _textureDescriptor.Dispose();
         _indexBuffer.Dispose();
         _vertexBuffer.Dispose();
     }
