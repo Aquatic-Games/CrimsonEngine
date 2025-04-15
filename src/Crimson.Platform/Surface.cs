@@ -1,6 +1,7 @@
 ﻿using Crimson.Core;
 using Crimson.Math;
 using Crimson.Render;
+using grabs.Graphics;
 using Silk.NET.SDL;
 using static Crimson.Platform.SdlUtils;
 
@@ -72,23 +73,18 @@ public sealed unsafe class Surface : IDisposable
                 throw new PlatformNotSupportedException();
 
             return info;*/
+            
+            SysWMInfo wmInfo = new SysWMInfo();
+            SDL.GetVersion(&wmInfo.Version);
+            SDL.GetWindowWMInfo(_window, &wmInfo);
 
-            SurfaceInfo info;
-
-            if (OperatingSystem.IsWindows())
+            return wmInfo.Subsystem switch
             {
-                SysWMInfo wmInfo = new SysWMInfo();
-                SDL.GetVersion(&wmInfo.Version);
-                SDL.GetWindowWMInfo(_window, &wmInfo);
-
-                info = new SurfaceInfo(wmInfo.Info.Win.Hwnd);
-            }
-            else
-            {
-                info = new SurfaceInfo((nint) _window);
-            }
-
-            return info;
+                SysWMType.Windows => SurfaceInfo.Windows(wmInfo.Info.Win.HInstance, wmInfo.Info.Win.Hwnd),
+                SysWMType.X11 => SurfaceInfo.Xlib((nint) wmInfo.Info.X11.Display, (nint) wmInfo.Info.X11.Window),
+                SysWMType.Wayland => SurfaceInfo.Wayland((nint) wmInfo.Info.Wayland.Display,
+                    (nint) wmInfo.Info.Wayland.Surface)
+            };
         }
     }
 

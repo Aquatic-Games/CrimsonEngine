@@ -1,11 +1,12 @@
 using Crimson.Core;
-using Vortice.Direct3D11;
+using grabs.Graphics;
+using grabs.ShaderCompiler;
 
 namespace Crimson.Render.Utils;
 
 internal static class ShaderUtils
 {
-    /*public static void LoadGraphicsShader(Device device, string name, out ShaderModule? vertex, out ShaderModule? pixel)
+    public static void LoadGraphicsShader(Device device, string name, out ShaderModule? vertex, out ShaderModule? pixel)
     {
         Logger.Trace($"Compiling shader '{name}'.");
         
@@ -53,26 +54,5 @@ internal static class ShaderUtils
             byte[] spirv = Compiler.CompileHlsl(ShaderStage.Pixel, hlsl, pixelEntryPoint);
             pixel = device.CreateShaderModule(ShaderStage.Pixel, spirv, pixelEntryPoint);
         }
-    }*/
-
-    public static void LoadGraphicsShader(ID3D11Device device, string name, out ID3D11VertexShader? vertex,
-        out ID3D11PixelShader? pixel, out byte[]? vertexBytecode)
-    {
-        string basePath = Path.Combine("Shaders", $"{name}");
-
-        vertex = null;
-        pixel = null;
-        vertexBytecode = null;
-        
-        string vertexPath = basePath + "_v.fxc";
-        if (File.Exists(vertexPath))
-        {
-            vertexBytecode = File.ReadAllBytes(vertexPath);
-            vertex = device.CreateVertexShader(vertexBytecode);
-        }
-
-        string pixelPath = basePath + "_p.fxc";
-        if (File.Exists(pixelPath))
-            pixel = device.CreatePixelShader(File.ReadAllBytes(pixelPath));
     }
 }

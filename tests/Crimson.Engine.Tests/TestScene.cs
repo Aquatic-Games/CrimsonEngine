@@ -4,7 +4,6 @@ using Crimson.Engine.Entities.Components;
 using Crimson.Input;
 using Crimson.Platform;
 using Crimson.Render;
-using Crimson.Render.Materials;
 using Crimson.Render.Primitives;
 using JoltPhysicsSharp;
 using Plane = Crimson.Render.Primitives.Plane;
@@ -18,7 +17,7 @@ public class TestScene : Scene
         App.FpsLimit = 30;
         App.Graphics.VSync = true;
         
-        MaterialDefinition def = new(new Texture(App.Graphics, "DEBUG.png"))
+        /*MaterialDefinition def = new(new Texture(App.Graphics, "DEBUG.png"))
         {
             RenderFace = RenderFace.Both
         };
@@ -36,7 +35,7 @@ public class TestScene : Scene
         AddEntity(dynamicCube);
         
         Camera.Transform.Position = new Vector3(0, 0, 3);
-        Camera.AddComponent(new CameraMove());
+        Camera.AddComponent(new CameraMove());*/
         
         base.Initialize();
     }

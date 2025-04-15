@@ -11,5 +11,9 @@
       <ProjectReference Include="..\Crimson.Render\Crimson.Render.csproj" />
       <ProjectReference Include="..\Crimson.Platform\Crimson.Platform.csproj" />
     </ItemGroup>
+  
+    <ItemGroup>
+      <Compile Remove="Entities\Components\MeshRenderer.cs" />
+    </ItemGroup>
 
 </Project>

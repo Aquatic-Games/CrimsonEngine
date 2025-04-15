@@ -1,13 +1,10 @@
-﻿using System.Diagnostics;
-using System.Numerics;
+﻿using System.Numerics;
 using Crimson.Core;
 using Crimson.Math;
 using Crimson.Render.Renderers;
-using Crimson.Render.Renderers.Structs;
-using Vortice.Direct3D;
-using Vortice.Direct3D11;
-using Vortice.DXGI;
-using Vortice.Mathematics;
+using grabs.Core;
+using grabs.Graphics;
+using grabs.Graphics.Vulkan;
 
 namespace Crimson.Render;
 
@@ -16,24 +13,24 @@ namespace Crimson.Render;
 /// </summary>
 public sealed class Graphics : IDisposable
 {
-    private readonly IDXGISwapChain _swapchain;
-    private ID3D11Texture2D _swapchainTexture;
-    private ID3D11RenderTargetView _swapchainTarget;
+    private readonly Instance _instance;
+    private readonly Surface _surface;
+    private readonly Swapchain _swapchain;
 
     private uint _targetSwapInterval;
     private Size<int> _swapchainSize;
     
-    private readonly TextureBatcher _uiBatcher;
-    private readonly DeferredRenderer _deferredRenderer;
+    /*private readonly TextureBatcher _uiBatcher;
+    private readonly DeferredRenderer _deferredRenderer;*/
     
-    internal readonly ID3D11Device Device;
-    internal readonly ID3D11DeviceContext Context;
+    internal readonly Device Device;
+    internal readonly CommandList CommandList;
     
-    public readonly Texture WhiteTexture;
+    /*public readonly Texture WhiteTexture;
 
     public readonly Texture BlackTexture;
 
-    public readonly Texture NormalTexture;
+    public readonly Texture NormalTexture;*/
 
     /// <summary>
     /// The 3D <see cref="Crimson.Render.Camera"/> that will be used when drawing.
@@ -65,45 +62,40 @@ public sealed class Graphics : IDisposable
         _swapchainSize = size;
         VSync = true;
 
-        SwapChainDescription swapchainDesc = new()
-        {
-            OutputWindow = info.NativeHandle,
-            Windowed = true,
-            BufferDescription = new ModeDescription((uint) size.Width, (uint) size.Height, Format.B8G8R8A8_UNorm),
-            BufferUsage = Usage.RenderTargetOutput,
-            BufferCount = 2,
-            SampleDescription = new SampleDescription(1, 0),
-            SwapEffect = SwapEffect.FlipDiscard,
-            Flags = SwapChainFlags.None
-        };
+        Instance.RegisterBackend<VulkanBackend>();
 
-        DeviceCreationFlags flags = DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport;
-        FeatureLevel[] levels = [FeatureLevel.Level_11_1];
+        InstanceInfo instanceInfo = new InstanceInfo(appName, true);
 
-        Logger.Trace("Creating D3D11 device.");
-        D3D11.D3D11CreateDeviceAndSwapChain(null, DriverType.Hardware, flags, levels, swapchainDesc, out _swapchain!,
-            out Device!, out _, out Context!).CheckError();
+        _instance = Instance.Create(in instanceInfo);
+        _surface = _instance.CreateSurface(in info);
 
-        /*IDXGIAdapter adapter = Device.QueryInterface<IDXGIDevice>().GetAdapter();
-        AdapterDescription adapterDesc = adapter.Description;
+        Device = _instance.CreateDevice(_surface);
+        CommandList = Device.CreateCommandList();
         
         Logger.Info("Adapter:");
-        Logger.Info($"    Name: {adapterDesc.Description}");
-        Logger.Info($"    Memory: {adapterDesc.DedicatedVideoMemory / 1024 / 1024}MB");*/
+        Logger.Info($"    Name: {Device.Adapter.Name}");
+        Logger.Info($"    Memory: {Device.Adapter.DedicatedMemory / 1024 / 1024}MB");
 
-        Logger.Trace("Creating swapchain textures.");
-        _swapchainTexture = _swapchain.GetBuffer<ID3D11Texture2D>(0);
-        _swapchainTarget = Device.CreateRenderTargetView(_swapchainTexture);
+        SwapchainInfo swapchainInfo = new()
+        {
+            Surface = _surface,
+            Size = new Size2D((uint) size.Width, (uint) size.Height),
+            Format = Format.B8G8R8A8_UNorm,
+            NumBuffers = 2,
+            PresentMode = PresentMode.Fifo
+        };
 
-        Logger.Trace("Creating texture batcher.");
+        _swapchain = Device.CreateSwapchain(in swapchainInfo);
+
+        /*Logger.Trace("Creating texture batcher.");
         _uiBatcher = new TextureBatcher(Device);
         
         Logger.Trace("Creating deferred renderer.");
-        _deferredRenderer = new DeferredRenderer(Device, size);
+        _deferredRenderer = new DeferredRenderer(Device, size);*/
 
-        WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
+        /*WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
         BlackTexture = new Texture(this, new Size<int>(1), [0, 0, 0, 255], PixelFormat.RGBA8);
-        NormalTexture = new Texture(this, new Size<int>(1), [128, 128, 255, 255], PixelFormat.RGBA8);
+        NormalTexture = new Texture(this, new Size<int>(1), [128, 128, 255, 255], PixelFormat.RGBA8);*/
 
         Camera = new Camera()
         {
@@ -118,21 +110,21 @@ public sealed class Graphics : IDisposable
     /// </summary>
     public void Dispose()
     {
-        NormalTexture.Dispose();
+        /*NormalTexture.Dispose();
         BlackTexture.Dispose();
-        WhiteTexture.Dispose();
+        WhiteTexture.Dispose();*/
         
-        _deferredRenderer.Dispose();
-        _uiBatcher.Dispose();
-
-        _swapchainTarget.Dispose();
-        _swapchainTexture.Dispose();
+        /*_deferredRenderer.Dispose();
+        _uiBatcher.Dispose();*/
+        
         _swapchain.Dispose();
-        Context.Dispose();
+        CommandList.Dispose();
         Device.Dispose();
+        _surface.Dispose();
+        _instance.Dispose();
     }
 
-    /// <summary>
+    /*/// <summary>
     /// Draw a <see cref="Renderable"/> to the screen using the built-in renderers.
     /// </summary>
     /// <param name="renderable">The <see cref="Renderable"/> to draw.</param>
@@ -140,9 +132,9 @@ public sealed class Graphics : IDisposable
     public void DrawRenderable(Renderable renderable, Matrix4x4 worldMatrix)
     {
         _deferredRenderer.AddToQueue(renderable, worldMatrix);
-    }
+    }*/
 
-    /// <summary>
+    /*/// <summary>
     /// Draw an image to the screen.
     /// </summary>
     /// <param name="texture">The texture to use as the image.</param>
@@ -157,25 +149,25 @@ public sealed class Graphics : IDisposable
         Vector2 bottomRight = position + new Vector2(size.Width, size.Height);
 
         _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft, topRight, bottomLeft, bottomRight));
-    }
+    }*/
 
     /// <summary>
     /// Render and present to the surface.
     /// </summary>
     public void Render()
     {
-        Context.OMSetRenderTargets(_swapchainTarget);
-        Context.ClearRenderTargetView(_swapchainTarget, new Color4(0.0f, 0.0f, 0.0f));
-
-        Context.RSSetViewport(0, 0, _swapchainSize.Width, _swapchainSize.Height);
+        Texture swapchainTexture = _swapchain.GetNextTexture();
         
-        _deferredRenderer.Render(Context, _swapchainTarget, Camera.Matrices);
-
+        CommandList.Begin();
+        CommandList.BeginRenderPass(new RenderPassInfo(new ColorAttachmentInfo(swapchainTexture, new ColorF(1.0f, 0.5f, 0.25f))));
+        CommandList.EndRenderPass();
+        CommandList.End();
+        
+        Device.ExecuteCommandList(CommandList);
+        
         Matrix4x4 projection =
             Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
         
-        _uiBatcher.DispatchDrawQueue(Context, projection, Matrix4x4.Identity);
-        
-        _swapchain.Present(_targetSwapInterval);
+        _swapchain.Present();
     }
 }
