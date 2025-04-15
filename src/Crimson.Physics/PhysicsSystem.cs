@@ -1,6 +1,8 @@
 ﻿global using JoltPhysics = JoltPhysicsSharp.PhysicsSystem;
 using System.Diagnostics;
+using System.Numerics;
 using Crimson.Core;
+using Crimson.Physics.Internal;
 using JoltPhysicsSharp;
 
 namespace Crimson.Physics;
@@ -10,6 +12,12 @@ public class PhysicsSystem : IDisposable
     private readonly JobSystem _jobSystem;
     
     internal readonly JoltPhysics Physics;
+
+    public Vector3 Gravity
+    {
+        get => Physics.Gravity;
+        set => Physics.Gravity = value;
+    }
     
     public PhysicsSystem()
     {
@@ -24,8 +32,23 @@ public class PhysicsSystem : IDisposable
             MaxBodies = ushort.MaxValue,
             MaxBodyPairs = ushort.MaxValue,
             MaxContactConstraints = ushort.MaxValue,
-            NumBodyMutexes = 0
+            NumBodyMutexes = 0,
         };
+
+        ObjectLayerPairFilterTable objectFilter = new ObjectLayerPairFilterTable(2);
+        objectFilter.EnableCollision(Layers.NonMoving, Layers.Moving);
+        objectFilter.EnableCollision(Layers.Moving, Layers.Moving);
+
+        BroadPhaseLayerInterfaceTable broadPhaseInterface = new BroadPhaseLayerInterfaceTable(2, 2);
+        broadPhaseInterface.MapObjectToBroadPhaseLayer(Layers.NonMoving, Layers.NonMoving);
+        broadPhaseInterface.MapObjectToBroadPhaseLayer(Layers.Moving, Layers.Moving);
+
+        ObjectVsBroadPhaseLayerFilterTable objectBroadPhaseTable =
+            new ObjectVsBroadPhaseLayerFilterTable(broadPhaseInterface, 2, objectFilter, 2);
+
+        settings.ObjectLayerPairFilter = objectFilter;
+        settings.BroadPhaseLayerInterface = broadPhaseInterface;
+        settings.ObjectVsBroadPhaseLayerFilter = objectBroadPhaseTable;
 
         _jobSystem = new JobSystemThreadPool();
 
@@ -36,6 +59,16 @@ public class PhysicsSystem : IDisposable
     {
         PhysicsUpdateError error = Physics.Update(deltaTime, 1, _jobSystem);
         Debug.Assert(error == PhysicsUpdateError.None);
+    }
+
+    public Body CreateDynamicBody(Shape shape, Vector3 position, Quaternion rotation)
+    {
+        Body body = Physics.BodyInterface.CreateBody(new BodyCreationSettings(shape, position, rotation,
+            MotionType.Dynamic, Layers.Moving));
+        
+        Physics.BodyInterface.AddBody(body, Activation.Activate);
+
+        return body;
     }
 
     public void Dispose()

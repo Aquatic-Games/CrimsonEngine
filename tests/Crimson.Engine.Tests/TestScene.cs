@@ -6,6 +6,7 @@ using Crimson.Platform;
 using Crimson.Render;
 using Crimson.Render.Materials;
 using Crimson.Render.Primitives;
+using JoltPhysicsSharp;
 using Plane = Crimson.Render.Primitives.Plane;
 
 namespace Crimson.Engine.Tests;
@@ -30,6 +31,7 @@ public class TestScene : Scene
         AddEntity(test);
 
         Entity test2 = new Entity("test2", new Transform() { Position = new Vector3(-2, 0, 0) });
+        test2.AddComponent(new Rigidbody(new BoxShape(new Vector3(0.5f))));
         test2.AddComponent(new MeshRenderer(Mesh.FromPrimitive(new Cube(), material)));
         AddEntity(test2);
         
