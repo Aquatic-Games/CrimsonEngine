@@ -29,7 +29,6 @@
         <Compile Remove="Model.cs" />
         <Compile Remove="Renderers\Structs\WorldRenderable.cs" />
         <Compile Remove="Renderable.cs" />
-        <Compile Remove="Texture.cs" />
         <Compile Remove="Renderers\TextureBatcher.cs" />
     </ItemGroup>
 

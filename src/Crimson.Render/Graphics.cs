@@ -26,11 +26,11 @@ public sealed class Graphics : IDisposable
     internal readonly Device Device;
     internal readonly CommandList CommandList;
     
-    /*public readonly Texture WhiteTexture;
+    public readonly Texture WhiteTexture;
 
     public readonly Texture BlackTexture;
 
-    public readonly Texture NormalTexture;*/
+    public readonly Texture NormalTexture;
 
     /// <summary>
     /// The 3D <see cref="Crimson.Render.Camera"/> that will be used when drawing.
@@ -93,9 +93,9 @@ public sealed class Graphics : IDisposable
         Logger.Trace("Creating deferred renderer.");
         _deferredRenderer = new DeferredRenderer(Device, size);*/
 
-        /*WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
+        WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
         BlackTexture = new Texture(this, new Size<int>(1), [0, 0, 0, 255], PixelFormat.RGBA8);
-        NormalTexture = new Texture(this, new Size<int>(1), [128, 128, 255, 255], PixelFormat.RGBA8);*/
+        NormalTexture = new Texture(this, new Size<int>(1), [128, 128, 255, 255], PixelFormat.RGBA8);
 
         Camera = new Camera()
         {
@@ -110,9 +110,9 @@ public sealed class Graphics : IDisposable
     /// </summary>
     public void Dispose()
     {
-        /*NormalTexture.Dispose();
+        NormalTexture.Dispose();
         BlackTexture.Dispose();
-        WhiteTexture.Dispose();*/
+        WhiteTexture.Dispose();
         
         /*_deferredRenderer.Dispose();
         _uiBatcher.Dispose();*/
@@ -156,7 +156,7 @@ public sealed class Graphics : IDisposable
     /// </summary>
     public void Render()
     {
-        Texture swapchainTexture = _swapchain.GetNextTexture();
+        GrabsTexture swapchainTexture = _swapchain.GetNextTexture();
         
         CommandList.Begin();
         CommandList.BeginRenderPass(new RenderPassInfo(new ColorAttachmentInfo(swapchainTexture, new ColorF(1.0f, 0.5f, 0.25f))));
