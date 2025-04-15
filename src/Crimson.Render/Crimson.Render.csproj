@@ -5,6 +5,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <!--<ProjectReference Include="..\..\lib\grabs\src\grabs.Graphics.D3D11\grabs.Graphics.D3D11.csproj" />-->
+      <ProjectReference Include="..\..\lib\grabs\src\grabs.Graphics.Vulkan\grabs.Graphics.Vulkan.csproj" />
+      <ProjectReference Include="..\..\lib\grabs\src\grabs.Graphics\grabs.Graphics.csproj" />
+      <ProjectReference Include="..\..\lib\grabs\src\grabs.ShaderCompiler\grabs.ShaderCompiler.csproj" />
       <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
       <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
     </ItemGroup>
@@ -12,11 +16,10 @@
     <ItemGroup>
       <PackageReference Include="SharpGLTF.Core" Version="1.0.3" />
       <PackageReference Include="StbImageSharp" Version="2.30.15" />
-      <PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="Shaders\**\*.fxc" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="Shaders\**\*" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
 </Project>
