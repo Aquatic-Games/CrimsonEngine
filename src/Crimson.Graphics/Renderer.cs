@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using Crimson.Core;
 using Crimson.Graphics.Renderers;
+using Crimson.Graphics.Utils;
 using Crimson.Math;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
@@ -17,6 +18,8 @@ public sealed class Renderer : IDisposable
     private readonly IDXGISwapChain _swapchain;
     private ID3D11Texture2D _swapchainTexture;
     private ID3D11RenderTargetView _swapchainTarget;
+    
+    private readonly D3D11Target _depthTarget;
 
     private uint _targetSwapInterval;
     private Size<int> _swapchainSize;
@@ -82,22 +85,28 @@ public sealed class Renderer : IDisposable
         D3D11.D3D11CreateDeviceAndSwapChain(null, DriverType.Hardware, flags, levels, swapchainDesc, out _swapchain!,
             out Device!, out _, out Context!).CheckError();
 
-        /*IDXGIAdapter adapter = Device.QueryInterface<IDXGIDevice>().GetAdapter();
-        AdapterDescription adapterDesc = adapter.Description;
-        
-        Logger.Info("Adapter:");
-        Logger.Info($"    Name: {adapterDesc.Description}");
-        Logger.Info($"    Memory: {adapterDesc.DedicatedVideoMemory / 1024 / 1024}MB");*/
+        // Does not work with DXVK-native.
+        if (OperatingSystem.IsWindows())
+        {
+            IDXGIAdapter adapter = Device.QueryInterface<IDXGIDevice>().GetAdapter();
+            AdapterDescription adapterDesc = adapter.Description;
+
+            Logger.Info("Adapter:");
+            Logger.Info($"    Name: {adapterDesc.Description}");
+            Logger.Info($"    Memory: {adapterDesc.DedicatedVideoMemory / 1024 / 1024}MB");
+        }
 
         Logger.Trace("Creating swapchain textures.");
         _swapchainTexture = _swapchain.GetBuffer<ID3D11Texture2D>(0);
         _swapchainTarget = Device.CreateRenderTargetView(_swapchainTexture);
+        
+        _depthTarget = new D3D11Target(Device, Format.D32_Float, size, false);
 
         Logger.Trace("Creating texture batcher.");
         _uiBatcher = new TextureBatcher(Device);
         
         Logger.Trace("Creating deferred renderer.");
-        _deferredRenderer = new DeferredRenderer(Device, size);
+        _deferredRenderer = new DeferredRenderer(Device, size, _depthTarget);
 
         WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
         BlackTexture = new Texture(this, new Size<int>(1), [0, 0, 0, 255], PixelFormat.RGBA8);
@@ -123,6 +132,7 @@ public sealed class Renderer : IDisposable
         _deferredRenderer.Dispose();
         _uiBatcher.Dispose();
 
+        _depthTarget.Dispose();
         _swapchainTarget.Dispose();
         _swapchainTexture.Dispose();
         _swapchain.Dispose();

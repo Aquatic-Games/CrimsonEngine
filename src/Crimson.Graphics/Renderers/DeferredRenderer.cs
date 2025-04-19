@@ -32,9 +32,9 @@ internal class DeferredRenderer : IDisposable
 
     private readonly List<WorldRenderable> _drawQueue;
     
-    public DeferredRenderer(ID3D11Device device, Size<int> size)
+    public DeferredRenderer(ID3D11Device device, Size<int> size, D3D11Target depthTarget)
     {
-        _depthTarget = new D3D11Target(device, Format.D32_Float, size, false);
+        _depthTarget = depthTarget;
         
         _albedoTarget = new D3D11Target(device, Format.R32G32B32A32_Float, size);
         _positionTarget = new D3D11Target(device, Format.R32G32B32A32_Float, size);
@@ -153,6 +153,5 @@ internal class DeferredRenderer : IDisposable
         _gBufferPxl.Dispose();
         _gbufferVtx.Dispose();
         _albedoTarget.Dispose();
-        _depthTarget.Dispose();
     }
 }

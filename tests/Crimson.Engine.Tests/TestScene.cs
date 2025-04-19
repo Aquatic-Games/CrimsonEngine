@@ -37,6 +37,9 @@ public class TestScene : Scene
         
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());
+
+        Bitmap bitmap = new Bitmap("DEBUG.png");
+        Camera.Skybox = new Skybox(App.Renderer, [bitmap, bitmap, bitmap, bitmap, bitmap, bitmap]);
         
         base.Initialize();
     }

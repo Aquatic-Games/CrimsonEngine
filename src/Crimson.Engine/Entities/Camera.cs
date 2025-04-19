@@ -19,6 +19,12 @@ public class Camera : Entity
     public ref float NearPlane => ref _near;
 
     public ref float FarPlane => ref _far;
+
+    public Skybox? Skybox
+    {
+        get => App.Renderer.Camera.Skybox;
+        set => App.Renderer.Camera.Skybox = value;
+    }
     
     public Camera(string name, float fieldOfView, float near, float far) : base(name)
     {
