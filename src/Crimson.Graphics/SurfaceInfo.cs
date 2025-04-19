@@ -1,4 +1,4 @@
-namespace Crimson.Render;
+namespace Crimson.Graphics;
 
 /// <summary>
 /// Describes the underlying windowing information for a surface.

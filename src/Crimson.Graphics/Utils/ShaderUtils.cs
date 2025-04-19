@@ -1,7 +1,6 @@
-using Crimson.Core;
 using Vortice.Direct3D11;
 
-namespace Crimson.Render.Utils;
+namespace Crimson.Graphics.Utils;
 
 internal static class ShaderUtils
 {

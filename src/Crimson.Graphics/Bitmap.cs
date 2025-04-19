@@ -2,7 +2,7 @@ using Crimson.Core;
 using Crimson.Math;
 using StbImageSharp;
 
-namespace Crimson.Render;
+namespace Crimson.Graphics;
 
 /// <summary>
 /// A bitmap image, used to create textures.

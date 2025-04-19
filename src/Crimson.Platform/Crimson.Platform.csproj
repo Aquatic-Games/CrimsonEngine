@@ -7,7 +7,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
       <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
-      <ProjectReference Include="..\Crimson.Render\Crimson.Render.csproj" />
+      <ProjectReference Include="..\Crimson.Graphics\Crimson.Graphics.csproj" />
     </ItemGroup>
 
     <ItemGroup>

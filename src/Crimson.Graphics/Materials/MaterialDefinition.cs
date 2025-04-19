@@ -1,4 +1,4 @@
-﻿namespace Crimson.Render.Materials;
+﻿namespace Crimson.Graphics.Materials;
 
 /// <summary>
 /// Defines how a material will be created.

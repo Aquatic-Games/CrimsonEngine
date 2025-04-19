@@ -1,7 +1,7 @@
-using Crimson.Render.Materials;
+using Crimson.Graphics.Materials;
 using Vortice.Direct3D11;
 
-namespace Crimson.Render;
+namespace Crimson.Graphics;
 
 /// <summary>
 /// A renderable is a GPU object that can be drawn to the screen. All rendering done by the main 3D renderer will use a
@@ -23,11 +23,11 @@ public class Renderable : IDisposable
     /// <summary>
     /// Create a <see cref="Renderable"/> that can be drawn.
     /// </summary>
-    /// <param name="graphics">A <see cref="Graphics"/> instance.</param>
+    /// <param name="renderer">A <see cref="Renderer"/> instance.</param>
     /// <param name="mesh">The mesh to use.</param>
-    public Renderable(Graphics graphics, Mesh mesh)
+    public Renderable(Renderer renderer, Mesh mesh)
     {
-        ID3D11Device device = graphics.Device;
+        ID3D11Device device = renderer.Device;
         
         VertexBuffer = device.CreateBuffer(mesh.Vertices, BindFlags.VertexBuffer);
         IndexBuffer = device.CreateBuffer(mesh.Indices, BindFlags.IndexBuffer);

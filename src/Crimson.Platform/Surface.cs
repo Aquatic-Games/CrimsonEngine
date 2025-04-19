@@ -1,6 +1,6 @@
 ﻿using Crimson.Core;
+using Crimson.Graphics;
 using Crimson.Math;
-using Crimson.Render;
 using Silk.NET.SDL;
 using static Crimson.Platform.SdlUtils;
 
@@ -16,6 +16,7 @@ public sealed unsafe class Surface : IDisposable
     /// <summary>
     /// The surface's size, in pixels.
     /// </summary>
+    /// <remarks><see cref="set_Size"/> may not be available on all platforms.</remarks>
     public Size<int> Size
     {
         get

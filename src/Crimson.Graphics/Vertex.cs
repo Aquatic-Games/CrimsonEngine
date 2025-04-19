@@ -1,7 +1,7 @@
 using System.Numerics;
 using Crimson.Math;
 
-namespace Crimson.Render;
+namespace Crimson.Graphics;
 
 /// <summary>
 /// The primary vertex type that is passed into shaders.

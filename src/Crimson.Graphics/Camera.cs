@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
-using Crimson.Render.Renderers.Structs;
+using Crimson.Graphics.Renderers.Structs;
 
-namespace Crimson.Render;
+namespace Crimson.Graphics;
 
 /// <summary>
 /// Represents a camera that is used when rendering.

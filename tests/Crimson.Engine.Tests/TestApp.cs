@@ -1,10 +1,9 @@
 using System.Numerics;
 using Crimson.Engine;
+using Crimson.Graphics;
+using Crimson.Graphics.Materials;
 using Crimson.Math;
-using Crimson.Render;
-using Crimson.Render.Materials;
-using Crimson.Render.Primitives;
-using Plane = Crimson.Render.Primitives.Plane;
+using Plane = Crimson.Graphics.Primitives.Plane;
 
 namespace Crimson.Engine.Tests;
 
@@ -18,17 +17,17 @@ public class TestApp : GlobalApp
     {
         base.Initialize();
 
-        Graphics graphics = App.Graphics;
-        graphics.Camera.ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(-1, 1, 3), Vector3.Zero, Vector3.UnitY);
+        Renderer renderer = App.Renderer;
+        renderer.Camera.ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(-1, 1, 3), Vector3.Zero, Vector3.UnitY);
 
-        Material material = new Material(graphics,
-            new MaterialDefinition(new Texture(graphics, "/home/aqua/Pictures/BAGELMIP.png")));
+        Material material = new Material(renderer,
+            new MaterialDefinition(new Texture(renderer, "/home/aqua/Pictures/BAGELMIP.png")));
 
-        Model model = Model.FromGltf(graphics, "/home/aqua/Documents/test.glb");
+        Model model = Model.FromGltf(renderer, "/home/aqua/Documents/test.glb");
         
         //Mesh mesh = Mesh.FromPrimitive(new Cube(), material);
         Mesh mesh = model.Meshes[0];
-        _renderable = new Renderable(graphics, mesh);
+        _renderable = new Renderable(renderer, mesh);
     }
 
     public override void PreUpdate(float dt)
@@ -42,7 +41,7 @@ public class TestApp : GlobalApp
     {
         base.PreDraw();
         
-        App.Graphics.DrawRenderable(_renderable, Matrix4x4.CreateRotationY(_rotation));
+        App.Renderer.DrawRenderable(_renderable, Matrix4x4.CreateRotationY(_rotation));
     }
 
     public override void Dispose()

@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using Crimson.Math;
 
-namespace Crimson.Render.Primitives;
+namespace Crimson.Graphics.Primitives;
 
 /// <summary>
 /// A flat, 2D plane with no depth.

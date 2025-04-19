@@ -1,20 +1,18 @@
-﻿using System.Diagnostics;
-using System.Numerics;
+﻿using System.Numerics;
 using Crimson.Core;
+using Crimson.Graphics.Renderers;
 using Crimson.Math;
-using Crimson.Render.Renderers;
-using Crimson.Render.Renderers.Structs;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
 using Vortice.Mathematics;
 
-namespace Crimson.Render;
+namespace Crimson.Graphics;
 
 /// <summary>
 /// The graphics subsystem, containing everything used to render.
 /// </summary>
-public sealed class Graphics : IDisposable
+public sealed class Renderer : IDisposable
 {
     private readonly IDXGISwapChain _swapchain;
     private ID3D11Texture2D _swapchainTexture;
@@ -36,7 +34,7 @@ public sealed class Graphics : IDisposable
     public readonly Texture NormalTexture;
 
     /// <summary>
-    /// The 3D <see cref="Crimson.Render.Camera"/> that will be used when drawing.
+    /// The 3D <see cref="Crimson.Graphics.Camera"/> that will be used when drawing.
     /// </summary>
     public Camera Camera;
 
@@ -60,7 +58,7 @@ public sealed class Graphics : IDisposable
     /// <param name="appName">The application name.</param>
     /// <param name="info">The <see cref="SurfaceInfo"/> to use when creating the subsystem.</param>
     /// <param name="size">The size of the swapchain.</param>
-    public Graphics(string appName, in SurfaceInfo info, Size<int> size)
+    public Renderer(string appName, in SurfaceInfo info, Size<int> size)
     {
         _swapchainSize = size;
         VSync = true;

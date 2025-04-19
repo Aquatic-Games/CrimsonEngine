@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
+using Crimson.Graphics;
 using Crimson.Math;
-using Crimson.Render;
 
 namespace Crimson.Engine.Entities;
 
@@ -29,10 +29,10 @@ public class Camera : Entity
 
     public override void Draw()
     {
-        Graphics graphics = App.Graphics;
-        Size<int> size = graphics.RenderSize;
+        Renderer renderer = App.Renderer;
+        Size<int> size = renderer.RenderSize;
 
-        graphics.Camera = new Render.Camera()
+        renderer.Camera = new Graphics.Camera()
         {
             ProjectionMatrix =
                 Matrix4x4.CreatePerspectiveFieldOfView(_fov, size.Width / (float) size.Height, _near, _far),

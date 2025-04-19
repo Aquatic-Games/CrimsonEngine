@@ -3,9 +3,8 @@ using Crimson.Math;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
-using Vortice.Mathematics;
 
-namespace Crimson.Render;
+namespace Crimson.Graphics;
 
 /// <summary>
 /// A texture image that is used during rendering.
@@ -23,16 +22,16 @@ public class Texture : IDisposable
     /// <summary>
     /// Create a <see cref="Texture"/>.
     /// </summary>
-    /// <param name="graphics">A <see cref="Graphics"/> instance.</param>
+    /// <param name="renderer">A <see cref="Renderer"/> instance.</param>
     /// <param name="size">The size, in pixels.</param>
     /// <param name="data">The data.</param>
     /// <param name="format">The <see cref="PixelFormat"/> of the texture.</param>
-    public Texture(Graphics graphics, in Size<int> size, byte[] data, PixelFormat format)
+    public Texture(Renderer renderer, in Size<int> size, byte[] data, PixelFormat format)
     {
         Size = size;
 
-        ID3D11Device device = graphics.Device;
-        ID3D11DeviceContext context = graphics.Context;
+        ID3D11Device device = renderer.Device;
+        ID3D11DeviceContext context = renderer.Context;
         
         Format fmt = format switch
         {
@@ -85,16 +84,16 @@ public class Texture : IDisposable
     /// <summary>
     /// Create a <see cref="Texture"/> from the given bitmap.
     /// </summary>
-    /// <param name="graphics">A <see cref="Graphics"/> instance.</param>
+    /// <param name="renderer">A <see cref="Renderer"/> instance.</param>
     /// <param name="bitmap">The <see cref="Bitmap"/> to use.</param>
-    public Texture(Graphics graphics, Bitmap bitmap) : this(graphics, bitmap.Size, bitmap.Data, bitmap.Format) { }
+    public Texture(Renderer renderer, Bitmap bitmap) : this(renderer, bitmap.Size, bitmap.Data, bitmap.Format) { }
 
     /// <summary>
     /// Create a <see cref="Texture"/> from the given path. 
     /// </summary>
-    /// <param name="graphics">A <see cref="Graphics"/> instance.</param>
+    /// <param name="renderer">A <see cref="Renderer"/> instance.</param>
     /// <param name="path">The path to load from.</param>
-    public Texture(Graphics graphics, string path) : this(graphics, new Bitmap(path)) { }
+    public Texture(Renderer renderer, string path) : this(renderer, new Bitmap(path)) { }
 
     /// <summary>
     /// Dispose of this <see cref="Texture"/>.

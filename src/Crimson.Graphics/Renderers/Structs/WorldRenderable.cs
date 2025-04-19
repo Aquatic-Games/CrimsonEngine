@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace Crimson.Render.Renderers.Structs;
+namespace Crimson.Graphics.Renderers.Structs;
 
 internal readonly struct WorldRenderable
 {

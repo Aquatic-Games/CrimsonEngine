@@ -1,4 +1,4 @@
-namespace Crimson.Render;
+namespace Crimson.Graphics;
 
 /// <summary>
 /// Represents various pixel formats supported by the GPU.

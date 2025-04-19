@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using Crimson.Math;
 
-namespace Crimson.Render.Primitives;
+namespace Crimson.Graphics.Primitives;
 
 /// <summary>
 /// A 3D cube primitive.

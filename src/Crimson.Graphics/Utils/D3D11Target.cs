@@ -3,7 +3,7 @@ using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
 
-namespace Crimson.Render.Utils;
+namespace Crimson.Graphics.Utils;
 
 internal class D3D11Target : IDisposable
 {

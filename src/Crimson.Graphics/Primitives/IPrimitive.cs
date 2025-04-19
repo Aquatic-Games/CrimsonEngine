@@ -1,4 +1,4 @@
-﻿namespace Crimson.Render.Primitives;
+﻿namespace Crimson.Graphics.Primitives;
 
 /// <summary>
 /// Represents a primitive shape.

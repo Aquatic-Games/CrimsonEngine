@@ -1,7 +1,7 @@
-using Crimson.Render.Materials;
-using Crimson.Render.Primitives;
+using Crimson.Graphics.Materials;
+using Crimson.Graphics.Primitives;
 
-namespace Crimson.Render;
+namespace Crimson.Graphics;
 
 /// <summary>
 /// A mesh contains vertices, indices, and a material, that can be drawn to the screen.

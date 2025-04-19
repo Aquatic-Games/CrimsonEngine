@@ -1,5 +1,5 @@
-﻿using Crimson.Render;
-using Crimson.Render.Materials;
+﻿using Crimson.Graphics;
+using Crimson.Graphics.Materials;
 
 namespace Crimson.Engine.Entities.Components;
 
@@ -11,12 +11,12 @@ public class MeshRenderer : Component
     
     public MeshRenderer(Mesh mesh)
     {
-        _renderable = new Renderable(App.Graphics, mesh);
+        _renderable = new Renderable(App.Renderer, mesh);
     }
 
     public override void Draw()
     {
-        App.Graphics.DrawRenderable(_renderable, Transform.WorldMatrix);
+        App.Renderer.DrawRenderable(_renderable, Transform.WorldMatrix);
     }
 
     public override void Dispose()

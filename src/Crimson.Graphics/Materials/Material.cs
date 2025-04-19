@@ -1,6 +1,6 @@
 using Vortice.Direct3D11;
 
-namespace Crimson.Render.Materials;
+namespace Crimson.Graphics.Materials;
 
 /// <summary>
 /// A material that is used during rendering.
@@ -24,16 +24,16 @@ public class Material : IDisposable
     /// <summary>
     /// Create a <see cref="Material"/> from the given definition.
     /// </summary>
-    /// <param name="graphics">A <see cref="Graphics"/> instance.</param>
+    /// <param name="renderer">A <see cref="Renderer"/> instance.</param>
     /// <param name="definition">The <see cref="MaterialDefinition"/> that describes how the material should be created.</param>
-    public Material(Graphics graphics, in MaterialDefinition definition)
+    public Material(Renderer renderer, in MaterialDefinition definition)
     {
         Albedo = definition.Albedo;
-        Normal = definition.Normal ?? graphics.NormalTexture;
-        Metallic = definition.Metallic ?? graphics.WhiteTexture;
-        Roughness = definition.Roughness ?? graphics.BlackTexture;
-        Occlusion = definition.Occlusion ?? graphics.WhiteTexture;
-        Emission = definition.Emission ?? graphics.BlackTexture;
+        Normal = definition.Normal ?? renderer.NormalTexture;
+        Metallic = definition.Metallic ?? renderer.WhiteTexture;
+        Roughness = definition.Roughness ?? renderer.BlackTexture;
+        Occlusion = definition.Occlusion ?? renderer.WhiteTexture;
+        Emission = definition.Emission ?? renderer.BlackTexture;
 
         CullMode cullMode = definition.RenderFace switch
         {
@@ -50,7 +50,7 @@ public class Material : IDisposable
             CullMode = cullMode
         };
         
-        RasterizerState = graphics.Device.CreateRasterizerState(rasterizerDesc);
+        RasterizerState = renderer.Device.CreateRasterizerState(rasterizerDesc);
     }
 
     /// <summary>

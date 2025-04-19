@@ -5,7 +5,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Engine", "src\Crims
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Core", "src\Crimson.Core\Crimson.Core.csproj", "{AFEB0C8E-E65C-4935-B2F1-2AFFE3DA51CB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Render", "src\Crimson.Render\Crimson.Render.csproj", "{4238C5C2-50BF-4F0C-ADE1-65A8DFDCC1F6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Graphics", "src\Crimson.Graphics\Crimson.Graphics.csproj", "{4238C5C2-50BF-4F0C-ADE1-65A8DFDCC1F6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Math", "src\Crimson.Math\Crimson.Math.csproj", "{A3A0AD9F-3D12-4E46-9144-24CAFCF47606}"
 EndProject

@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace Crimson.Render.Renderers.Structs;
+namespace Crimson.Graphics.Renderers.Structs;
 
 /// <summary>
 /// A set of camera matrices passed to a shader.

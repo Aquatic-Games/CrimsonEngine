@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using System.Numerics;
+using Crimson.Graphics.Materials;
 using Crimson.Math;
-using Crimson.Render.Materials;
 using SharpGLTF.Schema2;
-using Material = Crimson.Render.Materials.Material;
+using Material = Crimson.Graphics.Materials.Material;
 
-namespace Crimson.Render;
+namespace Crimson.Graphics;
 
 public class Model
 {
@@ -19,7 +19,7 @@ public class Model
         Materials = materials;
     }
 
-    public static Model FromGltf(Graphics graphics, string path)
+    public static Model FromGltf(Renderer renderer, string path)
     {
         ModelRoot root = ModelRoot.Load(path);
 
@@ -32,11 +32,11 @@ public class Model
             if (material.FindChannel("BaseColor") is { } baseColor)
             {
                 Image primaryImage = baseColor.Texture.PrimaryImage;
-                Texture albedo = new Texture(graphics, new Bitmap(primaryImage.Content.Content.ToArray()));
+                Texture albedo = new Texture(renderer, new Bitmap(primaryImage.Content.Content.ToArray()));
                 definition.Albedo = albedo;
             }
             
-            materialMap.Add(material, new Material(graphics, in definition));
+            materialMap.Add(material, new Material(renderer, in definition));
         }
 
         List<Mesh> meshes = [];

@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 using Crimson.Core;
 using Crimson.Engine.Entities;
+using Crimson.Graphics;
 using Crimson.Input;
 using Crimson.Physics;
-using Crimson.Render;
 using Crimson.Platform;
 
 namespace Crimson.Engine;
@@ -24,7 +24,7 @@ public static class App
 
     private static EventsManager _events;
     private static Surface _surface;
-    private static Graphics _graphics;
+    private static Renderer _renderer;
     private static InputManager _input;
     private static PhysicsSystem _physics;
     
@@ -70,9 +70,9 @@ public static class App
     public static Surface Surface => _surface;
 
     /// <summary>
-    /// The app's <see cref="Crimson.Render.Graphics"/> instance.
+    /// The app's <see cref="Renderer"/> instance.
     /// </summary>
-    public static Graphics Graphics => _graphics;
+    public static Renderer Renderer => _renderer;
 
     /// <summary>
     /// The app's <see cref="InputManager"/>.
@@ -91,7 +91,7 @@ public static class App
         _globalApp = null!;
         _events = null!;
         _surface = null!;
-        _graphics = null!;
+        _renderer = null!;
         _currentScene = null!;
         _input = null!;
         _deltaWatch = null!;
@@ -126,7 +126,7 @@ public static class App
         _events.WindowClose += Close;
         
         Logger.Debug("Initializing graphics subsystem.");
-        _graphics = new Graphics(_appName, Surface.Info, Surface.Size);
+        _renderer = new Renderer(_appName, Surface.Info, Surface.Size);
         
         Logger.Debug("Initializing input manager.");
         _input = new InputManager(_events);
@@ -145,7 +145,7 @@ public static class App
         Logger.Debug("Entering main loop.");
         while (_isRunning)
         {
-            if (_deltaWatch.Elapsed.TotalSeconds < _targetDelta && !Graphics.VSync)
+            if (_deltaWatch.Elapsed.TotalSeconds < _targetDelta && !Renderer.VSync)
                 continue;
             
             _input.Update();
@@ -163,7 +163,7 @@ public static class App
             _currentScene.Draw();
             _globalApp.PostDraw();
             
-            _graphics.Render();
+            _renderer.Render();
         }
         
         Logger.Info("Cleaning up.");
@@ -171,7 +171,7 @@ public static class App
         _currentScene.Dispose();
         _globalApp.Dispose();
         _physics.Dispose();
-        _graphics.Dispose();
+        _renderer.Dispose();
         _surface.Dispose();
         _events.Dispose();
     }

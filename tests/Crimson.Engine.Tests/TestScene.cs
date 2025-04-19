@@ -1,13 +1,13 @@
 using System.Numerics;
 using Crimson.Engine.Entities;
 using Crimson.Engine.Entities.Components;
+using Crimson.Graphics;
+using Crimson.Graphics.Materials;
+using Crimson.Graphics.Primitives;
 using Crimson.Input;
 using Crimson.Platform;
-using Crimson.Render;
-using Crimson.Render.Materials;
-using Crimson.Render.Primitives;
 using JoltPhysicsSharp;
-using Plane = Crimson.Render.Primitives.Plane;
+using Plane = Crimson.Graphics.Primitives.Plane;
 
 namespace Crimson.Engine.Tests;
 
@@ -16,14 +16,14 @@ public class TestScene : Scene
     public override void Initialize()
     {
         App.FpsLimit = 30;
-        App.Graphics.VSync = true;
+        App.Renderer.VSync = true;
         
-        MaterialDefinition def = new(new Texture(App.Graphics, "DEBUG.png"))
+        MaterialDefinition def = new(new Texture(App.Renderer, "DEBUG.png"))
         {
             RenderFace = RenderFace.Both
         };
         
-        Material material = new Material(App.Graphics, in def);
+        Material material = new Material(App.Renderer, in def);
 
         Entity staticCube = new Entity("StaticCube", new Transform(new Vector3(0, -5, 0)));
         staticCube.AddComponent(new Rigidbody(new BoxShape(new Vector3(0.5f)), 0));

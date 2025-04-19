@@ -1,14 +1,13 @@
 using System.Diagnostics;
 using System.Numerics;
-using Crimson.Math;
-using Crimson.Render.Renderers.Structs;
-using Crimson.Render.Utils;
+using Crimson.Graphics.Renderers.Structs;
+using Crimson.Graphics.Utils;
 using Vortice;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
 
-namespace Crimson.Render.Renderers;
+namespace Crimson.Graphics.Renderers;
 
 /// <summary>
 /// Batches textures together efficiently for rendering.
