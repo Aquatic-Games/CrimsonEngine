@@ -112,7 +112,7 @@ public sealed class Renderer : IDisposable
         _deferredRenderer = new DeferredRenderer(Device, size, _depthTarget);
         
         Logger.Trace("Creating ImGUI renderer.");
-        _imGuiRenderer = new ImGuiRenderer(Device, size);
+        _imGuiRenderer = new ImGuiRenderer(Device, RenderSize);
 
         Logger.Trace("Creating default textures.");
         WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
@@ -211,6 +211,8 @@ public sealed class Renderer : IDisposable
             Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
         
         _uiBatcher.DispatchDrawQueue(Context, projection, Matrix4x4.Identity);
+        
+        _imGuiRenderer.Render(Context);
         
         _swapchain.Present(_targetSwapInterval);
     }

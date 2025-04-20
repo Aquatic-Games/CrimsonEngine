@@ -7,6 +7,7 @@ using Crimson.Graphics.Primitives;
 using Crimson.Input;
 using Crimson.Math;
 using Crimson.Platform;
+using Hexa.NET.ImGui;
 using JoltPhysicsSharp;
 using Plane = Crimson.Graphics.Primitives.Plane;
 
@@ -73,5 +74,7 @@ public class TestScene : Scene
             
             AddEntity(entity);
         }
+        
+        ImGui.ShowDemoWindow();
     }
 }

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Numerics;
+using Crimson.Core;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
 using Hexa.NET.ImGui;
@@ -12,16 +13,16 @@ namespace Crimson.Graphics.Renderers;
 internal sealed class ImGuiRenderer : IDisposable
 {
     private readonly ID3D11Device _device;
-
-    private Size<int> _size;
+    
     private readonly ImGuiContextPtr _imguiContext;
+    private readonly Size<int> _size;
 
     private uint _vBufferSize;
     private uint _iBufferSize;
 
     private ID3D11Buffer _vertexBuffer;
     private ID3D11Buffer _indexBuffer;
-    private ID3D11Buffer _cameraBuffer;
+    private readonly ID3D11Buffer _cameraBuffer;
 
     private readonly ID3D11VertexShader _vertexShader;
     private readonly ID3D11PixelShader _pixelShader;
@@ -67,6 +68,101 @@ internal sealed class ImGuiRenderer : IDisposable
         
         io.Fonts.AddFontDefault();
         RecreateFontTexture();
+        
+        ImGui.NewFrame();
+    }
+
+    public unsafe void Render(ID3D11DeviceContext context)
+    {
+        ImGui.SetCurrentContext(_imguiContext);
+        
+        ImGui.Render();
+        ImDrawDataPtr drawData = ImGui.GetDrawData();
+
+        if (drawData.TotalVtxCount >= _vBufferSize)
+        {
+            Logger.Trace("Recreate vertex buffer.");
+            _vertexBuffer.Dispose();
+            _vBufferSize = (uint) drawData.TotalVtxCount + 5000;
+            _vertexBuffer = _device.CreateBuffer(_vBufferSize, BindFlags.VertexBuffer, ResourceUsage.Dynamic,
+                CpuAccessFlags.Write);
+        }
+        
+        if (drawData.TotalIdxCount >= _iBufferSize)
+        {
+            Logger.Trace("Recreate index buffer.");
+            _indexBuffer.Dispose();
+            _iBufferSize = (uint) drawData.TotalIdxCount + 10000;
+            _indexBuffer = _device.CreateBuffer(_iBufferSize, BindFlags.IndexBuffer, ResourceUsage.Dynamic,
+                CpuAccessFlags.Write);
+        }
+
+        uint vertexOffset = 0;
+        uint indexOffset = 0;
+
+        for (int i = 0; i < drawData.CmdListsCount; i++)
+        {
+            ImDrawListPtr cmdList = drawData.CmdLists[i];
+
+            uint vertexSize = (uint) (cmdList.VtxBuffer.Size * sizeof(ImDrawVert));
+            uint indexSize = (uint) (cmdList.IdxBuffer.Size * sizeof(ushort));
+            
+            context.UpdateBuffer(_vertexBuffer, (nint) cmdList.VtxBuffer.Data, vertexSize, vertexOffset);
+            context.UpdateBuffer(_indexBuffer, (nint) cmdList.IdxBuffer.Data, indexSize, indexOffset);
+
+            vertexOffset += vertexSize;
+            indexOffset += indexSize;
+        }
+
+        context.UpdateBuffer(_cameraBuffer,
+            Matrix4x4.CreateOrthographicOffCenter(drawData.DisplayPos.X, drawData.DisplayPos.X + drawData.DisplaySize.X,
+                drawData.DisplayPos.Y + drawData.DisplaySize.Y, drawData.DisplayPos.Y, -1, 1));
+        
+        context.RSSetViewport(drawData.DisplayPos.X, drawData.DisplayPos.Y, drawData.DisplaySize.X, drawData.DisplaySize.Y);
+        context.IASetInputLayout(_inputLayout);
+        
+        context.IASetVertexBuffer(0, _vertexBuffer, (uint) sizeof(ImDrawVert));
+        context.IASetIndexBuffer(_indexBuffer, Format.R16_UInt, 0);
+
+        vertexOffset = 0;
+        indexOffset = 0;
+        Vector2 clipOff = drawData.DisplayPos;
+
+        for (int i = 0; i < drawData.CmdListsCount; i++)
+        {
+            ImDrawListPtr cmdList = drawData.CmdLists[i];
+
+            for (int j = 0; j < cmdList.CmdBuffer.Size; j++)
+            {
+                ImDrawCmd drawCmd = cmdList.CmdBuffer[j];
+                
+                if (drawCmd.UserCallback != null)
+                    continue;
+
+                if (drawCmd.TextureId != ImTextureID.Null)
+                    throw new NotImplementedException();
+                
+                Vector2 clipMin = new Vector2(drawCmd.ClipRect.X - clipOff.X, drawCmd.ClipRect.Y - clipOff.Y);
+                Vector2 clipMax = new Vector2(drawCmd.ClipRect.Z - clipOff.X, drawCmd.ClipRect.W - clipOff.Y);
+                
+                if (clipMax.X <= clipMin.X || clipMax.Y <= clipMin.Y)
+                    continue;
+
+                context.RSSetScissorRect((int) clipMin.X, (int) clipMin.Y, (int) clipMax.X - (int) clipMin.X,
+                    (int) clipMax.Y - (int) clipMin.Y);
+                
+                context.VSSetConstantBuffer(0, _cameraBuffer);
+                context.PSSetShaderResource(0, _resourceView!);
+
+                context.DrawIndexed(drawCmd.ElemCount, drawCmd.IdxOffset + indexOffset,
+                    (int) (drawCmd.VtxOffset + vertexOffset));
+            }
+            
+            vertexOffset += (uint) cmdList.VtxBuffer.Size;
+            indexOffset += (uint) cmdList.IdxBuffer.Size;
+        }
+        
+        ImGui.NewFrame();
     }
 
     private unsafe void RecreateFontTexture()

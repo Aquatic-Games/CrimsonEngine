@@ -13,6 +13,14 @@ internal static class D3D11Utils
         context.Unmap(buffer);
     }
 
+    public static unsafe void UpdateBuffer(this ID3D11DeviceContext context, ID3D11Buffer buffer, nint data, uint size,
+        uint offset = 0)
+    {
+        MappedSubresource mapped = context.Map(buffer, MapMode.WriteDiscard);
+        Unsafe.CopyBlockUnaligned((byte*) mapped.DataPointer + offset, (void*) data, size);
+        context.Unmap(buffer);
+    }
+
     public static Format ToD3D(this PixelFormat format, uint size, out uint pitch)
     {
         Format fmt = format switch
