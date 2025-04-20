@@ -3,6 +3,7 @@ using Crimson.Core;
 using Crimson.Engine.Entities;
 using Crimson.Graphics;
 using Crimson.Input;
+using Crimson.Math;
 using Crimson.Physics;
 using Crimson.Platform;
 
@@ -128,6 +129,7 @@ public static class App
         Logger.Debug("Creating window.");
         _surface = new Surface(in options.Window);
         _events.WindowClose += Close;
+        _events.SurfaceSizeChanged += OnSurfaceSizeChanged;
         
         Logger.Debug("Initializing graphics subsystem.");
         _renderer = new Renderer(_appName, Surface.Info, Surface.Size);
@@ -207,5 +209,10 @@ public static class App
     public static void SetScene(Scene scene)
     {
         _switchScene = scene;
+    }
+    
+    private static void OnSurfaceSizeChanged(Size<int> newSize)
+    {
+        _renderer.Resize(newSize);
     }
 }

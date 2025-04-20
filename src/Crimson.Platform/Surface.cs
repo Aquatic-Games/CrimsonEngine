@@ -114,7 +114,7 @@ public sealed unsafe class Surface : IDisposable
         if (SDL.Init(Sdl.InitVideo) < 0)
             throw new Exception($"Failed to initialize SDL: {SDL.GetErrorS()}");
 
-        WindowFlags flags = 0;
+        WindowFlags flags = WindowFlags.Resizable;
 
         if (!OperatingSystem.IsWindows())
             flags |= WindowFlags.Vulkan;

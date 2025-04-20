@@ -16,7 +16,6 @@ internal sealed class ImGuiRenderer : IDisposable
     private readonly ID3D11Device _device;
     
     private readonly ImGuiContextPtr _imguiContext;
-    private readonly Size<int> _size;
 
     private uint _vBufferSize;
     private uint _iBufferSize;
@@ -42,7 +41,6 @@ internal sealed class ImGuiRenderer : IDisposable
     public unsafe ImGuiRenderer(ID3D11Device device, Size<int> size)
     {
         _device = device;
-        _size = size;
 
         _imguiContext = ImGui.CreateContext();
         ImGui.SetCurrentContext(_imguiContext);
@@ -189,6 +187,11 @@ internal sealed class ImGuiRenderer : IDisposable
         }
         
         ImGui.NewFrame();
+    }
+
+    public void Resize(Size<int> size)
+    {
+        ImGui.GetIO().DisplaySize = new Vector2(size.Width, size.Height);
     }
 
     private unsafe void RecreateFontTexture()

@@ -222,4 +222,24 @@ public sealed class Renderer : IDisposable
         
         _swapchain.Present(_targetSwapInterval);
     }
+
+    /// <summary>
+    /// Resize the renderer.
+    /// </summary>
+    /// <param name="newSize">The new size to set.</param>
+    public void Resize(Size<int> newSize)
+    {
+        _swapchainSize = newSize;
+        
+        Context.ClearState();
+        Context.Flush();
+        
+        _swapchainTarget.Dispose();
+        _swapchainTexture.Dispose();
+
+        _swapchain.ResizeBuffers(0, (uint) newSize.Width, (uint) newSize.Height).CheckError();
+
+        _swapchainTexture = _swapchain.GetBuffer<ID3D11Texture2D>(0);
+        _swapchainTarget = Device.CreateRenderTargetView(_swapchainTexture);
+    }
 }

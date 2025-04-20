@@ -1,4 +1,5 @@
 using System.Numerics;
+using Crimson.Math;
 using Silk.NET.SDL;
 using static Crimson.Platform.SdlUtils;
 
@@ -13,6 +14,8 @@ public class EventsManager : IDisposable
     /// Invoked when the window is requesting to close.
     /// </summary>
     public event OnWindowClose WindowClose = delegate { };
+
+    public event OnSurfaceSizeChanged SurfaceSizeChanged = delegate { };
 
     public event OnKeyDown KeyDown = delegate { };
 
@@ -54,6 +57,11 @@ public class EventsManager : IDisposable
                         case WindowEventID.Close:
                             WindowClose();
                             break;
+                        case WindowEventID.Resized:
+                        {
+                            SurfaceSizeChanged(new Size<int>(sdlEvent.Window.Data1, sdlEvent.Window.Data2));
+                            break;
+                        }
                     }
                     
                     break;
@@ -109,6 +117,8 @@ public class EventsManager : IDisposable
     /// A delegate that is used in the <see cref="Events.WindowClose"/> event.
     /// </summary>
     public delegate void OnWindowClose();
+
+    public delegate void OnSurfaceSizeChanged(Size<int> newSize);
     
     public delegate void OnKeyDown(Key key);
 
