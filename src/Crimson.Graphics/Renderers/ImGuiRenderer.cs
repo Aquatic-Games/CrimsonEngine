@@ -76,6 +76,8 @@ internal sealed class ImGuiRenderer : IDisposable
         ImGuiIOPtr io = ImGui.GetIO();
         io.DisplaySize = new Vector2(size.Width, size.Height);
         io.BackendFlags = ImGuiBackendFlags.RendererHasVtxOffset;
+        io.IniFilename = null;
+        io.LogFilename = null;
         
         io.Fonts.AddFontDefault();
         RecreateFontTexture();
