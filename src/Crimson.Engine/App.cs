@@ -28,6 +28,8 @@ public static class App
     private static Renderer _renderer;
     private static InputManager _input;
     private static PhysicsSystem _physics;
+
+    private static ImGuiController _imGuiController;
     
     /// <summary>
     /// The app name.
@@ -97,6 +99,7 @@ public static class App
         _input = null!;
         _deltaWatch = null!;
         _physics = null!;
+        _imGuiController = null!;
         FpsLimit = 0;
     }
     
@@ -135,6 +138,9 @@ public static class App
         Logger.Debug("Initializing physics system.");
         _physics = new PhysicsSystem();
         
+        Logger.Debug("Creating imgui controller.");
+        _imGuiController = new ImGuiController(_renderer.ImGuiContext, _events);
+        
         _deltaWatch = Stopwatch.StartNew();
         
         _isRunning = true;
@@ -163,6 +169,8 @@ public static class App
                 GC.Collect();
                 _currentScene.Initialize();
             }
+            
+            _imGuiController.Update(dt);
             
             _globalApp.PreUpdate(dt);
             _physics.Step(1 / 60.0f);

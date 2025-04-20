@@ -4,6 +4,7 @@ using Crimson.Core;
 using Crimson.Graphics.Renderers;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
+using Hexa.NET.ImGui;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
@@ -57,6 +58,11 @@ public sealed class Renderer : IDisposable
         get => _targetSwapInterval == 1;
         set => _targetSwapInterval = value ? 1u : 0u;
     }
+
+    /// <summary>
+    /// Gets the ImGUI context pointer.
+    /// </summary>
+    public ImGuiContextPtr ImGuiContext => _imGuiRenderer.Context;
     
     /// <summary>
     /// Create the graphics subsystem.

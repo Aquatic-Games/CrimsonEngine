@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Crimson.Core;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
@@ -35,6 +36,8 @@ internal sealed class ImGuiRenderer : IDisposable
 
     private ID3D11Texture2D? _texture;
     private ID3D11ShaderResourceView? _resourceView;
+
+    public ImGuiContextPtr Context => _imguiContext;
     
     public unsafe ImGuiRenderer(ID3D11Device device, Size<int> size)
     {
@@ -68,7 +71,7 @@ internal sealed class ImGuiRenderer : IDisposable
         _inputLayout = _device.CreateInputLayout(inputElements, vertexBytes);
 
         _depthState = _device.CreateDepthStencilState(DepthStencilDescription.None);
-        _rasterizerState = _device.CreateRasterizerState(RasterizerDescription.CullBack with { ScissorEnable = true });
+        _rasterizerState = _device.CreateRasterizerState(RasterizerDescription.CullNone with { ScissorEnable = true });
         _blendState = _device.CreateBlendState(BlendDescription.NonPremultiplied);
         _samplerState = _device.CreateSamplerState(SamplerDescription.LinearWrap);
 
@@ -103,31 +106,36 @@ internal sealed class ImGuiRenderer : IDisposable
             Logger.Trace("Recreate index buffer.");
             _indexBuffer.Dispose();
             _iBufferSize = (uint) drawData.TotalIdxCount + 10000;
-            _indexBuffer = _device.CreateBuffer((uint) (_iBufferSize * sizeof(uint)), BindFlags.IndexBuffer,
+            _indexBuffer = _device.CreateBuffer((uint) (_iBufferSize * sizeof(ushort)), BindFlags.IndexBuffer,
                 ResourceUsage.Dynamic, CpuAccessFlags.Write);
         }
 
         uint vertexOffset = 0;
         uint indexOffset = 0;
 
+        MappedSubresource vMap = context.Map(_vertexBuffer, MapMode.WriteDiscard);
+        MappedSubresource iMap = context.Map(_indexBuffer, MapMode.WriteDiscard);
         for (int i = 0; i < drawData.CmdListsCount; i++)
         {
             ImDrawListPtr cmdList = drawData.CmdLists[i];
 
             uint vertexSize = (uint) (cmdList.VtxBuffer.Size * sizeof(ImDrawVert));
             uint indexSize = (uint) (cmdList.IdxBuffer.Size * sizeof(ushort));
-            
-            context.UpdateBuffer(_vertexBuffer, (nint) cmdList.VtxBuffer.Data, vertexSize, vertexOffset);
-            context.UpdateBuffer(_indexBuffer, (nint) cmdList.IdxBuffer.Data, indexSize, indexOffset);
+
+            Unsafe.CopyBlock((byte*) vMap.DataPointer + vertexOffset, cmdList.VtxBuffer.Data, vertexSize);
+            Unsafe.CopyBlock((byte*) iMap.DataPointer + indexOffset, cmdList.IdxBuffer.Data, indexSize);
 
             vertexOffset += vertexSize;
             indexOffset += indexSize;
         }
+        context.Unmap(_indexBuffer);
+        context.Unmap(_vertexBuffer);
 
         context.UpdateBuffer(_cameraBuffer,
             Matrix4x4.CreateOrthographicOffCenter(drawData.DisplayPos.X, drawData.DisplayPos.X + drawData.DisplaySize.X,
                 drawData.DisplayPos.Y + drawData.DisplaySize.Y, drawData.DisplayPos.Y, -1, 1));
         
+        context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
         context.RSSetViewport(drawData.DisplayPos.X, drawData.DisplayPos.Y, drawData.DisplaySize.X, drawData.DisplaySize.Y);
         context.IASetInputLayout(_inputLayout);
         

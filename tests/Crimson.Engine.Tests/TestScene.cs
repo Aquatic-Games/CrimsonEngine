@@ -22,7 +22,7 @@ public class TestScene : Scene
     {
         App.FpsLimit = 30;
         App.Renderer.VSync = true;
-        App.Surface.CursorVisible = false;
+        //App.Surface.CursorVisible = false;
         
         MaterialDefinition def = new(new Texture(App.Renderer, "DEBUG.png"))
         {
@@ -45,13 +45,13 @@ public class TestScene : Scene
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());
         
-        /*Camera.Skybox = new Skybox(App.Renderer,
+        Camera.Skybox = new Skybox(App.Renderer,
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/right.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/left.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/top.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/bottom.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/front.png"),
-            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/back.png"));*/
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/back.png"));
         
         base.Initialize();
     }
