@@ -36,7 +36,7 @@ public sealed unsafe class Surface : IDisposable
     public bool CursorVisible
     {
         get => SDL.GetRelativeMouseMode() == SdlBool.True;
-        set => SDL.SetRelativeMouseMode(SdlBool.True);
+        set => SDL.SetRelativeMouseMode(value ? SdlBool.False : SdlBool.True);
     }
     
     /// <summary>
