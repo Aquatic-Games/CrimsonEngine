@@ -37,9 +37,14 @@ public class TestScene : Scene
         
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());
-
-        Bitmap bitmap = new Bitmap("DEBUG.png");
-        Camera.Skybox = new Skybox(App.Renderer, [bitmap, bitmap, bitmap, bitmap, bitmap, bitmap]);
+        
+        Camera.Skybox = new Skybox(App.Renderer,
+            new Bitmap("/home/aqua/Pictures/skybox/space/right.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/space/left.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/space/top.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/space/bottom.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/space/front.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/space/back.png"));
         
         base.Initialize();
     }

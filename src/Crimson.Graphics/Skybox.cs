@@ -25,19 +25,33 @@ public sealed class Skybox : IDisposable
     private readonly ID3D11DepthStencilState _depthState;
     private readonly ID3D11RasterizerState _rasterizerState;
 
-    public unsafe Skybox(Renderer renderer, Bitmap[] bitmaps)
+    /// <summary>
+    /// Create a <see cref="Skybox"/> consisting of 6 textures in a cube.
+    /// </summary>
+    /// <param name="renderer">The <see cref="Renderer"/> that this skybox will be associated with.</param>
+    /// <param name="right">The right (X+) bitmap image.</param>
+    /// <param name="left">The left (X-) bitmap image.</param>
+    /// <param name="up">The up (Y+) bitmap image.</param>
+    /// <param name="down">The down (Y-) bitmap image.</param>
+    /// <param name="front">The back (Z+) bitmap image.</param>
+    /// <param name="back">The front (Z-) bitmap image.</param>
+    public unsafe Skybox(Renderer renderer, Bitmap right, Bitmap left, Bitmap up, Bitmap down, Bitmap front, Bitmap back)
     {
-        Debug.Assert(bitmaps.Length == 6);
-
+        Debug.Assert(right.Size == left.Size);
+        Debug.Assert(right.Size == up.Size);
+        Debug.Assert(right.Size == down.Size);
+        Debug.Assert(right.Size == front.Size);
+        Debug.Assert(right.Size == back.Size);
+        
         ID3D11Device device = renderer.Device;
         _context = renderer.Context;
 
-        Format fmt = bitmaps[0].Format.ToD3D((uint) bitmaps[0].Size.Width, out uint rowPitch);
+        Format fmt = right.Format.ToD3D((uint) right.Size.Width, out uint rowPitch);
 
         Texture2DDescription textureDesc = new()
         {
-            Width = (uint) bitmaps[0].Size.Width,
-            Height = (uint) bitmaps[0].Size.Height,
+            Width = (uint) right.Size.Width,
+            Height = (uint) right.Size.Height,
             Format = fmt,
             ArraySize = 6,
             MipLevels = 1,
@@ -49,12 +63,12 @@ public sealed class Skybox : IDisposable
         };
         
         // lol
-        fixed (void* pBitmap0 = bitmaps[0].Data)
-        fixed (void* pBitmap1 = bitmaps[1].Data)
-        fixed (void* pBitmap2 = bitmaps[2].Data)
-        fixed (void* pBitmap3 = bitmaps[3].Data)
-        fixed (void* pBitmap4 = bitmaps[4].Data)
-        fixed (void* pBitmap5 = bitmaps[5].Data)
+        fixed (void* pBitmap0 = right.Data)
+        fixed (void* pBitmap1 = left.Data)
+        fixed (void* pBitmap2 = up.Data)
+        fixed (void* pBitmap3 = down.Data)
+        fixed (void* pBitmap4 = front.Data)
+        fixed (void* pBitmap5 = back.Data)
         {
             Span<SubresourceData> subData =
             [
@@ -121,6 +135,12 @@ public sealed class Skybox : IDisposable
     
     public void Dispose()
     {
+        _rasterizerState.Dispose();
+        _depthState.Dispose();
+        
+        _indexBuffer.Dispose();
+        _vertexBuffer.Dispose();
+        
         _skyboxLayout.Dispose();
         _skyboxPxl.Dispose();
         _skyboxVtx.Dispose();
