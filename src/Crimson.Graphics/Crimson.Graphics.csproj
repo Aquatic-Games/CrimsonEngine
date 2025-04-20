@@ -19,4 +19,8 @@
       <None Include="Shaders\**\*.fxc" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ClCompile Include="Shaders\Environment\Skybox.hlsl" />
+    </ItemGroup>
+
 </Project>

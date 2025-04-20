@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics;
+using System.Numerics;
 using Crimson.Core;
 using Crimson.Graphics.Renderers;
 using Crimson.Graphics.Utils;
@@ -108,6 +109,7 @@ public sealed class Renderer : IDisposable
         Logger.Trace("Creating deferred renderer.");
         _deferredRenderer = new DeferredRenderer(Device, size, _depthTarget);
 
+        Logger.Trace("Creating default textures.");
         WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
         BlackTexture = new Texture(this, new Size<int>(1), [0, 0, 0, 255], PixelFormat.RGBA8);
         NormalTexture = new Texture(this, new Size<int>(1), [128, 128, 255, 255], PixelFormat.RGBA8);
@@ -179,6 +181,8 @@ public sealed class Renderer : IDisposable
         
         _deferredRenderer.Render(Context, _swapchainTarget, Camera.Matrices);
 
+        Camera.Skybox?.Render();
+        
         Matrix4x4 projection =
             Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
         

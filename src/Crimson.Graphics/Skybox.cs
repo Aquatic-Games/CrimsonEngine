@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics;
+using Crimson.Core;
+using Crimson.Graphics.Primitives;
 using Crimson.Graphics.Utils;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
@@ -8,14 +10,27 @@ namespace Crimson.Graphics;
 
 public sealed class Skybox : IDisposable
 {
-    internal readonly ID3D11Texture2D TextureHandle;
-    internal readonly ID3D11ShaderResourceView ResourceView;
+    private readonly ID3D11DeviceContext _context;
+    
+    private readonly ID3D11Texture2D _textureHandle;
+    private readonly ID3D11ShaderResourceView _resourceView;
+    
+    private readonly ID3D11VertexShader _skyboxVtx;
+    private readonly ID3D11PixelShader _skyboxPxl;
+    private readonly ID3D11InputLayout _skyboxLayout;
+
+    private readonly ID3D11Buffer _vertexBuffer;
+    private readonly ID3D11Buffer _indexBuffer;
+
+    private readonly ID3D11DepthStencilState _depthState;
+    private readonly ID3D11RasterizerState _rasterizerState;
 
     public unsafe Skybox(Renderer renderer, Bitmap[] bitmaps)
     {
         Debug.Assert(bitmaps.Length == 6);
 
         ID3D11Device device = renderer.Device;
+        _context = renderer.Context;
 
         Format fmt = bitmaps[0].Format.ToD3D((uint) bitmaps[0].Size.Width, out uint rowPitch);
 
@@ -51,7 +66,7 @@ public sealed class Skybox : IDisposable
                 new SubresourceData(pBitmap5, rowPitch),
             ];
 
-            TextureHandle = device.CreateTexture2D(in textureDesc, subData);
+            _textureHandle = device.CreateTexture2D(in textureDesc, subData);
         }
 
         ShaderResourceViewDescription viewDesc = new()
@@ -65,12 +80,52 @@ public sealed class Skybox : IDisposable
             }
         };
 
-        ResourceView = device.CreateShaderResourceView(TextureHandle, viewDesc);
+        _resourceView = device.CreateShaderResourceView(_textureHandle, viewDesc);
+        
+        Logger.Trace("Creating skybox resources.");
+        ShaderUtils.LoadGraphicsShader(device, "Environment/Skybox", out _skyboxVtx!, out _skyboxPxl!,
+            out byte[] skyboxCode);
+        Debug.Assert(skyboxCode != null);
+
+        InputElementDescription[] skyboxLayout =
+            [new InputElementDescription("POSITION", 0, Format.R32G32B32_Float, 0, 0)];
+
+        _skyboxLayout = device.CreateInputLayout(skyboxLayout, skyboxCode);
+
+        Cube cube = new Cube();
+        _vertexBuffer = device.CreateBuffer(cube.Vertices, BindFlags.VertexBuffer);
+        _indexBuffer = device.CreateBuffer(cube.Indices, BindFlags.IndexBuffer);
+
+        _depthState =
+            device.CreateDepthStencilState(new DepthStencilDescription(true, DepthWriteMask.Zero,
+                ComparisonFunction.LessEqual));
+        _rasterizerState = device.CreateRasterizerState(RasterizerDescription.CullNone);
+    }
+
+    internal void Render()
+    {
+        _context.IASetInputLayout(_skyboxLayout);
+        _context.VSSetShader(_skyboxVtx);
+        _context.PSSetShader(_skyboxPxl);
+        
+        _context.OMSetDepthStencilState(_depthState);
+        _context.RSSetState(_rasterizerState);
+        
+        _context.IASetVertexBuffer(0, _vertexBuffer, Vertex.SizeInBytes);
+        _context.IASetIndexBuffer(_indexBuffer, Format.R32_UInt, 0);
+        
+        _context.PSSetShaderResource(0, _resourceView);
+        
+        _context.DrawIndexed(36, 0, 0);
     }
     
     public void Dispose()
     {
-        ResourceView.Dispose();
-        TextureHandle.Dispose();
+        _skyboxLayout.Dispose();
+        _skyboxPxl.Dispose();
+        _skyboxVtx.Dispose();
+        
+        _resourceView.Dispose();
+        _textureHandle.Dispose();
     }
 }
