@@ -110,6 +110,8 @@ public sealed unsafe class Surface : IDisposable
     /// <exception cref="Exception">Thrown if the surface failed to create.</exception>
     public Surface(in WindowOptions options)
     {
+        SDL.SetHint(Sdl.HintWindowsDpiAwareness, "system");
+        
         Logger.Trace("Initializing SDL.");
         if (SDL.Init(Sdl.InitVideo) < 0)
             throw new Exception($"Failed to initialize SDL: {SDL.GetErrorS()}");
