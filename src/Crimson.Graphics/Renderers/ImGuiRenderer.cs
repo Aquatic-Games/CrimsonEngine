@@ -28,6 +28,11 @@ internal sealed class ImGuiRenderer : IDisposable
     private readonly ID3D11PixelShader _pixelShader;
     private readonly ID3D11InputLayout _inputLayout;
 
+    private readonly ID3D11DepthStencilState _depthState;
+    private readonly ID3D11RasterizerState _rasterizerState;
+    private readonly ID3D11BlendState _blendState;
+    private readonly ID3D11SamplerState _samplerState;
+
     private ID3D11Texture2D? _texture;
     private ID3D11ShaderResourceView? _resourceView;
     
@@ -42,10 +47,10 @@ internal sealed class ImGuiRenderer : IDisposable
         _vBufferSize = 5000;
         _iBufferSize = 10000;
 
-        _vertexBuffer = _device.CreateBuffer(_vBufferSize, BindFlags.VertexBuffer, ResourceUsage.Dynamic,
-            CpuAccessFlags.Write);
-        _indexBuffer = _device.CreateBuffer(_iBufferSize, BindFlags.IndexBuffer, ResourceUsage.Dynamic,
-            CpuAccessFlags.Write);
+        _vertexBuffer = _device.CreateBuffer((uint) (_vBufferSize * sizeof(ImDrawVert)), BindFlags.VertexBuffer,
+            ResourceUsage.Dynamic, CpuAccessFlags.Write);
+        _indexBuffer = _device.CreateBuffer((uint) (_iBufferSize * sizeof(ushort)), BindFlags.IndexBuffer,
+            ResourceUsage.Dynamic, CpuAccessFlags.Write);
         _cameraBuffer = _device.CreateBuffer((uint) sizeof(Matrix4x4), BindFlags.ConstantBuffer, ResourceUsage.Dynamic,
             CpuAccessFlags.Write);
 
@@ -61,6 +66,11 @@ internal sealed class ImGuiRenderer : IDisposable
         ];
 
         _inputLayout = _device.CreateInputLayout(inputElements, vertexBytes);
+
+        _depthState = _device.CreateDepthStencilState(DepthStencilDescription.None);
+        _rasterizerState = _device.CreateRasterizerState(RasterizerDescription.CullBack with { ScissorEnable = true });
+        _blendState = _device.CreateBlendState(BlendDescription.NonPremultiplied);
+        _samplerState = _device.CreateSamplerState(SamplerDescription.LinearWrap);
 
         ImGuiIOPtr io = ImGui.GetIO();
         io.DisplaySize = new Vector2(size.Width, size.Height);
@@ -84,8 +94,8 @@ internal sealed class ImGuiRenderer : IDisposable
             Logger.Trace("Recreate vertex buffer.");
             _vertexBuffer.Dispose();
             _vBufferSize = (uint) drawData.TotalVtxCount + 5000;
-            _vertexBuffer = _device.CreateBuffer(_vBufferSize, BindFlags.VertexBuffer, ResourceUsage.Dynamic,
-                CpuAccessFlags.Write);
+            _vertexBuffer = _device.CreateBuffer((uint) (_vBufferSize * sizeof(ImDrawVert)), BindFlags.VertexBuffer,
+                ResourceUsage.Dynamic, CpuAccessFlags.Write);
         }
         
         if (drawData.TotalIdxCount >= _iBufferSize)
@@ -93,8 +103,8 @@ internal sealed class ImGuiRenderer : IDisposable
             Logger.Trace("Recreate index buffer.");
             _indexBuffer.Dispose();
             _iBufferSize = (uint) drawData.TotalIdxCount + 10000;
-            _indexBuffer = _device.CreateBuffer(_iBufferSize, BindFlags.IndexBuffer, ResourceUsage.Dynamic,
-                CpuAccessFlags.Write);
+            _indexBuffer = _device.CreateBuffer((uint) (_iBufferSize * sizeof(uint)), BindFlags.IndexBuffer,
+                ResourceUsage.Dynamic, CpuAccessFlags.Write);
         }
 
         uint vertexOffset = 0;
@@ -121,8 +131,17 @@ internal sealed class ImGuiRenderer : IDisposable
         context.RSSetViewport(drawData.DisplayPos.X, drawData.DisplayPos.Y, drawData.DisplaySize.X, drawData.DisplaySize.Y);
         context.IASetInputLayout(_inputLayout);
         
+        context.VSSetShader(_vertexShader);
+        context.PSSetShader(_pixelShader);
+        
+        context.OMSetDepthStencilState(_depthState);
+        context.RSSetState(_rasterizerState);
+        context.OMSetBlendState(_blendState);
+        context.PSSetSampler(0, _samplerState);
+        
         context.IASetVertexBuffer(0, _vertexBuffer, (uint) sizeof(ImDrawVert));
         context.IASetIndexBuffer(_indexBuffer, Format.R16_UInt, 0);
+        context.VSSetConstantBuffer(0, _cameraBuffer);
 
         vertexOffset = 0;
         indexOffset = 0;
@@ -151,7 +170,6 @@ internal sealed class ImGuiRenderer : IDisposable
                 context.RSSetScissorRect((int) clipMin.X, (int) clipMin.Y, (int) clipMax.X - (int) clipMin.X,
                     (int) clipMax.Y - (int) clipMin.Y);
                 
-                context.VSSetConstantBuffer(0, _cameraBuffer);
                 context.PSSetShaderResource(0, _resourceView!);
 
                 context.DrawIndexed(drawCmd.ElemCount, drawCmd.IdxOffset + indexOffset,
