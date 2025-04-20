@@ -8,6 +8,7 @@ using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
 using Vortice.Mathematics;
+using Color = Crimson.Math.Color;
 
 namespace Crimson.Graphics;
 
@@ -157,7 +158,8 @@ public sealed class Renderer : IDisposable
     /// </summary>
     /// <param name="texture">The texture to use as the image.</param>
     /// <param name="position">The position, in pixels.</param>
-    public void DrawImage(Texture texture, in Vector2 position)
+    /// <param name="tint">The tint to use, if any.</param>
+    public void DrawImage(Texture texture, in Vector2 position, Color? tint = null)
     {
         Size<int> size = texture.Size;
         
@@ -166,7 +168,24 @@ public sealed class Renderer : IDisposable
         Vector2 bottomLeft = position + new Vector2(0, size.Height);
         Vector2 bottomRight = position + new Vector2(size.Width, size.Height);
 
-        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft, topRight, bottomLeft, bottomRight));
+        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft, topRight, bottomLeft, bottomRight, tint ?? Color.White));
+    }
+
+    /// <summary>
+    /// Draw an image to the screen with the given size.
+    /// </summary>
+    /// <param name="texture">The texture to use as the image.</param>
+    /// <param name="position">The position, in pixels.</param>
+    /// <param name="size">The size, in pixels.</param>
+    /// <param name="tint">The tint to use, if any.</param>
+    public void DrawImage(Texture texture, in Vector2 position, Size<int> size, Color? tint = null)
+    {
+        Vector2 topLeft = position;
+        Vector2 topRight = position + new Vector2(size.Width, 0);
+        Vector2 bottomLeft = position + new Vector2(0, size.Height);
+        Vector2 bottomRight = position + new Vector2(size.Width, size.Height);
+        
+        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft, topRight, bottomLeft, bottomRight, tint ?? Color.White));
     }
 
     /// <summary>

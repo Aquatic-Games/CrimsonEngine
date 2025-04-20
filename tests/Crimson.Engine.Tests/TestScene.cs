@@ -5,6 +5,7 @@ using Crimson.Graphics;
 using Crimson.Graphics.Materials;
 using Crimson.Graphics.Primitives;
 using Crimson.Input;
+using Crimson.Math;
 using Crimson.Platform;
 using JoltPhysicsSharp;
 using Plane = Crimson.Graphics.Primitives.Plane;

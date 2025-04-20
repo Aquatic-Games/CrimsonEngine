@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Numerics;
 using Crimson.Graphics.Renderers.Structs;
 using Crimson.Graphics.Utils;
+using Crimson.Math;
 using Vortice;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
@@ -33,6 +34,10 @@ internal class TextureBatcher : IDisposable
     private readonly ID3D11PixelShader _pixelShader;
     private readonly ID3D11InputLayout _inputLayout;
 
+    private readonly ID3D11DepthStencilState _depthState;
+    private readonly ID3D11RasterizerState _rasterizerState;
+    private readonly ID3D11BlendState _blendState;
+
     private readonly List<Draw> _drawQueue;
     
     public TextureBatcher(ID3D11Device device)
@@ -60,6 +65,10 @@ internal class TextureBatcher : IDisposable
 
         _inputLayout = device.CreateInputLayout(elements, bytecode!);
 
+        _depthState = device.CreateDepthStencilState(DepthStencilDescription.None);
+        _rasterizerState = device.CreateRasterizerState(RasterizerDescription.CullBack);
+        _blendState = device.CreateBlendState(BlendDescription.NonPremultiplied);
+
         _drawQueue = [];
     }
 
@@ -80,6 +89,10 @@ internal class TextureBatcher : IDisposable
         
         context.VSSetShader(_vertexShader);
         context.PSSetShader(_pixelShader);
+        
+        context.OMSetDepthStencilState(_depthState);
+        context.RSSetState(_rasterizerState);
+        context.OMSetBlendState(_blendState);
         
         context.IASetVertexBuffer(0, _vertexBuffer, Vertex.SizeInBytes);
         context.IASetIndexBuffer(_indexBuffer, Format.R32_UInt, 0);
@@ -102,10 +115,10 @@ internal class TextureBatcher : IDisposable
             uint vOffset = numDraws * NumVertices;
             uint iOffset = numDraws * NumIndices;
 
-            _vertices[vOffset + 0] = new Vertex(draw.TopLeft, new Vector2(0, 0), Vector4.One);
-            _vertices[vOffset + 1] = new Vertex(draw.TopRight, new Vector2(1, 0), Vector4.One);
-            _vertices[vOffset + 2] = new Vertex(draw.BottomRight, new Vector2(1, 1), Vector4.One);
-            _vertices[vOffset + 3] = new Vertex(draw.BottomLeft, new Vector2(0, 1), Vector4.One);
+            _vertices[vOffset + 0] = new Vertex(draw.TopLeft, new Vector2(0, 0), draw.Tint);
+            _vertices[vOffset + 1] = new Vertex(draw.TopRight, new Vector2(1, 0), draw.Tint);
+            _vertices[vOffset + 2] = new Vertex(draw.BottomRight, new Vector2(1, 1), draw.Tint);
+            _vertices[vOffset + 3] = new Vertex(draw.BottomLeft, new Vector2(0, 1), draw.Tint);
 
             _indices[iOffset + 0] = 0 + vOffset;
             _indices[iOffset + 1] = 1 + vOffset;
@@ -159,9 +172,9 @@ internal class TextureBatcher : IDisposable
         
         public readonly Vector2 Position;
         public readonly Vector2 TexCoord;
-        public readonly Vector4 Tint; // TODO: Color struct
+        public readonly Color Tint;
 
-        public Vertex(Vector2 position, Vector2 texCoord, Vector4 tint)
+        public Vertex(Vector2 position, Vector2 texCoord, Color tint)
         {
             Position = position;
             TexCoord = texCoord;
@@ -176,14 +189,16 @@ internal class TextureBatcher : IDisposable
         public readonly Vector2 TopRight;
         public readonly Vector2 BottomLeft;
         public readonly Vector2 BottomRight;
+        public readonly Color Tint;
 
-        public Draw(Texture texture, Vector2 topLeft, Vector2 topRight, Vector2 bottomLeft, Vector2 bottomRight)
+        public Draw(Texture texture, Vector2 topLeft, Vector2 topRight, Vector2 bottomLeft, Vector2 bottomRight, Color tint)
         {
             Texture = texture;
             TopLeft = topLeft;
             TopRight = topRight;
             BottomLeft = bottomLeft;
             BottomRight = bottomRight;
+            Tint = tint;
         }
     }
 }
