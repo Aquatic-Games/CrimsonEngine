@@ -21,6 +21,7 @@ public static class App
     private static double _targetDelta;
     
     private static Scene _currentScene;
+    private static Scene? _switchScene;
 
     private static EventsManager _events;
     private static Surface _surface;
@@ -153,6 +154,15 @@ public static class App
 
             float dt = (float) _deltaWatch.Elapsed.TotalSeconds;
             _deltaWatch.Restart();
+
+            if (_switchScene != null)
+            {
+                _currentScene.Dispose();
+                _currentScene = _switchScene;
+                _switchScene = null;
+                GC.Collect();
+                _currentScene.Initialize();
+            }
             
             _globalApp.PreUpdate(dt);
             _physics.Step(1 / 60.0f);
@@ -184,5 +194,10 @@ public static class App
         Debug.Assert(_isRunning == true);
         
         _isRunning = false;
+    }
+
+    public static void SetScene(Scene scene)
+    {
+        _switchScene = scene;
     }
 }

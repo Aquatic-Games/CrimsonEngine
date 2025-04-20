@@ -24,7 +24,7 @@ public class IntroScene : Scene
     public override void Update(float dt)
     {
         if (_timer >= 7.0)
-            App.Close();
+            App.SetScene(new TestScene());
         else if (_timer >= 5.0)
         {
             _logoAlpha = 0;
