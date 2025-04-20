@@ -11,10 +11,12 @@ namespace Crimson.Graphics.Renderers;
 
 internal class DeferredRenderer : IDisposable
 {
-    private readonly D3D11Target _depthTarget;
+    private readonly ID3D11Device _device;
     
-    private readonly D3D11Target _albedoTarget;
-    private readonly D3D11Target _positionTarget;
+    private D3D11Target _depthTarget;
+    
+    private D3D11Target _albedoTarget;
+    private D3D11Target _positionTarget;
 
     private readonly ID3D11VertexShader _gbufferVtx;
     private readonly ID3D11PixelShader _gBufferPxl;
@@ -34,6 +36,7 @@ internal class DeferredRenderer : IDisposable
     
     public DeferredRenderer(ID3D11Device device, Size<int> size, D3D11Target depthTarget)
     {
+        _device = device;
         _depthTarget = depthTarget;
         
         _albedoTarget = new D3D11Target(device, Format.R32G32B32A32_Float, size);
@@ -138,6 +141,17 @@ internal class DeferredRenderer : IDisposable
         
         // TODO: Multi camera support.
         _drawQueue.Clear();
+    }
+
+    public void Resize(D3D11Target depthTarget, Size<int> newSize)
+    {
+        _depthTarget = depthTarget;
+        
+        _positionTarget.Dispose();
+        _albedoTarget.Dispose();
+        
+        _albedoTarget = new D3D11Target(_device, Format.R32G32B32A32_Float, newSize);
+        _positionTarget = new D3D11Target(_device, Format.R32G32B32A32_Float, newSize);
     }
     
     public void Dispose()

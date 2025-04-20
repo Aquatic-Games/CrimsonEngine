@@ -22,7 +22,7 @@ public sealed class Renderer : IDisposable
     private ID3D11Texture2D _swapchainTexture;
     private ID3D11RenderTargetView _swapchainTarget;
     
-    private readonly D3D11Target _depthTarget;
+    private D3D11Target _depthTarget;
 
     private uint _targetSwapInterval;
     private Size<int> _swapchainSize;
@@ -234,6 +234,8 @@ public sealed class Renderer : IDisposable
         Context.ClearState();
         Context.Flush();
         
+        _depthTarget.Dispose();
+        
         _swapchainTarget.Dispose();
         _swapchainTexture.Dispose();
 
@@ -241,5 +243,10 @@ public sealed class Renderer : IDisposable
 
         _swapchainTexture = _swapchain.GetBuffer<ID3D11Texture2D>(0);
         _swapchainTarget = Device.CreateRenderTargetView(_swapchainTexture);
+
+        _depthTarget = new D3D11Target(Device, Format.D32_Float, newSize, false);
+        
+        _deferredRenderer.Resize(_depthTarget, newSize);
+        _imGuiRenderer.Resize(newSize);
     }
 }
