@@ -28,6 +28,16 @@ public sealed unsafe class Surface : IDisposable
         }
         set => SDL.SetWindowSize(_window, value.Width, value.Height);
     }
+
+    /// <summary>
+    /// Gets/sets if the cursor is visible. If false, the cursor will be invisible and locked to the surface.
+    /// </summary>
+    /// <remarks>Only works on platforms that support mouse input.</remarks>
+    public bool CursorVisible
+    {
+        get => SDL.GetRelativeMouseMode() == SdlBool.True;
+        set => SDL.SetRelativeMouseMode(SdlBool.True);
+    }
     
     /// <summary>
     /// The underlying handle(s) to the surface, typically provided by the window manager.

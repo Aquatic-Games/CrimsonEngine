@@ -20,7 +20,13 @@ public class EventsManager : IDisposable
 
     public event OnKeyUp KeyUp = delegate { };
 
+    public event OnMouseButtonDown MouseButtonDown = delegate { };
+
+    public event OnMouseButtonUp MouseButtonUp = delegate { };
+
     public event OnMouseMove MouseMove = delegate { };
+
+    public event OnMouseScroll MouseScroll = delegate { };
 
     /// <summary>
     /// Create a new <see cref="EventsManager"/>.
@@ -66,10 +72,25 @@ public class EventsManager : IDisposable
                     break;
                 }
 
+                case EventType.Mousebuttondown:
+                {
+                    MouseButtonDown(ButtonIndexToButton(sdlEvent.Button.Button));
+                    break;
+                }
+                case EventType.Mousebuttonup:
+                {
+                    MouseButtonUp(ButtonIndexToButton(sdlEvent.Button.Button));
+                    break;
+                }
                 case EventType.Mousemotion:
                 {
                     MouseMove(new Vector2(sdlEvent.Motion.X, sdlEvent.Motion.Y),
                         new Vector2(sdlEvent.Motion.Xrel, sdlEvent.Motion.Yrel));
+                    break;
+                }
+                case EventType.Mousewheel:
+                {
+                    MouseScroll(new Vector2(sdlEvent.Wheel.PreciseX, sdlEvent.Wheel.PreciseY));
                     break;
                 }
             }
@@ -88,7 +109,6 @@ public class EventsManager : IDisposable
     /// A delegate that is used in the <see cref="Events.WindowClose"/> event.
     /// </summary>
     public delegate void OnWindowClose();
-
     
     public delegate void OnKeyDown(Key key);
 
@@ -96,5 +116,11 @@ public class EventsManager : IDisposable
 
     public delegate void OnKeyUp(Key key);
 
+    public delegate void OnMouseButtonDown(MouseButton button);
+
+    public delegate void OnMouseButtonUp(MouseButton button);
+    
     public delegate void OnMouseMove(Vector2 position, Vector2 delta);
+
+    public delegate void OnMouseScroll(Vector2 scroll);
 }

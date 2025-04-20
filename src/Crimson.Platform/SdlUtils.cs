@@ -136,4 +136,9 @@ internal class SdlUtils
             _ => Key.Unknown
         };
     }
+
+    public static MouseButton ButtonIndexToButton(byte button)
+    {
+        return (MouseButton) button;
+    }
 }

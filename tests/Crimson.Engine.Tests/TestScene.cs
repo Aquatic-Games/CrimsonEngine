@@ -13,38 +13,43 @@ namespace Crimson.Engine.Tests;
 
 public class TestScene : Scene
 {
+    private Material _material;
+    private Mesh _mesh;
+    
     public override void Initialize()
     {
         App.FpsLimit = 30;
         App.Renderer.VSync = true;
+        App.Surface.CursorVisible = false;
         
         MaterialDefinition def = new(new Texture(App.Renderer, "DEBUG.png"))
         {
-            RenderFace = RenderFace.Both
+            RenderFace = RenderFace.Front
         };
         
-        Material material = new Material(App.Renderer, in def);
+        _material = new Material(App.Renderer, in def);
+        _mesh = Mesh.FromPrimitive(new Cube(), _material);
 
         Entity staticCube = new Entity("StaticCube", new Transform(new Vector3(0, -5, 0)));
         staticCube.AddComponent(new Rigidbody(new BoxShape(new Vector3(0.5f)), 0));
-        staticCube.AddComponent(new MeshRenderer(Mesh.FromPrimitive(new Cube(), material)));
+        staticCube.AddComponent(new MeshRenderer(_mesh));
         AddEntity(staticCube);
 
         Entity dynamicCube = new Entity("DynamicCube");
         dynamicCube.AddComponent(new Rigidbody(new BoxShape(new Vector3(0.5f)), 1));
-        dynamicCube.AddComponent(new MeshRenderer(Mesh.FromPrimitive(new Cube(), material)));
+        dynamicCube.AddComponent(new MeshRenderer(_mesh));
         AddEntity(dynamicCube);
         
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());
         
         Camera.Skybox = new Skybox(App.Renderer,
-            new Bitmap("/home/aqua/Pictures/skybox/space/right.png"),
-            new Bitmap("/home/aqua/Pictures/skybox/space/left.png"),
-            new Bitmap("/home/aqua/Pictures/skybox/space/top.png"),
-            new Bitmap("/home/aqua/Pictures/skybox/space/bottom.png"),
-            new Bitmap("/home/aqua/Pictures/skybox/space/front.png"),
-            new Bitmap("/home/aqua/Pictures/skybox/space/back.png"));
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/right.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/left.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/top.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/bottom.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/front.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/back.png"));
         
         base.Initialize();
     }
@@ -55,15 +60,17 @@ public class TestScene : Scene
 
         InputManager input = App.Input;
         
-        if (input.IsKeyDown(Key.Space))
-            Console.WriteLine("Yes");
-        else
-            Console.WriteLine("No");
-        
-        if (input.IsKeyPressed(Key.S))
-            Console.WriteLine("Pressed");
-        
         if (input.IsKeyPressed(Key.Escape))
             App.Close();
+
+        if (input.IsMouseButtonPressed(MouseButton.Left) || input.IsMouseButtonDown(MouseButton.Right))
+        {
+            Entity entity = new Entity(Random.Shared.NextInt64().ToString(),
+                new Transform(Camera.Transform.Position + Camera.Transform.Forward * 6));
+            
+            entity.AddComponent(new MeshRenderer(_mesh));
+            
+            AddEntity(entity);
+        }
     }
 }
