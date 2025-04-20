@@ -28,6 +28,7 @@ public sealed class Renderer : IDisposable
     
     private readonly TextureBatcher _uiBatcher;
     private readonly DeferredRenderer _deferredRenderer;
+    private readonly ImGuiRenderer _imGuiRenderer;
     
     internal readonly ID3D11Device Device;
     internal readonly ID3D11DeviceContext Context;
@@ -109,6 +110,9 @@ public sealed class Renderer : IDisposable
         
         Logger.Trace("Creating deferred renderer.");
         _deferredRenderer = new DeferredRenderer(Device, size, _depthTarget);
+        
+        Logger.Trace("Creating ImGUI renderer.");
+        _imGuiRenderer = new ImGuiRenderer(Device, size);
 
         Logger.Trace("Creating default textures.");
         WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
@@ -132,6 +136,7 @@ public sealed class Renderer : IDisposable
         BlackTexture.Dispose();
         WhiteTexture.Dispose();
         
+        _imGuiRenderer.Dispose();
         _deferredRenderer.Dispose();
         _uiBatcher.Dispose();
 
