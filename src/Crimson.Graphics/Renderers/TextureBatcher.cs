@@ -3,6 +3,7 @@ using System.Numerics;
 using Crimson.Graphics.Renderers.Structs;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
+using SDL3;
 using Vortice;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
@@ -26,48 +27,39 @@ internal class TextureBatcher : IDisposable
     private readonly Vertex[] _vertices;
     private readonly uint[] _indices;
 
-    private readonly ID3D11Buffer _vertexBuffer;
-    private readonly ID3D11Buffer _indexBuffer;
-    private readonly ID3D11Buffer _cameraBuffer;
+    private readonly IntPtr _vertexBuffer;
+    private readonly IntPtr _indexBuffer;
 
-    private readonly ID3D11VertexShader _vertexShader;
-    private readonly ID3D11PixelShader _pixelShader;
-    private readonly ID3D11InputLayout _inputLayout;
-
-    private readonly ID3D11DepthStencilState _depthState;
-    private readonly ID3D11RasterizerState _rasterizerState;
-    private readonly ID3D11BlendState _blendState;
+    private readonly IntPtr _pipeline;
 
     private readonly List<Draw> _drawQueue;
     
-    public TextureBatcher(ID3D11Device device)
+    public unsafe TextureBatcher(IntPtr device, SDL.GPUTextureFormat format)
     {
         _vertices = new Vertex[MaxVertices];
         _indices = new uint[MaxIndices];
 
-        _vertexBuffer = device.CreateBuffer(MaxVertices * Vertex.SizeInBytes, BindFlags.VertexBuffer,
-            ResourceUsage.Dynamic, CpuAccessFlags.Write);
+        _vertexBuffer = SdlUtils.CreateBuffer(device, SDL.GPUBufferUsageFlags.Vertex, MaxVertices * Vertex.SizeInBytes);
+        _indexBuffer = SdlUtils.CreateBuffer(device, SDL.GPUBufferUsageFlags.Index, MaxIndices * sizeof(uint));
 
-        _indexBuffer = device.CreateBuffer(MaxIndices * sizeof(uint), BindFlags.IndexBuffer, ResourceUsage.Dynamic,
-            CpuAccessFlags.Write);
+        IntPtr vertexShader =
+            ShaderUtils.LoadGraphicsShader(device, SDL.GPUShaderStage.Vertex, "Texture", "VSMain", 1, 0);
+        IntPtr pixelShader =
+            ShaderUtils.LoadGraphicsShader(device, SDL.GPUShaderStage.Fragment, "Texture", "PSMain", 0, 1);
 
-        _cameraBuffer = device.CreateBuffer(CameraMatrices.SizeInBytes, BindFlags.ConstantBuffer, ResourceUsage.Dynamic,
-            CpuAccessFlags.Write);
+        SDL.GPUColorTargetDescription targetDesc = new()
+        {
+            Format = format,
+        };
         
-        ShaderUtils.LoadGraphicsShader(device, "Texture", out _vertexShader!, out _pixelShader!, out byte[] bytecode);
-
-        InputElementDescription[] elements =
-        [
-            new InputElementDescription("POSITION", 0, Format.R32G32_Float, 0, 0),
-            new InputElementDescription("TEXCOORD", 0, Format.R32G32_Float, 8, 0),
-            new InputElementDescription("COLOR", 0, Format.R32G32B32A32_Float, 16, 0)
-        ];
-
-        _inputLayout = device.CreateInputLayout(elements, bytecode!);
-
-        _depthState = device.CreateDepthStencilState(DepthStencilDescription.None);
-        _rasterizerState = device.CreateRasterizerState(RasterizerDescription.CullBack);
-        _blendState = device.CreateBlendState(BlendDescription.NonPremultiplied);
+        SDL.GPUGraphicsPipelineCreateInfo pipelineInfo = new()
+        {
+            VertexShader = vertexShader,
+            FragmentShader = pixelShader,
+            TargetInfo = { NumColorTargets = 1, ColorTargetDescriptions = new IntPtr(&targetDesc) },
+            PrimitiveType = SDL.GPUPrimitiveType.TriangleList,
+            
+        }
 
         _drawQueue = [];
     }
@@ -77,7 +69,7 @@ internal class TextureBatcher : IDisposable
         _drawQueue.Add(draw);
     }
 
-    public void DispatchDrawQueue(ID3D11DeviceContext context, Matrix4x4 projection, Matrix4x4 transform)
+    public void DispatchDrawQueue(IntPtr cb, in SDL.GPUColorTargetInfo passTarget, Matrix4x4 projection, Matrix4x4 transform)
     {
         MappedSubresource cameraRes = context.Map(_cameraBuffer, MapMode.WriteDiscard);
         CameraMatrices matrices = new CameraMatrices(projection, transform);

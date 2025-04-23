@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using Crimson.Core;
+using Crimson.Graphics.Renderers;
 //using Crimson.Graphics.Renderers;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
@@ -22,8 +23,8 @@ public sealed class Renderer : IDisposable
     private uint _targetSwapInterval;
     private Size<int> _swapchainSize;
     
-    /*private readonly TextureBatcher _uiBatcher;
-    private readonly DeferredRenderer _deferredRenderer;
+    private readonly TextureBatcher _uiBatcher;
+    /*private readonly DeferredRenderer _deferredRenderer;
     private readonly ImGuiRenderer _imGuiRenderer;*/
 
     internal readonly IntPtr Device;
@@ -79,12 +80,12 @@ public sealed class Renderer : IDisposable
         Logger.Trace("Claiming window for device.");
         SDL.ClaimWindowForGPUDevice(Device, _window).Check("Claim window for device");
 
-        /*_depthTarget = new D3D11Target(Device, Format.D32_Float, size, false);
+        //_depthTarget = new D3D11Target(Device, Format.D32_Float, size, false);
 
         Logger.Trace("Creating texture batcher.");
-        _uiBatcher = new TextureBatcher(Device);
+        _uiBatcher = new TextureBatcher(Device, SDL.GetGPUSwapchainTextureFormat(Device, _window));
 
-        Logger.Trace("Creating deferred renderer.");
+        /*Logger.Trace("Creating deferred renderer.");
         _deferredRenderer = new DeferredRenderer(Device, size, _depthTarget);
 
         Logger.Trace("Creating ImGUI renderer.");
@@ -113,8 +114,8 @@ public sealed class Renderer : IDisposable
         WhiteTexture.Dispose();
         
         /*_imGuiRenderer.Dispose();
-        _deferredRenderer.Dispose();
-        _uiBatcher.Dispose();*/
+        _deferredRenderer.Dispose();*/
+        _uiBatcher.Dispose();
 
         //_depthTarget.Dispose();
         SDL.ReleaseWindowFromGPUDevice(Device, _window);

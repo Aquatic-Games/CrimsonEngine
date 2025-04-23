@@ -23,6 +23,17 @@ internal static class SdlUtils
         return (uint) double.Floor(double.Log2(uint.Max(width, height))) + 1;
     }
 
+    public static IntPtr CreateBuffer(IntPtr device, SDL.GPUBufferUsageFlags usage, uint size)
+    {
+        SDL.GPUBufferCreateInfo bufferInfo = new()
+        {
+            Usage = usage,
+            Size = size
+        };
+
+        return SDL.CreateGPUBuffer(device, in bufferInfo).Check("Create buffer");
+    }
+
     public static SDL.GPUTextureFormat ToSdl(this PixelFormat format, out uint rowPitch)
     {
         switch (format)

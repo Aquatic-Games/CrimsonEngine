@@ -1,4 +1,5 @@
-using Vortice.Direct3D11;
+using System.Runtime.InteropServices;
+using SDL3;
 
 namespace Crimson.Graphics.Utils;
 
@@ -54,24 +55,33 @@ internal static class ShaderUtils
         }
     }*/
 
-    public static void LoadGraphicsShader(ID3D11Device device, string name, out ID3D11VertexShader? vertex,
-        out ID3D11PixelShader? pixel, out byte[]? vertexBytecode)
+    public static unsafe IntPtr LoadGraphicsShader(IntPtr device, SDL.GPUShaderStage stage, string name, string entryPoint, uint numUniforms, uint numSamplers)
     {
         string basePath = Path.Combine("Shaders", $"{name}");
 
-        vertex = null;
-        pixel = null;
-        vertexBytecode = null;
-        
-        string vertexPath = basePath + "_v.fxc";
-        if (File.Exists(vertexPath))
+        string path = stage switch
         {
-            vertexBytecode = File.ReadAllBytes(vertexPath);
-            vertex = device.CreateVertexShader(vertexBytecode);
-        }
+            SDL.GPUShaderStage.Vertex => basePath + "_v.spv",
+            SDL.GPUShaderStage.Fragment => basePath + "_p.spv",
+            _ => throw new ArgumentOutOfRangeException(nameof(stage), stage, null)
+        };
+        
+        byte[] data = File.ReadAllBytes(path);
 
-        string pixelPath = basePath + "_p.fxc";
-        if (File.Exists(pixelPath))
-            pixel = device.CreatePixelShader(File.ReadAllBytes(pixelPath));
+        fixed (byte* pData = data)
+        {
+            SDL.GPUShaderCreateInfo shaderInfo = new()
+            {
+                Stage = stage,
+                Format = SDL.GPUShaderFormat.SPIRV,
+                Code = (nint) pData,
+                CodeSize = (nuint) data.Length,
+                NumUniformBuffers = numUniforms,
+                NumSamplers = numSamplers,
+                Entrypoint = Marshal.StringToCoTaskMemAnsi(entryPoint)
+            };
+
+            return SDL.CreateGPUShader(device, in shaderInfo);
+        }
     }
 }

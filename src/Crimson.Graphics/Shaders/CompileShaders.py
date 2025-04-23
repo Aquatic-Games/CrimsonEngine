@@ -9,22 +9,22 @@ def compile_shader(path: Path, stage: str, entry_point: str):
     
     match stage:
         case "vertex":
-            profile = "vs_5_0"
+            profile = "vs_6_0"
             file_name += "_v"
         case "pixel":
-            profile = "ps_5_0"
+            profile = "ps_6_0"
             file_name += "_p"
         case _:
             raise Exception(f"Unknown shader stage '{stage}'.")
     
-    file_name += ".fxc"
+    file_name += ".spv"
     
     out_path = path.parent.joinpath(file_name)
     
     print(f"{path.resolve()} -> {out_path.resolve()}")
     
     # replace forward slashes with backslashes on linux because fxc is fxc and uses forward slashes because thanks microsoft
-    subprocess.run(['fxc', '/T', profile, '/E', entry_point, '/Fo', str(out_path).replace('/', '\\'), str(path).replace('/', '\\')]).check_returncode()
+    subprocess.run(['dxc', '-spirv', '-T', profile, '-E', entry_point, '-Fo', str(out_path), str(path)]).check_returncode()
     
 if __name__ == "__main__":
     working_dir = Path('.')
