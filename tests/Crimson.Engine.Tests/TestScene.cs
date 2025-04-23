@@ -15,6 +15,7 @@ namespace Crimson.Engine.Tests;
 
 public class TestScene : Scene
 {
+    private Texture _texture;
     //private Material _material;
     //private Mesh _mesh;
     
@@ -23,8 +24,10 @@ public class TestScene : Scene
         App.FpsLimit = 30;
         App.Renderer.VSync = true;
         //App.Surface.CursorVisible = false;
+
+        _texture = new Texture(App.Renderer, "DEBUG.png");
         
-        /*MaterialDefinition def = new(new Texture(App.Renderer, "DEBUG.png"))
+        /*MaterialDefinition def = new(_texture)
         {
             RenderFace = RenderFace.Front
         };

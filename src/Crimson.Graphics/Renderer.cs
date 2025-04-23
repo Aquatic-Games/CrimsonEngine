@@ -28,11 +28,11 @@ public sealed class Renderer : IDisposable
 
     internal readonly IntPtr Device;
     
-    /*public readonly Texture WhiteTexture;
+    public readonly Texture WhiteTexture;
 
     public readonly Texture BlackTexture;
 
-    public readonly Texture NormalTexture;*/
+    public readonly Texture NormalTexture;
 
     /*/// <summary>
     /// The 3D <see cref="Crimson.Graphics.Camera"/> that will be used when drawing.
@@ -73,7 +73,10 @@ public sealed class Renderer : IDisposable
 
         SDL.SetAppMetadata(appName, null!, null!);
 
+        Logger.Trace("Creating device.");
         Device = SDL.CreateGPUDevice(SDL.GPUShaderFormat.SPIRV, true, null!).Check("Create device");
+        
+        Logger.Trace("Claiming window for device.");
         SDL.ClaimWindowForGPUDevice(Device, _window).Check("Claim window for device");
 
         /*_depthTarget = new D3D11Target(Device, Format.D32_Float, size, false);
@@ -85,14 +88,14 @@ public sealed class Renderer : IDisposable
         _deferredRenderer = new DeferredRenderer(Device, size, _depthTarget);
 
         Logger.Trace("Creating ImGUI renderer.");
-        _imGuiRenderer = new ImGuiRenderer(Device, RenderSize);
+        _imGuiRenderer = new ImGuiRenderer(Device, RenderSize);*/
 
         Logger.Trace("Creating default textures.");
         WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
         BlackTexture = new Texture(this, new Size<int>(1), [0, 0, 0, 255], PixelFormat.RGBA8);
         NormalTexture = new Texture(this, new Size<int>(1), [128, 128, 255, 255], PixelFormat.RGBA8);
 
-        Camera = new Camera()
+        /*Camera = new Camera()
         {
             ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(float.DegreesToRadians(45),
                 _swapchainSize.Width / (float)_swapchainSize.Height, 0.1f, 100f),
@@ -105,11 +108,11 @@ public sealed class Renderer : IDisposable
     /// </summary>
     public void Dispose()
     {
-        /*NormalTexture.Dispose();
+        NormalTexture.Dispose();
         BlackTexture.Dispose();
         WhiteTexture.Dispose();
         
-        _imGuiRenderer.Dispose();
+        /*_imGuiRenderer.Dispose();
         _deferredRenderer.Dispose();
         _uiBatcher.Dispose();*/
 

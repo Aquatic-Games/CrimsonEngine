@@ -28,7 +28,6 @@
         <Compile Remove="Model.cs" />
         <Compile Remove="Skybox.cs" />
         <Compile Remove="Renderable.cs" />
-        <Compile Remove="Texture.cs" />
         <Compile Remove="Utils\ShaderUtils.cs" />
     </ItemGroup>
 

@@ -17,4 +17,21 @@ internal static class SdlUtils
         if (!b)
             throw new Exception($"SDL operation '{operation}' failed: {SDL.GetError()}");
     }
+
+    public static uint CalculateMipLevels(uint width, uint height)
+    {
+        return (uint) double.Floor(double.Log2(uint.Max(width, height))) + 1;
+    }
+
+    public static SDL.GPUTextureFormat ToSdl(this PixelFormat format, out uint rowPitch)
+    {
+        switch (format)
+        {
+            case PixelFormat.RGBA8:
+                rowPitch = 4;
+                return SDL.GPUTextureFormat.R8G8B8A8Unorm;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(format), format, null);
+        }
+    }
 }

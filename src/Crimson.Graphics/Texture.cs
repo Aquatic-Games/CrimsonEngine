@@ -1,9 +1,8 @@
+using System.Runtime.CompilerServices;
 using Crimson.Core;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
-using Vortice.Direct3D;
-using Vortice.Direct3D11;
-using Vortice.DXGI;
+using SDL3;
 
 namespace Crimson.Graphics;
 
@@ -12,8 +11,9 @@ namespace Crimson.Graphics;
 /// </summary>
 public class Texture : IDisposable
 {
-    internal ID3D11Texture2D TextureHandle;
-    internal ID3D11ShaderResourceView ResourceView;
+    private readonly IntPtr _device;
+    
+    internal readonly IntPtr TextureHandle;
 
     /// <summary>
     /// The texture's size in pixels.
@@ -27,49 +27,73 @@ public class Texture : IDisposable
     /// <param name="size">The size, in pixels.</param>
     /// <param name="data">The data.</param>
     /// <param name="format">The <see cref="PixelFormat"/> of the texture.</param>
-    public Texture(Renderer renderer, in Size<int> size, byte[] data, PixelFormat format)
+    public unsafe Texture(Renderer renderer, in Size<int> size, byte[] data, PixelFormat format)
     {
         Size = size;
 
-        ID3D11Device device = renderer.Device;
-        ID3D11DeviceContext context = renderer.Context;
+        _device = renderer.Device;
 
-        Format fmt = format.ToD3D((uint) size.Width, out uint rowPitch);
-
-        Texture2DDescription textureDesc = new()
+        SDL.GPUTextureCreateInfo textureInfo = new()
         {
+            Type = SDL.GPUTextureType.Texturetype2D,
+            Format = format.ToSdl(out uint rowPitch),
             Width = (uint) size.Width,
             Height = (uint) size.Height,
-            Format = fmt,
-            ArraySize = 1,
-            MipLevels = 0,
-            Usage = ResourceUsage.Default,
-            BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
-            SampleDescription = new SampleDescription(1, 0),
-            CPUAccessFlags = CpuAccessFlags.None,
-            MiscFlags = ResourceOptionFlags.GenerateMips
+            LayerCountOrDepth = 1,
+            NumLevels = SdlUtils.CalculateMipLevels((uint) size.Width, (uint) size.Height),
+            Usage = SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget
         };
 
         Logger.Trace("Creating texture.");
-        TextureHandle = device.CreateTexture2D(in textureDesc);
-        context.UpdateSubresource(data, TextureHandle, rowPitch: rowPitch);
+        TextureHandle = SDL.CreateGPUTexture(_device, in textureInfo).Check("Create texture");
 
-        ShaderResourceViewDescription viewDesc = new()
+        SDL.GPUTransferBufferCreateInfo transInfo = new()
         {
-            ViewDimension = ShaderResourceViewDimension.Texture2D,
-            Format = fmt,
-            Texture2D = new Texture2DShaderResourceView()
-            {
-                MipLevels = uint.MaxValue,
-                MostDetailedMip = 0
-            }
+            Usage = SDL.GPUTransferBufferUsage.Upload,
+            Size = (uint) size.Width * (uint) size.Height * rowPitch
+        };
+
+        Logger.Trace("Creating transfer buffer");
+        IntPtr transBuffer = SDL.CreateGPUTransferBuffer(_device, in transInfo);
+
+        nint mappedData = SDL.MapGPUTransferBuffer(_device, transBuffer, false);
+        fixed (byte* pData = data)
+            Unsafe.CopyBlock((void*) mappedData, pData, transInfo.Size);
+        SDL.UnmapGPUTransferBuffer(_device, transBuffer);
+
+        IntPtr cb = SDL.AcquireGPUCommandBuffer(_device).Check("Acquire command buffer");
+        IntPtr pass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
+
+        SDL.GPUTextureTransferInfo source = new()
+        {
+            TransferBuffer = transBuffer,
+            Offset = 0,
+            PixelsPerRow = (uint) size.Width
+        };
+
+        SDL.GPUTextureRegion dest = new()
+        {
+            Texture = TextureHandle,
+            X = 0,
+            Y = 0,
+            W = (uint) size.Width,
+            H = (uint) size.Height,
+            D = 1,
+            MipLevel = 0
         };
         
-        Logger.Trace("Creating resource view.");
-        ResourceView = device.CreateShaderResourceView(TextureHandle, viewDesc);
+        SDL.UploadToGPUTexture(pass, in source, in dest, false);
         
-        Logger.Trace("Generating mipmaps.");
-        context.GenerateMips(ResourceView);
+        SDL.EndGPUCopyPass(pass);
+
+        if (textureInfo.NumLevels > 1)
+        {
+            Logger.Trace($"Generating mipmaps. (Level {textureInfo.NumLevels})");
+            SDL.GenerateMipmapsForGPUTexture(cb, TextureHandle);
+        }
+
+        SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
+        SDL.ReleaseGPUTransferBuffer(_device, transBuffer);
     }
 
     /// <summary>
@@ -91,7 +115,6 @@ public class Texture : IDisposable
     /// </summary>
     public void Dispose()
     {
-        ResourceView.Dispose();
-        TextureHandle.Dispose();
+        SDL.ReleaseGPUTexture(_device, TextureHandle);
     }
 }
