@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Crimson.Core;
 using SDL3;
 
 namespace Crimson.Graphics.Utils;
@@ -81,7 +82,8 @@ internal static class ShaderUtils
                 Entrypoint = Marshal.StringToCoTaskMemAnsi(entryPoint)
             };
 
-            return SDL.CreateGPUShader(device, in shaderInfo);
+            Logger.Trace("Creating shader.");
+            return SDL.CreateGPUShader(device, in shaderInfo).Check("Create GPU shader");
         }
     }
 }

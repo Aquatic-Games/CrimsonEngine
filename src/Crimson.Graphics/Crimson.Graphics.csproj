@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="Shaders\**\*.fxc" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="Shaders\**\*.spv" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>

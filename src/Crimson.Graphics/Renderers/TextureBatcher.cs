@@ -4,10 +4,6 @@ using Crimson.Graphics.Renderers.Structs;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
 using SDL3;
-using Vortice;
-using Vortice.Direct3D;
-using Vortice.Direct3D11;
-using Vortice.DXGI;
 
 namespace Crimson.Graphics.Renderers;
 
@@ -24,6 +20,8 @@ internal class TextureBatcher : IDisposable
     private const uint MaxVertices = NumVertices * MaxBatches;
     private const uint MaxIndices = NumIndices * MaxBatches;
 
+    private readonly IntPtr _device;
+
     private readonly Vertex[] _vertices;
     private readonly uint[] _indices;
 
@@ -36,6 +34,8 @@ internal class TextureBatcher : IDisposable
     
     public unsafe TextureBatcher(IntPtr device, SDL.GPUTextureFormat format)
     {
+        _device = device;
+        
         _vertices = new Vertex[MaxVertices];
         _indices = new uint[MaxIndices];
 
@@ -51,15 +51,44 @@ internal class TextureBatcher : IDisposable
         {
             Format = format,
         };
-        
+
+        SDL.GPUVertexAttribute* vertexAttributes = stackalloc SDL.GPUVertexAttribute[]
+        {
+            new SDL.GPUVertexAttribute
+                { Format = SDL.GPUVertexElementFormat.Float2, Offset = 0, BufferSlot = 0, Location = 0 },
+            new SDL.GPUVertexAttribute
+                { Format = SDL.GPUVertexElementFormat.Float2, Offset = 8, BufferSlot = 0, Location = 1 },
+            new SDL.GPUVertexAttribute
+                { Format = SDL.GPUVertexElementFormat.Float4, Offset = 16, BufferSlot = 0, Location = 2 }
+        };
+
+        SDL.GPUVertexBufferDescription vertexBufferDesc = new()
+        {
+            InputRate = SDL.GPUVertexInputRate.Vertex,
+            InstanceStepRate = 0,
+            Pitch = Vertex.SizeInBytes,
+            Slot = 0
+        };
+
         SDL.GPUGraphicsPipelineCreateInfo pipelineInfo = new()
         {
             VertexShader = vertexShader,
             FragmentShader = pixelShader,
             TargetInfo = { NumColorTargets = 1, ColorTargetDescriptions = new IntPtr(&targetDesc) },
-            PrimitiveType = SDL.GPUPrimitiveType.TriangleList,
-            
-        }
+            VertexInputState = new SDL.GPUVertexInputState()
+            {
+                NumVertexAttributes = 3, 
+                VertexAttributes = (nint) vertexAttributes, 
+                NumVertexBuffers = 1,
+                VertexBufferDescriptions = new IntPtr(&vertexBufferDesc)
+            },
+            PrimitiveType = SDL.GPUPrimitiveType.TriangleList
+        };
+
+        _pipeline = SDL.CreateGPUGraphicsPipeline(device, in pipelineInfo).Check("Create GPU pipeline");
+        
+        SDL.ReleaseGPUShader(device, pixelShader);
+        SDL.ReleaseGPUShader(device, vertexShader);
 
         _drawQueue = [];
     }
@@ -71,26 +100,6 @@ internal class TextureBatcher : IDisposable
 
     public void DispatchDrawQueue(IntPtr cb, in SDL.GPUColorTargetInfo passTarget, Matrix4x4 projection, Matrix4x4 transform)
     {
-        MappedSubresource cameraRes = context.Map(_cameraBuffer, MapMode.WriteDiscard);
-        CameraMatrices matrices = new CameraMatrices(projection, transform);
-        UnsafeUtilities.Write(cameraRes.DataPointer, ref matrices);
-        context.Unmap(_cameraBuffer);
-        
-        context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
-        context.IASetInputLayout(_inputLayout);
-        
-        context.VSSetShader(_vertexShader);
-        context.PSSetShader(_pixelShader);
-        
-        context.OMSetDepthStencilState(_depthState);
-        context.RSSetState(_rasterizerState);
-        context.OMSetBlendState(_blendState);
-        
-        context.IASetVertexBuffer(0, _vertexBuffer, Vertex.SizeInBytes);
-        context.IASetIndexBuffer(_indexBuffer, Format.R32_UInt, 0);
-        
-        context.VSSetConstantBuffer(0, _cameraBuffer);
-
         uint numDraws = 0;
         Texture? texture = null;
 
@@ -145,17 +154,13 @@ internal class TextureBatcher : IDisposable
         context.PSSetShaderResource(0, texture.ResourceView);
         
         context.DrawIndexed(numDraws * NumIndices, 0, 0);
-    }
+    }*/
     
     public void Dispose()
     {
-        _inputLayout.Dispose();
-        _pixelShader.Dispose();
-        _vertexShader.Dispose();
-        
-        _cameraBuffer.Dispose();
-        _indexBuffer.Dispose();
-        _vertexBuffer.Dispose();
+        SDL.ReleaseGPUGraphicsPipeline(_device, _pipeline);
+        SDL.ReleaseGPUBuffer(_device, _indexBuffer);
+        SDL.ReleaseGPUBuffer(_device, _vertexBuffer);
     }
 
     private readonly struct Vertex
