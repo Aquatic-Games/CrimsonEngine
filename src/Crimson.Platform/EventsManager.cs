@@ -1,7 +1,6 @@
 using System.Numerics;
 using Crimson.Math;
-using Silk.NET.SDL;
-using static Crimson.Platform.SdlUtils;
+using SDL3;
 
 namespace Crimson.Platform;
 
@@ -36,8 +35,8 @@ public class EventsManager : IDisposable
     /// </summary>
     public EventsManager()
     {
-        if (SDL.Init(Sdl.InitEvents) < 0)
-            throw new Exception($"Failed to initialize SDL: {SDL.GetErrorS()}");
+        if (!SDL.Init(SDL.InitFlags.Events))
+            throw new Exception($"Failed to initialize SDL: {SDL.GetError()}");
     }
 
     /// <summary>
@@ -45,60 +44,55 @@ public class EventsManager : IDisposable
     /// </summary>
     public unsafe void ProcessEvents()
     {
-        Event sdlEvent;
-        while (SDL.PollEvent(&sdlEvent) != 0)
+        SDL.Event sdlEvent;
+        while (SDL.PollEvent(out sdlEvent))
         {
-            switch ((EventType) sdlEvent.Type)
+            switch ((SDL.EventType) sdlEvent.Type)
             {
-                case EventType.Windowevent:
+                case SDL.EventType.WindowCloseRequested:
                 {
-                    switch ((WindowEventID) sdlEvent.Window.Event)
-                    {
-                        case WindowEventID.Close:
-                            WindowClose();
-                            break;
-                        case WindowEventID.Resized:
-                        {
-                            SurfaceSizeChanged(new Size<int>(sdlEvent.Window.Data1, sdlEvent.Window.Data2));
-                            break;
-                        }
-                    }
-                    
-                    break;
-                }
-                
-                case EventType.Keydown:
-                {
-                    if (sdlEvent.Key.Repeat != 0)
-                        break;
-                    KeyDown(KeycodeToKey((KeyCode) sdlEvent.Key.Keysym.Sym));
-                    break;
-                }
-                case EventType.Keyup:
-                {
-                    KeyUp(KeycodeToKey((KeyCode) sdlEvent.Key.Keysym.Sym));
+                    WindowClose();
                     break;
                 }
 
-                case EventType.Mousebuttondown:
+                case SDL.EventType.WindowResized:
                 {
-                    MouseButtonDown(ButtonIndexToButton(sdlEvent.Button.Button));
+                    SurfaceSizeChanged(new Size<int>(sdlEvent.Window.Data1, sdlEvent.Window.Data2));
                     break;
                 }
-                case EventType.Mousebuttonup:
+                
+                case SDL.EventType.KeyDown:
                 {
-                    MouseButtonUp(ButtonIndexToButton(sdlEvent.Button.Button));
+                    if (sdlEvent.Key.Repeat)
+                        break;
+                    KeyDown(SdlUtils.KeycodeToKey(sdlEvent.Key.Key));
                     break;
                 }
-                case EventType.Mousemotion:
+                case SDL.EventType.KeyUp:
+                {
+                    KeyUp(SdlUtils.KeycodeToKey(sdlEvent.Key.Key));
+                    break;
+                }
+
+                case SDL.EventType.MouseButtonDown:
+                {
+                    MouseButtonDown(SdlUtils.ButtonIndexToButton(sdlEvent.Button.Button));
+                    break;
+                }
+                case SDL.EventType.MouseButtonUp:
+                {
+                    MouseButtonUp(SdlUtils.ButtonIndexToButton(sdlEvent.Button.Button));
+                    break;
+                }
+                case SDL.EventType.MouseMotion:
                 {
                     MouseMove(new Vector2(sdlEvent.Motion.X, sdlEvent.Motion.Y),
-                        new Vector2(sdlEvent.Motion.Xrel, sdlEvent.Motion.Yrel));
+                        new Vector2(sdlEvent.Motion.XRel, sdlEvent.Motion.YRel));
                     break;
                 }
-                case EventType.Mousewheel:
+                case SDL.EventType.MouseWheel:
                 {
-                    MouseScroll(new Vector2(sdlEvent.Wheel.PreciseX, sdlEvent.Wheel.PreciseY));
+                    MouseScroll(new Vector2(sdlEvent.Wheel.X, sdlEvent.Wheel.Y));
                     break;
                 }
             }

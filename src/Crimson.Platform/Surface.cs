@@ -1,17 +1,16 @@
 ﻿using Crimson.Core;
 using Crimson.Graphics;
 using Crimson.Math;
-using Silk.NET.SDL;
-using static Crimson.Platform.SdlUtils;
+using SDL3;
 
 namespace Crimson.Platform;
 
 /// <summary>
 /// The primary application surface that is being rendered to.
 /// </summary>
-public sealed unsafe class Surface : IDisposable
+public sealed class Surface : IDisposable
 {
-    private Window* _window;
+    private IntPtr _window;
 
     /// <summary>
     /// The surface's size, in pixels.
@@ -21,8 +20,7 @@ public sealed unsafe class Surface : IDisposable
     {
         get
         {
-            int w, h;
-            SDL.GetWindowSizeInPixels(_window, &w, &h);
+            SDL.GetWindowSizeInPixels(_window, out int w, out int h);
 
             return new Size<int>(w, h);
         }
@@ -35,8 +33,8 @@ public sealed unsafe class Surface : IDisposable
     /// <remarks>Only works on platforms that support mouse input.</remarks>
     public bool CursorVisible
     {
-        get => SDL.GetRelativeMouseMode() == SdlBool.True;
-        set => SDL.SetRelativeMouseMode(value ? SdlBool.False : SdlBool.True);
+        get => SDL.GetWindowRelativeMouseMode(_window);
+        set => SDL.SetWindowRelativeMouseMode(_window, !value);
     }
     
     /// <summary>
@@ -83,23 +81,11 @@ public sealed unsafe class Surface : IDisposable
                 throw new PlatformNotSupportedException();
 
             return info;*/
+            
+            nint hwnd = SDL.GetPointerProperty(SDL.GetWindowProperties(_window), "SDL.window.win32.hwnd", 0);
+            return new SurfaceInfo(hwnd);
 
-            SurfaceInfo info;
-
-            if (OperatingSystem.IsWindows())
-            {
-                SysWMInfo wmInfo = new SysWMInfo();
-                SDL.GetVersion(&wmInfo.Version);
-                SDL.GetWindowWMInfo(_window, &wmInfo);
-
-                info = new SurfaceInfo(wmInfo.Info.Win.Hwnd);
-            }
-            else
-            {
-                info = new SurfaceInfo((nint) _window);
-            }
-
-            return info;
+            return new SurfaceInfo(_window);
         }
     }
 
@@ -110,23 +96,17 @@ public sealed unsafe class Surface : IDisposable
     /// <exception cref="Exception">Thrown if the surface failed to create.</exception>
     public Surface(in WindowOptions options)
     {
-        SDL.SetHint(Sdl.HintWindowsDpiAwareness, "system");
-        
         Logger.Trace("Initializing SDL.");
-        if (SDL.Init(Sdl.InitVideo) < 0)
-            throw new Exception($"Failed to initialize SDL: {SDL.GetErrorS()}");
+        if (!SDL.Init(SDL.InitFlags.Video))
+            throw new Exception($"Failed to initialize SDL: {SDL.GetError()}");
 
-        WindowFlags flags = WindowFlags.Resizable;
-
-        if (!OperatingSystem.IsWindows())
-            flags |= WindowFlags.Vulkan;
+        SDL.WindowFlags flags = SDL.WindowFlags.Resizable;
         
         Logger.Trace("Creating window.");
-        _window = SDL.CreateWindow(options.Title, Sdl.WindowposCentered, Sdl.WindowposCentered, options.Size.Width,
-            options.Size.Height, (uint) flags);
+        _window = SDL.CreateWindow(options.Title, options.Size.Width, options.Size.Height, flags);
 
-        if (_window == null)
-            throw new Exception($"Failed to create window: {SDL.GetErrorS()}");
+        if (_window == IntPtr.Zero)
+            throw new Exception($"Failed to create window: {SDL.GetError()}");
     }
 
     /// <summary>

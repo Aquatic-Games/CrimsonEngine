@@ -12,6 +12,7 @@
 
     <ItemGroup>
       <PackageReference Include="SDL3-CS" Version="3.2.10" />
+      <PackageReference Include="SDL3-CS.Native" Version="3.2.10" />
     </ItemGroup>
 
 </Project>
