@@ -1,14 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using Crimson.Core;
-using Crimson.Graphics.Renderers;
+//using Crimson.Graphics.Renderers;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
 using Hexa.NET.ImGui;
-using Vortice.Direct3D;
-using Vortice.Direct3D11;
-using Vortice.DXGI;
-using Vortice.Mathematics;
+using SDL3;
 using Color = Crimson.Math.Color;
 
 namespace Crimson.Graphics;
@@ -18,32 +15,29 @@ namespace Crimson.Graphics;
 /// </summary>
 public sealed class Renderer : IDisposable
 {
-    private readonly IDXGISwapChain _swapchain;
-    private ID3D11Texture2D _swapchainTexture;
-    private ID3D11RenderTargetView _swapchainTarget;
+    private readonly IntPtr _window;
     
-    private D3D11Target _depthTarget;
+    //private D3D11Target _depthTarget;
 
     private uint _targetSwapInterval;
     private Size<int> _swapchainSize;
     
-    private readonly TextureBatcher _uiBatcher;
+    /*private readonly TextureBatcher _uiBatcher;
     private readonly DeferredRenderer _deferredRenderer;
-    private readonly ImGuiRenderer _imGuiRenderer;
+    private readonly ImGuiRenderer _imGuiRenderer;*/
+
+    internal readonly IntPtr Device;
     
-    internal readonly ID3D11Device Device;
-    internal readonly ID3D11DeviceContext Context;
-    
-    public readonly Texture WhiteTexture;
+    /*public readonly Texture WhiteTexture;
 
     public readonly Texture BlackTexture;
 
-    public readonly Texture NormalTexture;
+    public readonly Texture NormalTexture;*/
 
-    /// <summary>
+    /*/// <summary>
     /// The 3D <see cref="Crimson.Graphics.Camera"/> that will be used when drawing.
     /// </summary>
-    public Camera Camera;
+    public Camera Camera;*/
 
     /// <summary>
     /// Get the render area size in pixels.
@@ -59,10 +53,10 @@ public sealed class Renderer : IDisposable
         set => _targetSwapInterval = value ? 1u : 0u;
     }
 
-    /// <summary>
+    /*/// <summary>
     /// Gets the ImGUI context pointer.
     /// </summary>
-    public ImGuiContextPtr ImGuiContext => _imGuiRenderer.Context;
+    public ImGuiContextPtr ImGuiContext => _imGuiRenderer.Context;*/
     
     /// <summary>
     /// Create the graphics subsystem.
@@ -75,48 +69,21 @@ public sealed class Renderer : IDisposable
         _swapchainSize = size;
         VSync = true;
 
-        SwapChainDescription swapchainDesc = new()
-        {
-            OutputWindow = info.NativeHandle,
-            Windowed = true,
-            BufferDescription = new ModeDescription((uint) size.Width, (uint) size.Height, Format.B8G8R8A8_UNorm),
-            BufferUsage = Usage.RenderTargetOutput,
-            BufferCount = 2,
-            SampleDescription = new SampleDescription(1, 0),
-            SwapEffect = SwapEffect.FlipDiscard,
-            Flags = SwapChainFlags.None
-        };
+        _window = info.NativeHandle;
 
-        DeviceCreationFlags flags = DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport;
-        FeatureLevel[] levels = [FeatureLevel.Level_11_1];
+        SDL.SetAppMetadata(appName, null!, null!);
 
-        Logger.Trace("Creating D3D11 device.");
-        D3D11.D3D11CreateDeviceAndSwapChain(null, DriverType.Hardware, flags, levels, swapchainDesc, out _swapchain!,
-            out Device!, out _, out Context!).CheckError();
+        Device = SDL.CreateGPUDevice(SDL.GPUShaderFormat.SPIRV, true, null!).Check("Create device");
+        SDL.ClaimWindowForGPUDevice(Device, _window).Check("Claim window for device");
 
-        // Does not work with DXVK-native.
-        if (OperatingSystem.IsWindows())
-        {
-            IDXGIAdapter adapter = Device.QueryInterface<IDXGIDevice>().GetAdapter();
-            AdapterDescription adapterDesc = adapter.Description;
-
-            Logger.Info("Adapter:");
-            Logger.Info($"    Name: {adapterDesc.Description}");
-            Logger.Info($"    Memory: {adapterDesc.DedicatedVideoMemory / 1024 / 1024}MB");
-        }
-
-        Logger.Trace("Creating swapchain textures.");
-        _swapchainTexture = _swapchain.GetBuffer<ID3D11Texture2D>(0);
-        _swapchainTarget = Device.CreateRenderTargetView(_swapchainTexture);
-        
-        _depthTarget = new D3D11Target(Device, Format.D32_Float, size, false);
+        /*_depthTarget = new D3D11Target(Device, Format.D32_Float, size, false);
 
         Logger.Trace("Creating texture batcher.");
         _uiBatcher = new TextureBatcher(Device);
-        
+
         Logger.Trace("Creating deferred renderer.");
         _deferredRenderer = new DeferredRenderer(Device, size, _depthTarget);
-        
+
         Logger.Trace("Creating ImGUI renderer.");
         _imGuiRenderer = new ImGuiRenderer(Device, RenderSize);
 
@@ -130,7 +97,7 @@ public sealed class Renderer : IDisposable
             ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(float.DegreesToRadians(45),
                 _swapchainSize.Width / (float)_swapchainSize.Height, 0.1f, 100f),
             ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(0, 0, 3), Vector3.Zero, Vector3.UnitY)
-        };
+        };*/
     }
 
     /// <summary>
@@ -138,23 +105,20 @@ public sealed class Renderer : IDisposable
     /// </summary>
     public void Dispose()
     {
-        NormalTexture.Dispose();
+        /*NormalTexture.Dispose();
         BlackTexture.Dispose();
         WhiteTexture.Dispose();
         
         _imGuiRenderer.Dispose();
         _deferredRenderer.Dispose();
-        _uiBatcher.Dispose();
+        _uiBatcher.Dispose();*/
 
-        _depthTarget.Dispose();
-        _swapchainTarget.Dispose();
-        _swapchainTexture.Dispose();
-        _swapchain.Dispose();
-        Context.Dispose();
-        Device.Dispose();
+        //_depthTarget.Dispose();
+        SDL.ReleaseWindowFromGPUDevice(Device, _window);
+        SDL.DestroyGPUDevice(Device);
     }
 
-    /// <summary>
+    /*/// <summary>
     /// Draw a <see cref="Renderable"/> to the screen using the built-in renderers.
     /// </summary>
     /// <param name="renderable">The <see cref="Renderable"/> to draw.</param>
@@ -162,9 +126,9 @@ public sealed class Renderer : IDisposable
     public void DrawRenderable(Renderable renderable, Matrix4x4 worldMatrix)
     {
         _deferredRenderer.AddToQueue(renderable, worldMatrix);
-    }
+    }*/
 
-    /// <summary>
+    /*/// <summary>
     /// Draw an image to the screen.
     /// </summary>
     /// <param name="texture">The texture to use as the image.</param>
@@ -197,30 +161,41 @@ public sealed class Renderer : IDisposable
         Vector2 bottomRight = position + new Vector2(size.Width, size.Height);
         
         _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft, topRight, bottomLeft, bottomRight, tint ?? Color.White));
-    }
+    }*/
 
     /// <summary>
     /// Render and present to the surface.
     /// </summary>
-    public void Render()
+    public unsafe void Render()
     {
-        Context.OMSetRenderTargets(_swapchainTarget);
-        Context.ClearRenderTargetView(_swapchainTarget, new Color4(0.0f, 0.0f, 0.0f));
+        IntPtr cb = SDL.AcquireGPUCommandBuffer(Device).Check("Acquire command buffer");
 
-        Context.RSSetViewport(0, 0, _swapchainSize.Width, _swapchainSize.Height);
+        SDL.WaitAndAcquireGPUSwapchainTexture(cb, _window, out IntPtr swapchainTexture, out uint width,
+            out uint height).Check("Acquire swapchain texture");
+
+        SDL.GPUColorTargetInfo targetInfo = new()
+        {
+            Texture = swapchainTexture,
+            ClearColor = new SDL.FColor(1.0f, 0.5f, 0.25f, 1.0f),
+            LoadOp = SDL.GPULoadOp.Clear,
+            StoreOp = SDL.GPUStoreOp.Store
+        };
+
+        IntPtr pass = SDL.BeginGPURenderPass(cb, new IntPtr(&targetInfo), 1, IntPtr.Zero).Check("Begin render pass");
+        SDL.EndGPURenderPass(pass);
         
-        _deferredRenderer.Render(Context, _swapchainTarget, Camera.Matrices);
+        //_deferredRenderer.Render(Context, _swapchainTarget, Camera.Matrices);
 
-        Camera.Skybox?.Render();
+        //Camera.Skybox?.Render();
         
         Matrix4x4 projection =
             Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
         
-        _uiBatcher.DispatchDrawQueue(Context, projection, Matrix4x4.Identity);
+        //_uiBatcher.DispatchDrawQueue(Context, projection, Matrix4x4.Identity);
         
-        _imGuiRenderer.Render(Context);
-        
-        _swapchain.Present(_targetSwapInterval);
+        //_imGuiRenderer.Render(Context);
+
+        SDL.SubmitGPUCommandBuffer(cb);
     }
 
     /// <summary>
@@ -231,22 +206,11 @@ public sealed class Renderer : IDisposable
     {
         _swapchainSize = newSize;
         
-        Context.ClearState();
-        Context.Flush();
-        
-        _depthTarget.Dispose();
-        
-        _swapchainTarget.Dispose();
-        _swapchainTexture.Dispose();
+        //_depthTarget.Dispose();
 
-        _swapchain.ResizeBuffers(0, (uint) newSize.Width, (uint) newSize.Height).CheckError();
-
-        _swapchainTexture = _swapchain.GetBuffer<ID3D11Texture2D>(0);
-        _swapchainTarget = Device.CreateRenderTargetView(_swapchainTexture);
-
-        _depthTarget = new D3D11Target(Device, Format.D32_Float, newSize, false);
+        /*_depthTarget = new D3D11Target(Device, Format.D32_Float, newSize, false);
         
         _deferredRenderer.Resize(_depthTarget, newSize);
-        _imGuiRenderer.Resize(newSize);
+        _imGuiRenderer.Resize(newSize);*/
     }
 }

@@ -2,7 +2,7 @@ using System.Numerics;
 using Crimson.Engine.Entities;
 using Crimson.Engine.Entities.Components;
 using Crimson.Graphics;
-using Crimson.Graphics.Materials;
+//using Crimson.Graphics.Materials;
 using Crimson.Graphics.Primitives;
 using Crimson.Input;
 using Crimson.Math;
@@ -15,8 +15,8 @@ namespace Crimson.Engine.Tests;
 
 public class TestScene : Scene
 {
-    private Material _material;
-    private Mesh _mesh;
+    //private Material _material;
+    //private Mesh _mesh;
     
     public override void Initialize()
     {
@@ -24,7 +24,7 @@ public class TestScene : Scene
         App.Renderer.VSync = true;
         //App.Surface.CursorVisible = false;
         
-        MaterialDefinition def = new(new Texture(App.Renderer, "DEBUG.png"))
+        /*MaterialDefinition def = new(new Texture(App.Renderer, "DEBUG.png"))
         {
             RenderFace = RenderFace.Front
         };
@@ -40,7 +40,7 @@ public class TestScene : Scene
         Entity dynamicCube = new Entity("DynamicCube");
         dynamicCube.AddComponent(new Rigidbody(new BoxShape(new Vector3(0.5f)), 1));
         dynamicCube.AddComponent(new MeshRenderer(_mesh));
-        AddEntity(dynamicCube);
+        AddEntity(dynamicCube);*/
         
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());
@@ -70,11 +70,11 @@ public class TestScene : Scene
             Entity entity = new Entity(Random.Shared.NextInt64().ToString(),
                 new Transform(Camera.Transform.Position + Camera.Transform.Forward * 6));
             
-            entity.AddComponent(new MeshRenderer(_mesh));
+            //entity.AddComponent(new MeshRenderer(_mesh));
             
             AddEntity(entity);
         }
         
-        ImGui.ShowDemoWindow();
+        //ImGui.ShowDemoWindow();
     }
 }

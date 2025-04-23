@@ -140,8 +140,8 @@ public static class App
         Logger.Debug("Initializing physics system.");
         _physics = new PhysicsSystem();
         
-        Logger.Debug("Creating imgui controller.");
-        _imGuiController = new ImGuiController(_renderer.ImGuiContext, _events);
+        //Logger.Debug("Creating imgui controller.");
+        //_imGuiController = new ImGuiController(_renderer.ImGuiContext, _events);
         
         _deltaWatch = Stopwatch.StartNew();
         
@@ -172,7 +172,7 @@ public static class App
                 _currentScene.Initialize();
             }
             
-            _imGuiController.Update(dt);
+            //_imGuiController.Update(dt);
             
             _globalApp.PreUpdate(dt);
             _physics.Step(1 / 60.0f);

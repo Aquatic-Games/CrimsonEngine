@@ -81,9 +81,6 @@ public sealed class Surface : IDisposable
                 throw new PlatformNotSupportedException();
 
             return info;*/
-            
-            nint hwnd = SDL.GetPointerProperty(SDL.GetWindowProperties(_window), "SDL.window.win32.hwnd", 0);
-            return new SurfaceInfo(hwnd);
 
             return new SurfaceInfo(_window);
         }

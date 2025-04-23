@@ -11,9 +11,9 @@
 
     <ItemGroup>
       <PackageReference Include="Hexa.NET.ImGui" Version="2.2.7" />
+      <PackageReference Include="SDL3-CS" Version="3.2.10" />
       <PackageReference Include="SharpGLTF.Core" Version="1.0.3" />
       <PackageReference Include="StbImageSharp" Version="2.30.15" />
-      <PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
     </ItemGroup>
 
     <ItemGroup>
@@ -21,8 +21,15 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ClCompile Include="Shaders\Debug\ImGui.hlsl" />
-      <ClCompile Include="Shaders\Environment\Skybox.hlsl" />
+        <Compile Remove="Renderers\**\*" />
+        <Compile Remove="Materials\**\*" />
+        <Compile Remove="Camera.cs" />
+        <Compile Remove="Mesh.cs" />
+        <Compile Remove="Model.cs" />
+        <Compile Remove="Skybox.cs" />
+        <Compile Remove="Renderable.cs" />
+        <Compile Remove="Texture.cs" />
+        <Compile Remove="Utils\ShaderUtils.cs" />
     </ItemGroup>
 
 </Project>
