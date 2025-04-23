@@ -11,7 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Silk.NET.SDL" Version="2.22.0" />
+      <PackageReference Include="SDL3-CS" Version="3.2.10" />
     </ItemGroup>
 
 </Project>
