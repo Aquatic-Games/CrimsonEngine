@@ -2,6 +2,7 @@
 using System.Numerics;
 using Crimson.Core;
 using Crimson.Graphics.Renderers;
+using Crimson.Graphics.Renderers.Structs;
 //using Crimson.Graphics.Renderers;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
@@ -132,7 +133,7 @@ public sealed class Renderer : IDisposable
         _deferredRenderer.AddToQueue(renderable, worldMatrix);
     }*/
 
-    /*/// <summary>
+    /// <summary>
     /// Draw an image to the screen.
     /// </summary>
     /// <param name="texture">The texture to use as the image.</param>
@@ -165,7 +166,7 @@ public sealed class Renderer : IDisposable
         Vector2 bottomRight = position + new Vector2(size.Width, size.Height);
         
         _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft, topRight, bottomLeft, bottomRight, tint ?? Color.White));
-    }*/
+    }
 
     /// <summary>
     /// Render and present to the surface.
@@ -174,19 +175,16 @@ public sealed class Renderer : IDisposable
     {
         IntPtr cb = SDL.AcquireGPUCommandBuffer(Device).Check("Acquire command buffer");
 
-        SDL.WaitAndAcquireGPUSwapchainTexture(cb, _window, out IntPtr swapchainTexture, out uint width,
-            out uint height).Check("Acquire swapchain texture");
+        SDL.WaitAndAcquireGPUSwapchainTexture(cb, _window, out IntPtr swapchainTexture, out _, out _)
+            .Check("Acquire swapchain texture");
 
         SDL.GPUColorTargetInfo targetInfo = new()
         {
             Texture = swapchainTexture,
-            ClearColor = new SDL.FColor(1.0f, 0.5f, 0.25f, 1.0f),
+            ClearColor = new SDL.FColor(0.0f, 0.0f, 0.0f, 1.0f),
             LoadOp = SDL.GPULoadOp.Clear,
             StoreOp = SDL.GPUStoreOp.Store
         };
-
-        IntPtr pass = SDL.BeginGPURenderPass(cb, new IntPtr(&targetInfo), 1, IntPtr.Zero).Check("Begin render pass");
-        SDL.EndGPURenderPass(pass);
         
         //_deferredRenderer.Render(Context, _swapchainTarget, Camera.Matrices);
 
@@ -195,7 +193,7 @@ public sealed class Renderer : IDisposable
         Matrix4x4 projection =
             Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
         
-        //_uiBatcher.DispatchDrawQueue(Context, projection, Matrix4x4.Identity);
+        _uiBatcher.DispatchDrawQueue(cb, targetInfo, _swapchainSize, new CameraMatrices(projection, Matrix4x4.Identity));
         
         //_imGuiRenderer.Render(Context);
 

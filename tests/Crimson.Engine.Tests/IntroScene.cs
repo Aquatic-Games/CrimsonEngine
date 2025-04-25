@@ -7,8 +7,8 @@ namespace Crimson.Engine.Tests;
 
 public class IntroScene : Scene
 {
-    //private Texture _logo;
-    //private Texture _logo2;
+    private Texture _logo;
+    private Texture _logo2;
 
     private float _logoAlpha;
     private float _logo2Alpha;
@@ -17,8 +17,8 @@ public class IntroScene : Scene
     
     public override void Initialize()
     {
-        //_logo = new Texture(App.Renderer, "/home/aqua/Pictures/Aquatic Games/nizzine-aquaticgameswide.png");
-        //_logo2 = new Texture(App.Renderer, "/home/aqua/Pictures/Aquatic Games/nizzine-aquaticgameswide-night.png");
+        _logo = new Texture(App.Renderer, "/home/aqua/Pictures/Aquatic Games/nizzine-aquaticgameswide.png");
+        _logo2 = new Texture(App.Renderer, "/home/aqua/Pictures/Aquatic Games/nizzine-aquaticgameswide-night.png");
     }
 
     public override void Update(float dt)
@@ -49,7 +49,7 @@ public class IntroScene : Scene
     {
         Renderer renderer = App.Renderer;
 
-        //renderer.DrawImage(_logo, Vector2.Zero, renderer.RenderSize, Color.White with { A = _logoAlpha });
-        //renderer.DrawImage(_logo2, Vector2.Zero, renderer.RenderSize, Color.White with { A = _logo2Alpha });
+        renderer.DrawImage(_logo, Vector2.Zero, renderer.RenderSize, Color.White with { A = _logoAlpha });
+        renderer.DrawImage(_logo2, Vector2.Zero, renderer.RenderSize, Color.White with { A = _logo2Alpha });
     }
 }

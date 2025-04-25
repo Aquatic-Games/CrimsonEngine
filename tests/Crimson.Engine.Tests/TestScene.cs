@@ -16,6 +16,7 @@ namespace Crimson.Engine.Tests;
 public class TestScene : Scene
 {
     private Texture _texture;
+    private Texture _texture2;
     //private Material _material;
     //private Mesh _mesh;
     
@@ -26,6 +27,7 @@ public class TestScene : Scene
         //App.Surface.CursorVisible = false;
 
         _texture = new Texture(App.Renderer, "DEBUG.png");
+        _texture2 = new Texture(App.Renderer, "/home/aqua/Pictures/awesomeface.png");
         
         /*MaterialDefinition def = new(_texture)
         {
@@ -79,5 +81,14 @@ public class TestScene : Scene
         }
         
         //ImGui.ShowDemoWindow();
+    }
+
+    public override void Draw()
+    {
+        base.Draw();
+        
+        App.Renderer.DrawImage(_texture2, Vector2.Zero);
+        App.Renderer.DrawImage(_texture, Vector2.Zero);
+        App.Renderer.DrawImage(_texture, new Vector2(100));
     }
 }

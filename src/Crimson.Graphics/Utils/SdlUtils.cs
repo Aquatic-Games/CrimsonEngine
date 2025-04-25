@@ -34,6 +34,17 @@ internal static class SdlUtils
         return SDL.CreateGPUBuffer(device, in bufferInfo).Check("Create buffer");
     }
 
+    public static IntPtr CreateTransferBuffer(IntPtr device, SDL.GPUTransferBufferUsage usage, uint size)
+    {
+        SDL.GPUTransferBufferCreateInfo bufferInfo = new()
+        {
+            Usage = usage,
+            Size = size
+        };
+
+        return SDL.CreateGPUTransferBuffer(device, in bufferInfo).Check("Create transfer buffer");
+    }
+
     public static SDL.GPUTextureFormat ToSdl(this PixelFormat format, out uint rowPitch)
     {
         switch (format)

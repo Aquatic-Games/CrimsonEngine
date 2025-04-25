@@ -20,14 +20,14 @@ struct PSOutput
     float4 Color: SV_Target0;
 };
 
-cbuffer CameraMatrices : register(b0)
+cbuffer CameraMatrices : register(b0, space1)
 {
     float4x4 Projection;
     float4x4 Transform;
 }
 
-Texture2D Texture : register(t0);
-SamplerState State : register(s0);
+Texture2D Texture : register(t0, space2);
+SamplerState State : register(s0, space2);
 
 VSOutput VSMain(const in VSInput input)
 {
