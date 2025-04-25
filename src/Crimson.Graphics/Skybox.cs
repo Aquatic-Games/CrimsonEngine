@@ -192,7 +192,9 @@ public sealed class Skybox : IDisposable
             },
             RasterizerState = new SDL.GPURasterizerState()
             {
-                CullMode = SDL.GPUCullMode.None
+                CullMode = SDL.GPUCullMode.Front,
+                FrontFace = SDL.GPUFrontFace.CounterClockwise,
+                FillMode = SDL.GPUFillMode.Fill
             }
         };
 
@@ -217,7 +219,9 @@ public sealed class Skybox : IDisposable
             LoadOp = SDL.GPULoadOp.Load,
             StoreOp = SDL.GPUStoreOp.Store
         };
-
+        
+        SdlUtils.PushDebugGroup(cb, "Skybox Pass");
+        
         IntPtr pass = SDL.BeginGPURenderPass(cb, new IntPtr(&targetInfo), 1, in depthTargetInfo)
             .Check("Begin render pass");
         
@@ -252,6 +256,8 @@ public sealed class Skybox : IDisposable
         SDL.DrawGPUIndexedPrimitives(pass, 36, 1, 0, 0, 0);
         
         SDL.EndGPURenderPass(pass);
+        
+        SdlUtils.PopDebugGroup(cb);
     }
     
     public void Dispose()

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using SDL3;
 
 namespace Crimson.Graphics.Utils;
@@ -17,6 +18,18 @@ internal static class SdlUtils
     {
         if (!b)
             throw new Exception($"SDL operation '{operation}' failed: {SDL.GetError()}");
+    }
+
+    [Conditional("DEBUG")]
+    public static void PushDebugGroup(IntPtr cb, string name)
+    {
+        SDL.PushGPUDebugGroup(cb, name);
+    }
+
+    [Conditional("DEBUG")]
+    public static void PopDebugGroup(IntPtr cb)
+    {
+        SDL.PopGPUDebugGroup(cb);
     }
 
     public static uint CalculateMipLevels(uint width, uint height)

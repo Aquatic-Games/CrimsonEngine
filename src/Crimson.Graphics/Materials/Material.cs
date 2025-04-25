@@ -96,6 +96,23 @@ public class Material : IDisposable
                 EnableDepthTest = 1,
                 EnableDepthWrite = 1,
                 CompareOp = SDL.GPUCompareOp.Less
+            },
+            RasterizerState = new SDL.GPURasterizerState()
+            {
+                FillMode = SDL.GPUFillMode.Fill,
+                CullMode = definition.RenderFace switch
+                {
+                    RenderFace.Front => SDL.GPUCullMode.Back,
+                    RenderFace.Back => SDL.GPUCullMode.Front,
+                    RenderFace.Both => SDL.GPUCullMode.None,
+                    _ => throw new ArgumentOutOfRangeException()
+                },
+                FrontFace = definition.WindingOrder switch
+                {
+                    WindingOrder.CounterClockwise => SDL.GPUFrontFace.CounterClockwise,
+                    WindingOrder.Clockwise => SDL.GPUFrontFace.Clockwise,
+                    _ => throw new ArgumentOutOfRangeException()
+                },
             }
         };
 

@@ -150,6 +150,10 @@ internal class TextureBatcher : IDisposable
 
     public unsafe void DispatchDrawQueue(IntPtr cb, SDL.GPUColorTargetInfo passTarget, Size<int> size, CameraMatrices matrices)
     {
+        // Don't even try to draw if the draw count is 0.
+        if (_drawQueue.Count == 0)
+            return;
+        
         uint numDraws = 0;
         uint bufferOffset = 0;
         uint lastBufferOffset = 0;
@@ -201,6 +205,8 @@ internal class TextureBatcher : IDisposable
         }
         
         SDL.UnmapGPUTransferBuffer(_device, _transferBuffer);
+        
+        SdlUtils.PushDebugGroup(cb, "TextureBatcher Copy Pass");
 
         IntPtr copyPass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
 
@@ -235,6 +241,10 @@ internal class TextureBatcher : IDisposable
         SDL.UploadToGPUBuffer(copyPass, indexSource, indexDest, false);
         
         SDL.EndGPUCopyPass(copyPass);
+        
+        SdlUtils.PopDebugGroup(cb);
+        
+        SdlUtils.PushDebugGroup(cb, "TextureBatcher Pass");
 
         IntPtr renderPass = SDL.BeginGPURenderPass(cb, new IntPtr(&passTarget), 1, IntPtr.Zero)
             .Check("Begin render pass");
@@ -269,15 +279,14 @@ internal class TextureBatcher : IDisposable
         
         SDL.EndGPURenderPass(renderPass);
         
+        SdlUtils.PopDebugGroup(cb);
+        
         _drawList.Clear();
     }
 
     private void Flush(IntPtr pass, ref readonly DrawList drawList)
     {
-        // Don't bother drawing unless there's stuff to draw.
-        if (drawList.NumDraws == 0)
-            return;
-        
+        Debug.Assert(drawList.NumDraws != 0);
         Debug.Assert(drawList.Texture != null);
 
         SDL.GPUTextureSamplerBinding samplerBinding = new()

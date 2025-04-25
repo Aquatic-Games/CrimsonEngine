@@ -96,8 +96,14 @@ public sealed class Surface : IDisposable
         Logger.Trace("Initializing SDL.");
         if (!SDL.Init(SDL.InitFlags.Video))
             throw new Exception($"Failed to initialize SDL: {SDL.GetError()}");
+        
+        SDL.WindowFlags flags = SDL.WindowFlags.InputFocus | SDL.WindowFlags.MouseFocus;
 
-        SDL.WindowFlags flags = SDL.WindowFlags.Resizable;
+        if (options.Resizable)
+            flags |= SDL.WindowFlags.Resizable;
+
+        if (options.FullScreen)
+            flags |= SDL.WindowFlags.Fullscreen;
         
         Logger.Trace("Creating window.");
         _window = SDL.CreateWindow(options.Title, options.Size.Width, options.Size.Height, flags);

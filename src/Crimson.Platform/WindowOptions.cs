@@ -7,7 +7,9 @@ namespace Crimson.Platform;
 /// </summary>
 /// <param name="Title">The title to use for the window.</param>
 /// <param name="Size">The size, in pixels, of the window.</param>
-public record struct WindowOptions(string Title, Size<int> Size)
+/// <param name="Resizable">If the window should be resizable by the user.</param>
+/// <param name="FullScreen">If the window should be borderless fullscreen.</param>
+public record struct WindowOptions(string Title, Size<int> Size, bool Resizable, bool FullScreen)
 {
     /// <summary>
     /// The title to use for the window.
@@ -20,7 +22,17 @@ public record struct WindowOptions(string Title, Size<int> Size)
     public Size<int> Size = Size;
 
     /// <summary>
+    /// If the window should be resizable by the user.
+    /// </summary>
+    public bool Resizable = Resizable;
+
+    /// <summary>
+    /// If the window should be borderless fullscreen.
+    /// </summary>
+    public bool FullScreen = FullScreen;
+
+    /// <summary>
     /// Create a new <see cref="WindowOptions"/> with the default values.
     /// </summary>
-    public WindowOptions() : this("Crimson Engine", new Size<int>(1280, 720)) { }
+    public WindowOptions() : this("Crimson Engine", new Size<int>(1280, 720), false, false) { }
 }

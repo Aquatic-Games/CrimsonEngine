@@ -81,6 +81,8 @@ internal class DeferredRenderer : IDisposable
         SDL.PushGPUVertexUniformData(cb, 0, new IntPtr(&camera), CameraMatrices.SizeInBytes);
         
         #region GBuffer Pass
+        
+        SdlUtils.PushDebugGroup(cb, "GBuffer Pass");
 
         SDL.GPUColorTargetInfo* gBufferTargets = stackalloc SDL.GPUColorTargetInfo[]
         {
@@ -143,9 +145,13 @@ internal class DeferredRenderer : IDisposable
         
         SDL.EndGPURenderPass(gBufferPass);
         
+        SdlUtils.PopDebugGroup(cb);
+        
         #endregion
 
         #region Lighting Pass
+        
+        SdlUtils.PushDebugGroup(cb, "Deferred Lighting Pass");
 
         SDL.GPUColorTargetInfo compositeInfo = new()
         {
@@ -171,6 +177,8 @@ internal class DeferredRenderer : IDisposable
         SDL.DrawGPUPrimitives(lightingPass, 6, 1, 0, 0);
         
         SDL.EndGPURenderPass(lightingPass);
+        
+        SdlUtils.PopDebugGroup(cb);
 
         #endregion
         
