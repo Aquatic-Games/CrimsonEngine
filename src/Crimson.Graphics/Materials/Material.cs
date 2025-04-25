@@ -90,10 +90,19 @@ public class Material : IDisposable
                 NumVertexAttributes = 4,
                 VertexAttributes = (nint) vertexAttributes
             },
-            PrimitiveType = SDL.GPUPrimitiveType.TriangleList
+            PrimitiveType = SDL.GPUPrimitiveType.TriangleList,
+            DepthStencilState = new SDL.GPUDepthStencilState()
+            {
+                EnableDepthTest = 1,
+                EnableDepthWrite = 1,
+                CompareOp = SDL.GPUCompareOp.Less
+            }
         };
 
         Pipeline = SDL.CreateGPUGraphicsPipeline(_device, in pipelineInfo);
+        
+        SDL.ReleaseGPUShader(_device, pixelShader);
+        SDL.ReleaseGPUShader(_device, vertexShader);
     }
 
     /// <summary>

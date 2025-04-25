@@ -48,9 +48,9 @@ public sealed class Skybox : IDisposable
             Width = (uint) right.Size.Width,
             Height = (uint) right.Size.Height,
             LayerCountOrDepth = 6,
-            NumLevels = 1,
+            NumLevels = SdlUtils.CalculateMipLevels((uint) right.Size.Width, (uint) right.Size.Height),
             Type = SDL.GPUTextureType.TexturetypeCube,
-            Usage = SDL.GPUTextureUsageFlags.Sampler,
+            Usage = SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget,
             SampleCount = SDL.GPUSampleCount.SampleCount1
         };
 
@@ -128,6 +128,9 @@ public sealed class Skybox : IDisposable
         }
 
         SDL.EndGPUCopyPass(copyPass);
+        
+        SDL.GenerateMipmapsForGPUTexture(cb, _textureHandle);
+        
         SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
         
         SDL.ReleaseGPUTransferBuffer(_device, transferBuffer);
@@ -194,6 +197,9 @@ public sealed class Skybox : IDisposable
         };
 
         _pipeline = SDL.CreateGPUGraphicsPipeline(_device, in pipelineInfo).Check("Create pipeline");
+        
+        SDL.ReleaseGPUShader(_device, pixelShader);
+        SDL.ReleaseGPUShader(_device, vertexShader);
     }
 
     internal unsafe void Render(IntPtr cb, IntPtr texture, IntPtr depthTarget, CameraMatrices matrices)
@@ -205,13 +211,11 @@ public sealed class Skybox : IDisposable
             StoreOp = SDL.GPUStoreOp.Store
         };
         
-        // TODO: Don't clear the depth target once ANY other form of rendering is done
         SDL.GPUDepthStencilTargetInfo depthTargetInfo = new()
         {
             Texture = depthTarget,
-            LoadOp = SDL.GPULoadOp.Clear,
-            StoreOp = SDL.GPUStoreOp.Store,
-            ClearDepth = 1.0f
+            LoadOp = SDL.GPULoadOp.Load,
+            StoreOp = SDL.GPUStoreOp.Store
         };
 
         IntPtr pass = SDL.BeginGPURenderPass(cb, new IntPtr(&targetInfo), 1, in depthTargetInfo)

@@ -2,76 +2,71 @@ using System.Numerics;
 using Crimson.Graphics.Renderers.Structs;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
-using Vortice.Direct3D;
-using Vortice.Direct3D11;
-using Vortice.DXGI;
-using Vortice.Mathematics;
+using SDL3;
 
 namespace Crimson.Graphics.Renderers;
 
 internal class DeferredRenderer : IDisposable
 {
-    private readonly ID3D11Device _device;
+    private readonly IntPtr _device;
     
-    private D3D11Target _depthTarget;
-    
-    private D3D11Target _albedoTarget;
-    private D3D11Target _positionTarget;
+    private IntPtr _albedoTexture;
+    private IntPtr _positionTexture;
 
-    private readonly ID3D11VertexShader _gbufferVtx;
-    private readonly ID3D11PixelShader _gBufferPxl;
-    private readonly ID3D11InputLayout _gBufferLayout;
-
-    private readonly ID3D11DepthStencilState _depthState;
-
-    private readonly ID3D11VertexShader _passVtx;
-    private readonly ID3D11PixelShader _passPxl;
-    private readonly ID3D11DepthStencilState _passDepthState;
-    private readonly ID3D11RasterizerState _passRasterizerState;
-
-    private readonly ID3D11Buffer _cameraBuffer;
-    private readonly ID3D11Buffer _worldBuffer;
+    private readonly IntPtr _passPipeline;
+    private readonly IntPtr _passSampler;
 
     private readonly List<WorldRenderable> _drawQueue;
     
-    public DeferredRenderer(ID3D11Device device, Size<int> size, D3D11Target depthTarget)
+    public unsafe DeferredRenderer(IntPtr device, Size<int> size, SDL.GPUTextureFormat outFormat)
     {
         _device = device;
-        _depthTarget = depthTarget;
+
+        _albedoTexture = SdlUtils.CreateTexture2D(device, (uint) size.Width, (uint) size.Height,
+            SDL.GPUTextureFormat.R32G32B32A32Float,
+            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget, 1);
         
-        _albedoTarget = new D3D11Target(device, Format.R32G32B32A32_Float, size);
-        _positionTarget = new D3D11Target(device, Format.R32G32B32A32_Float, size);
+        _positionTexture = SdlUtils.CreateTexture2D(device, (uint) size.Width, (uint) size.Height,
+            SDL.GPUTextureFormat.R32G32B32A32Float,
+            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget, 1);
 
-        ShaderUtils.LoadGraphicsShader(device, "Deferred/GBuffer", out _gbufferVtx!, out _gBufferPxl!,
-            out byte[] vtxCode);
+        IntPtr passVtx = ShaderUtils.LoadGraphicsShader(device, SDL.GPUShaderStage.Vertex, "Deferred/DeferredPass",
+            "VSMain", 0, 0);
+        IntPtr passPxl = ShaderUtils.LoadGraphicsShader(device, SDL.GPUShaderStage.Fragment, "Deferred/DeferredPass",
+            "PSMain", 0, 1);
 
-        InputElementDescription[] gBufferElements =
-        [
-            new InputElementDescription("POSITION", 0, Format.R32G32B32_Float, 0, 0),
-            new InputElementDescription("TEXCOORD", 0, Format.R32G32_Float, 12, 0),
-            new InputElementDescription("COLOR", 0, Format.R32G32B32A32_Float, 20, 0),
-            new InputElementDescription("NORMAL", 0, Format.R32G32B32_Float, 36, 0)
-        ];
-
-        _gBufferLayout = device.CreateInputLayout(gBufferElements, vtxCode!);
-
-        _depthState = device.CreateDepthStencilState(DepthStencilDescription.Default);
-        
-        ShaderUtils.LoadGraphicsShader(device, "Deferred/DeferredPass", out _passVtx!, out _passPxl!, out _);
-
-        _passDepthState = device.CreateDepthStencilState(new DepthStencilDescription()
+        SDL.GPUColorTargetDescription targetDesc = new()
         {
-            DepthEnable = true,
-            DepthWriteMask = DepthWriteMask.Zero,
-            DepthFunc = ComparisonFunction.Less
-        });
+            Format = outFormat
+        };
 
-        _passRasterizerState = device.CreateRasterizerState(RasterizerDescription.CullBack);
+        SDL.GPUGraphicsPipelineCreateInfo passPipelineInfo = new()
+        {
+            VertexShader = passVtx,
+            FragmentShader = passPxl,
+            TargetInfo = new SDL.GPUGraphicsPipelineTargetInfo()
+            {
+                NumColorTargets = 1,
+                ColorTargetDescriptions = new IntPtr(&targetDesc)
+            },
+            PrimitiveType = SDL.GPUPrimitiveType.TriangleList
+        };
+
+        _passPipeline = SDL.CreateGPUGraphicsPipeline(_device, in passPipelineInfo).Check("Create graphics pipeline");
         
-        _cameraBuffer = device.CreateBuffer(CameraMatrices.SizeInBytes, BindFlags.ConstantBuffer, ResourceUsage.Dynamic,
-            CpuAccessFlags.Write);
-        
-        _worldBuffer = device.CreateBuffer(64, BindFlags.ConstantBuffer, ResourceUsage.Dynamic, CpuAccessFlags.Write);
+        SDL.ReleaseGPUShader(_device, passPxl);
+        SDL.ReleaseGPUShader(_device, passVtx);
+
+        SDL.GPUSamplerCreateInfo samplerInfo = new()
+        {
+            MinFilter = SDL.GPUFilter.Linear,
+            MagFilter = SDL.GPUFilter.Linear,
+            MipmapMode = SDL.GPUSamplerMipmapMode.Linear,
+            AddressModeU = SDL.GPUSamplerAddressMode.ClampToEdge,
+            AddressModeV = SDL.GPUSamplerAddressMode.ClampToEdge
+        };
+
+        _passSampler = SDL.CreateGPUSampler(_device, in samplerInfo).Check("Create sampler");
 
         _drawQueue = [];
     }
@@ -81,61 +76,101 @@ internal class DeferredRenderer : IDisposable
         _drawQueue.Add(new WorldRenderable(renderable, worldMatrix));
     }
 
-    public void Render(ID3D11DeviceContext context, ID3D11RenderTargetView renderTarget, CameraMatrices camera)
+    public unsafe void Render(IntPtr cb, IntPtr compositeTarget, IntPtr depthTexture, CameraMatrices camera)
     {
-        context.UpdateBuffer(_cameraBuffer, camera);
+        SDL.PushGPUVertexUniformData(cb, 0, new IntPtr(&camera), CameraMatrices.SizeInBytes);
         
         #region GBuffer Pass
-        
-        Span<ID3D11RenderTargetView> targets = [_albedoTarget.RenderTarget!, _positionTarget.RenderTarget!];
-        context.OMSetRenderTargets(targets, _depthTarget.DepthTarget!);
-        
-        context.ClearRenderTargetView(_albedoTarget.RenderTarget, new Color4(0.0f, 0.0f, 0.0f, 0.0f));
-        context.ClearRenderTargetView(_positionTarget.RenderTarget, new Color4(0.0f, 0.0f, 0.0f, 0.0f));
-        context.ClearDepthStencilView(_depthTarget.DepthTarget, DepthStencilClearFlags.Depth, 1, 0);
 
-        context.VSSetConstantBuffer(0, _cameraBuffer);
-        context.VSSetConstantBuffer(2, _worldBuffer);
-            
-        context.VSSetShader(_gbufferVtx);
-        context.PSSetShader(_gBufferPxl);
-            
-        context.IASetPrimitiveTopology(PrimitiveTopology.TriangleList);
-        context.IASetInputLayout(_gBufferLayout);
-        
-        context.OMSetDepthStencilState(_depthState);
+        SDL.GPUColorTargetInfo* gBufferTargets = stackalloc SDL.GPUColorTargetInfo[]
+        {
+            new SDL.GPUColorTargetInfo
+            {
+                Texture = _albedoTexture, ClearColor = new SDL.FColor(), LoadOp = SDL.GPULoadOp.Clear,
+                StoreOp = SDL.GPUStoreOp.Store
+            },
+            new SDL.GPUColorTargetInfo
+            {
+                Texture = _positionTexture, ClearColor = new SDL.FColor(), LoadOp = SDL.GPULoadOp.Clear,
+                StoreOp = SDL.GPUStoreOp.Store
+            }
+        };
+
+        SDL.GPUDepthStencilTargetInfo depthInfo = new()
+        {
+            Texture = depthTexture,
+            ClearDepth = 1.0f,
+            LoadOp = SDL.GPULoadOp.Clear,
+            StoreOp = SDL.GPUStoreOp.Store
+        };
+
+        IntPtr gBufferPass = SDL.BeginGPURenderPass(cb, (nint) gBufferTargets, 2, in depthInfo)
+            .Check("Begin gbuffer pass");
         
         foreach ((Renderable renderable, Matrix4x4 world) in _drawQueue)
         {
-            // TODO: This is inefficient. Ideally have a large buffer with offsets.
-            //       When GRABS is implemented use push constants.
-            context.UpdateBuffer(_worldBuffer, world);
+            SDL.PushGPUVertexUniformData(cb, 1, new IntPtr(&world), 64);
             
-            context.RSSetState(renderable.Material.RasterizerState);
+            SDL.BindGPUGraphicsPipeline(gBufferPass, renderable.Material.Pipeline);
+
+            // TODO: Have a sampler per material.
+            SDL.GPUTextureSamplerBinding albedoBinding = new()
+            {
+                Texture = renderable.Material.Albedo.TextureHandle,
+                Sampler = _passSampler
+            };
+
+            SDL.BindGPUFragmentSamplers(gBufferPass, 0, [albedoBinding], 1);
+
+            SDL.GPUBufferBinding vertexBinding = new()
+            {
+                Buffer = renderable.VertexBuffer,
+                Offset = 0
+            };
             
-            context.PSSetShaderResource(0, renderable.Material.Albedo.ResourceView);
+            SDL.BindGPUVertexBuffers(gBufferPass, 0, new IntPtr(&vertexBinding), 1);
+
+            SDL.GPUBufferBinding indexBinding = new()
+            {
+                Buffer = renderable.IndexBuffer,
+                Offset = 0
+            };
             
-            context.IASetVertexBuffer(0, renderable.VertexBuffer, Vertex.SizeInBytes);
-            context.IASetIndexBuffer(renderable.IndexBuffer, Format.R32_UInt, 0);
-            
-            context.DrawIndexed(renderable.NumIndices, 0, 0);
+            SDL.BindGPUIndexBuffer(gBufferPass, in indexBinding, SDL.GPUIndexElementSize.IndexElementSize32Bit);
+
+            SDL.DrawGPUIndexedPrimitives(gBufferPass, renderable.NumIndices, 1, 0, 0, 0);
         }
+        
+        SDL.EndGPURenderPass(gBufferPass);
         
         #endregion
 
         #region Lighting Pass
 
-        context.OMSetRenderTargets(renderTarget, _depthTarget.DepthTarget);
+        SDL.GPUColorTargetInfo compositeInfo = new()
+        {
+            Texture = compositeTarget,
+            LoadOp = SDL.GPULoadOp.Clear,
+            StoreOp = SDL.GPUStoreOp.Store,
+            ClearColor = new SDL.FColor(0.0f, 0.0f, 0.0f, 1.0f)
+        };
+
+        IntPtr lightingPass = SDL.BeginGPURenderPass(cb, new IntPtr(&compositeInfo), 1, IntPtr.Zero)
+            .Check("Begin lighting pass");
         
-        context.VSSetShader(_passVtx);
-        context.PSSetShader(_passPxl);
-        context.OMSetDepthStencilState(_passDepthState);
-        context.RSSetState(_passRasterizerState);
+        SDL.BindGPUGraphicsPipeline(lightingPass, _passPipeline);
+
+        SDL.GPUTextureSamplerBinding albedoTargetBinding = new()
+        {
+            Texture = _albedoTexture,
+            Sampler = _passSampler
+        };
+
+        SDL.BindGPUFragmentSamplers(lightingPass, 0, [albedoTargetBinding], 1);
         
-        context.PSSetShaderResource(0, _albedoTarget.ResourceView!);
-        context.PSSetShaderResource(1, _positionTarget.ResourceView!);
+        SDL.DrawGPUPrimitives(lightingPass, 6, 1, 0, 0);
         
-        context.Draw(6, 0);
+        SDL.EndGPURenderPass(lightingPass);
 
         #endregion
         
@@ -143,29 +178,25 @@ internal class DeferredRenderer : IDisposable
         _drawQueue.Clear();
     }
 
-    public void Resize(D3D11Target depthTarget, Size<int> newSize)
+    public void Resize(Size<int> newSize)
     {
-        _depthTarget = depthTarget;
+        SDL.ReleaseGPUTexture(_device, _albedoTexture);
+        SDL.ReleaseGPUTexture(_device, _positionTexture);
         
-        _positionTarget.Dispose();
-        _albedoTarget.Dispose();
+        _albedoTexture = SdlUtils.CreateTexture2D(_device, (uint) newSize.Width, (uint) newSize.Height,
+            SDL.GPUTextureFormat.R32G32B32A32Float,
+            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget, 1);
         
-        _albedoTarget = new D3D11Target(_device, Format.R32G32B32A32_Float, newSize);
-        _positionTarget = new D3D11Target(_device, Format.R32G32B32A32_Float, newSize);
+        _positionTexture = SdlUtils.CreateTexture2D(_device, (uint) newSize.Width, (uint) newSize.Height,
+            SDL.GPUTextureFormat.R32G32B32A32Float,
+            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget, 1);
     }
     
     public void Dispose()
     {
-        _worldBuffer.Dispose();
-        _cameraBuffer.Dispose();
-        _passRasterizerState.Dispose();
-        _passDepthState.Dispose();
-        _passPxl.Dispose();
-        _passVtx.Dispose();
-        _depthState.Dispose();
-        _gBufferLayout.Dispose();
-        _gBufferPxl.Dispose();
-        _gbufferVtx.Dispose();
-        _albedoTarget.Dispose();
+        SDL.ReleaseGPUSampler(_device, _passSampler);
+        SDL.ReleaseGPUGraphicsPipeline(_device, _passPipeline);
+        SDL.ReleaseGPUTexture(_device, _positionTexture);
+        SDL.ReleaseGPUTexture(_device, _albedoTexture);
     }
 }

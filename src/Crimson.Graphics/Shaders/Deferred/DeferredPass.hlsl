@@ -12,10 +12,10 @@ struct PSOutput
     float4 Color: SV_Target0;
 };
 
-SamplerState Sampler : register(s0);
+SamplerState Sampler : register(s0, space2);
 
-Texture2D Albedo : register(t0);
-Texture2D Position : register(t1);
+Texture2D Albedo : register(t0, space2);
+Texture2D Position : register(t1, space2);
 
 VSOutput VSMain(const uint vertexId: SV_VertexID)
 {

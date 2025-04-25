@@ -1,5 +1,6 @@
 using Crimson.Graphics.Materials;
-using Vortice.Direct3D11;
+using Crimson.Graphics.Utils;
+using SDL3;
 
 namespace Crimson.Graphics;
 
@@ -9,9 +10,11 @@ namespace Crimson.Graphics;
 /// </summary>
 public class Renderable : IDisposable
 {
-    internal readonly ID3D11Buffer VertexBuffer;
+    private readonly IntPtr _device;
     
-    internal readonly ID3D11Buffer IndexBuffer;
+    internal readonly IntPtr VertexBuffer;
+    
+    internal readonly IntPtr IndexBuffer;
 
     internal readonly uint NumIndices;
 
@@ -27,10 +30,10 @@ public class Renderable : IDisposable
     /// <param name="mesh">The mesh to use.</param>
     public Renderable(Renderer renderer, Mesh mesh)
     {
-        ID3D11Device device = renderer.Device;
-        
-        VertexBuffer = device.CreateBuffer(mesh.Vertices, BindFlags.VertexBuffer);
-        IndexBuffer = device.CreateBuffer(mesh.Indices, BindFlags.IndexBuffer);
+        _device = renderer.Device;
+
+        VertexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Vertex, mesh.Vertices);
+        IndexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Index, mesh.Indices);
         
         NumIndices = (uint) mesh.Indices.Length;
 
@@ -42,7 +45,7 @@ public class Renderable : IDisposable
     /// </summary>
     public void Dispose()
     {
-        IndexBuffer.Dispose();
-        VertexBuffer.Dispose();
+        SDL.ReleaseGPUBuffer(_device, IndexBuffer);
+        SDL.ReleaseGPUBuffer(_device, VertexBuffer);
     }
 }

@@ -1,6 +1,7 @@
 using System.Numerics;
 using Crimson.Engine;
 using Crimson.Graphics;
+using Crimson.Graphics.Materials;
 //using Crimson.Graphics.Materials;
 using Crimson.Math;
 using Plane = Crimson.Graphics.Primitives.Plane;
@@ -9,7 +10,7 @@ namespace Crimson.Engine.Tests;
 
 public class TestApp : GlobalApp
 {
-    //private Renderable _renderable;
+    private Renderable _renderable;
 
     private float _rotation;
     
@@ -17,7 +18,7 @@ public class TestApp : GlobalApp
     {
         base.Initialize();
 
-        /*Renderer renderer = App.Renderer;
+        Renderer renderer = App.Renderer;
         renderer.Camera.ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(-1, 1, 3), Vector3.Zero, Vector3.UnitY);
 
         Material material = new Material(renderer,
@@ -27,7 +28,7 @@ public class TestApp : GlobalApp
         
         //Mesh mesh = Mesh.FromPrimitive(new Cube(), material);
         Mesh mesh = model.Meshes[0];
-        _renderable = new Renderable(renderer, mesh);*/
+        _renderable = new Renderable(renderer, mesh);
     }
 
     public override void PreUpdate(float dt)

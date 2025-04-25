@@ -84,6 +84,24 @@ internal static class SdlUtils
         return SDL.CreateGPUTransferBuffer(device, in bufferInfo).Check("Create transfer buffer");
     }
 
+    public static IntPtr CreateTexture2D(IntPtr device, uint width, uint height, SDL.GPUTextureFormat format,
+        SDL.GPUTextureUsageFlags usage = SDL.GPUTextureUsageFlags.Sampler, uint mipLevels = 0)
+    {
+        SDL.GPUTextureCreateInfo textureInfo = new()
+        {
+            Type = SDL.GPUTextureType.Texturetype2D,
+            Width = width,
+            Height = height,
+            LayerCountOrDepth = 1,
+            Format = format,
+            Usage = usage,
+            NumLevels = mipLevels == 0 ? CalculateMipLevels(width, height) : mipLevels,
+            SampleCount = SDL.GPUSampleCount.SampleCount1
+        };
+
+        return SDL.CreateGPUTexture(device, in textureInfo).Check("Create texture");
+    }
+
     public static SDL.GPUTextureFormat ToSdl(this PixelFormat format, out uint rowPitch)
     {
         switch (format)

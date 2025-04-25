@@ -12,6 +12,7 @@ using Hexa.NET.ImGui;
 using JoltPhysicsSharp;
 using SharpGLTF.Schema2;
 using Material = Crimson.Graphics.Materials.Material;
+using Mesh = Crimson.Graphics.Mesh;
 using Plane = Crimson.Graphics.Primitives.Plane;
 using Scene = Crimson.Engine.Entities.Scene;
 using Texture = Crimson.Graphics.Texture;
@@ -23,7 +24,7 @@ public class TestScene : Scene
     private Texture _texture;
     private Texture _texture2;
     private Material _material;
-    //private Mesh _mesh;
+    private Mesh _mesh;
     
     public override void Initialize()
     {
@@ -40,7 +41,7 @@ public class TestScene : Scene
         };
         
         _material = new Material(App.Renderer, in def);
-        /*_mesh = Mesh.FromPrimitive(new Cube(), _material);
+        _mesh = Mesh.FromPrimitive(new Cube(), _material);
 
         Entity staticCube = new Entity("StaticCube", new Transform(new Vector3(0, -5, 0)));
         staticCube.AddComponent(new Rigidbody(new BoxShape(new Vector3(0.5f)), 0));
@@ -50,7 +51,7 @@ public class TestScene : Scene
         Entity dynamicCube = new Entity("DynamicCube");
         dynamicCube.AddComponent(new Rigidbody(new BoxShape(new Vector3(0.5f)), 1));
         dynamicCube.AddComponent(new MeshRenderer(_mesh));
-        AddEntity(dynamicCube);*/
+        AddEntity(dynamicCube);
         
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());
@@ -80,7 +81,7 @@ public class TestScene : Scene
             Entity entity = new Entity(Random.Shared.NextInt64().ToString(),
                 new Transform(Camera.Transform.Position + Camera.Transform.Forward * 6));
             
-            //entity.AddComponent(new MeshRenderer(_mesh));
+            entity.AddComponent(new MeshRenderer(_mesh));
             
             AddEntity(entity);
         }

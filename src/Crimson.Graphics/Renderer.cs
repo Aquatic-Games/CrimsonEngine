@@ -25,8 +25,8 @@ public sealed class Renderer : IDisposable
     private Size<int> _swapchainSize;
     
     private readonly TextureBatcher _uiBatcher;
-    /*private readonly DeferredRenderer _deferredRenderer;
-    private readonly ImGuiRenderer _imGuiRenderer;*/
+    private readonly DeferredRenderer _deferredRenderer;
+    /*private readonly ImGuiRenderer _imGuiRenderer;*/
 
     internal readonly IntPtr Device;
 
@@ -83,29 +83,18 @@ public sealed class Renderer : IDisposable
         Logger.Trace("Claiming window for device.");
         SDL.ClaimWindowForGPUDevice(Device, _window).Check("Claim window for device");
 
-        SDL.GPUTextureCreateInfo depthTargetInfo = new()
-        {
-            Type = SDL.GPUTextureType.Texturetype2D,
-            Format = SDL.GPUTextureFormat.D32Float,
-            Width = (uint) size.Width,
-            Height = (uint) size.Height,
-            LayerCountOrDepth = 1,
-            Usage = SDL.GPUTextureUsageFlags.DepthStencilTarget,
-            NumLevels = 1,
-            SampleCount = SDL.GPUSampleCount.SampleCount1
-        };
-
-        _depthTexture = SDL.CreateGPUTexture(Device, in depthTargetInfo).Check("Create depth texture");
+        _depthTexture = SdlUtils.CreateTexture2D(Device, (uint) size.Width, (uint) size.Height,
+            SDL.GPUTextureFormat.D32Float, SDL.GPUTextureUsageFlags.DepthStencilTarget, 1);
 
         MainTargetFormat = SDL.GetGPUSwapchainTextureFormat(Device, _window);
 
         Logger.Trace("Creating texture batcher.");
         _uiBatcher = new TextureBatcher(Device, SDL.GetGPUSwapchainTextureFormat(Device, _window));
 
-        /*Logger.Trace("Creating deferred renderer.");
-        _deferredRenderer = new DeferredRenderer(Device, size, _depthTarget);
+        Logger.Trace("Creating deferred renderer.");
+        _deferredRenderer = new DeferredRenderer(Device, size, MainTargetFormat);
 
-        Logger.Trace("Creating ImGUI renderer.");
+        /*Logger.Trace("Creating ImGUI renderer.");
         _imGuiRenderer = new ImGuiRenderer(Device, RenderSize);*/
 
         Logger.Trace("Creating default textures.");
@@ -130,8 +119,8 @@ public sealed class Renderer : IDisposable
         BlackTexture.Dispose();
         WhiteTexture.Dispose();
         
-        /*_imGuiRenderer.Dispose();
-        _deferredRenderer.Dispose();*/
+        /*_imGuiRenderer.Dispose();*/
+        _deferredRenderer.Dispose();
         _uiBatcher.Dispose();
 
         SDL.ReleaseGPUTexture(Device, _depthTexture);
@@ -139,7 +128,7 @@ public sealed class Renderer : IDisposable
         SDL.DestroyGPUDevice(Device);
     }
 
-    /*/// <summary>
+    /// <summary>
     /// Draw a <see cref="Renderable"/> to the screen using the built-in renderers.
     /// </summary>
     /// <param name="renderable">The <see cref="Renderable"/> to draw.</param>
@@ -147,7 +136,7 @@ public sealed class Renderer : IDisposable
     public void DrawRenderable(Renderable renderable, Matrix4x4 worldMatrix)
     {
         _deferredRenderer.AddToQueue(renderable, worldMatrix);
-    }*/
+    }
 
     /// <summary>
     /// Draw an image to the screen.
@@ -193,7 +182,14 @@ public sealed class Renderer : IDisposable
 
         SDL.WaitAndAcquireGPUSwapchainTexture(cb, _window, out IntPtr swapchainTexture, out _, out _)
             .Check("Acquire swapchain texture");
+        
+        _deferredRenderer.Render(cb, swapchainTexture, _depthTexture, Camera.Matrices);
 
+        Camera.Skybox?.Render(cb, swapchainTexture, _depthTexture, Camera.Matrices);
+        
+        Matrix4x4 projection =
+            Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
+        
         SDL.GPUColorTargetInfo targetInfo = new()
         {
             Texture = swapchainTexture,
@@ -201,13 +197,6 @@ public sealed class Renderer : IDisposable
             LoadOp = SDL.GPULoadOp.Load,
             StoreOp = SDL.GPUStoreOp.Store
         };
-        
-        //_deferredRenderer.Render(Context, _swapchainTarget, Camera.Matrices);
-
-        Camera.Skybox?.Render(cb, swapchainTexture, _depthTexture, Camera.Matrices);
-        
-        Matrix4x4 projection =
-            Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
         
         _uiBatcher.DispatchDrawQueue(cb, targetInfo, _swapchainSize, new CameraMatrices(projection, Matrix4x4.Identity));
         
@@ -224,11 +213,12 @@ public sealed class Renderer : IDisposable
     {
         _swapchainSize = newSize;
         
-        //_depthTarget.Dispose();
+        SDL.ReleaseGPUTexture(Device, _depthTexture);
 
-        /*_depthTarget = new D3D11Target(Device, Format.D32_Float, newSize, false);
+        _depthTexture = SdlUtils.CreateTexture2D(Device, (uint) newSize.Width, (uint) newSize.Height,
+            SDL.GPUTextureFormat.D32Float, SDL.GPUTextureUsageFlags.DepthStencilTarget, 1);
         
-        _deferredRenderer.Resize(_depthTarget, newSize);
-        _imGuiRenderer.Resize(newSize);*/
+        _deferredRenderer.Resize(newSize);
+        /*_imGuiRenderer.Resize(newSize);*/
     }
 }
