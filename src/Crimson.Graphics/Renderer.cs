@@ -21,7 +21,7 @@ public sealed class Renderer : IDisposable
     
     private IntPtr _depthTexture;
 
-    private uint _targetSwapInterval;
+    private bool _vsyncEnabled;
     private Size<int> _swapchainSize;
     
     private readonly TextureBatcher _uiBatcher;
@@ -53,8 +53,14 @@ public sealed class Renderer : IDisposable
     /// </summary>
     public bool VSync
     {
-        get => _targetSwapInterval == 1;
-        set => _targetSwapInterval = value ? 1u : 0u;
+        get => _vsyncEnabled;
+        set
+        {
+            _vsyncEnabled = value;
+
+            SDL.SetGPUSwapchainParameters(Device, _window, SDL.GPUSwapchainComposition.SDR,
+                value ? SDL.GPUPresentMode.VSync : SDL.GPUPresentMode.Immediate).Check("Set swapchain parameters");
+        }
     }
 
     /*/// <summary>
@@ -71,7 +77,6 @@ public sealed class Renderer : IDisposable
     public Renderer(string appName, in SurfaceInfo info, Size<int> size)
     {
         _swapchainSize = size;
-        VSync = true;
 
         _window = info.NativeHandle;
 
@@ -82,6 +87,8 @@ public sealed class Renderer : IDisposable
         
         Logger.Trace("Claiming window for device.");
         SDL.ClaimWindowForGPUDevice(Device, _window).Check("Claim window for device");
+        
+        VSync = true;
 
         _depthTexture = SdlUtils.CreateTexture2D(Device, (uint) size.Width, (uint) size.Height,
             SDL.GPUTextureFormat.D32Float, SDL.GPUTextureUsageFlags.DepthStencilTarget, 1);
@@ -182,6 +189,9 @@ public sealed class Renderer : IDisposable
 
         SDL.WaitAndAcquireGPUSwapchainTexture(cb, _window, out IntPtr swapchainTexture, out _, out _)
             .Check("Acquire swapchain texture");
+
+        if (swapchainTexture == IntPtr.Zero)
+            return;
         
         _deferredRenderer.Render(cb, swapchainTexture, _depthTexture, Camera.Matrices);
 

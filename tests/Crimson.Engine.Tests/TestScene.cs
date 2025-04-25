@@ -28,9 +28,9 @@ public class TestScene : Scene
     
     public override void Initialize()
     {
-        App.FpsLimit = 30;
-        App.Renderer.VSync = true;
-        //App.Surface.CursorVisible = false;
+        //App.FpsLimit = 240;
+        //App.Renderer.VSync = false;
+        App.Surface.CursorVisible = false;
 
         _texture = new Texture(App.Renderer, "DEBUG.png");
         _texture2 = new Texture(App.Renderer, "/home/aqua/Pictures/awesomeface.png");
