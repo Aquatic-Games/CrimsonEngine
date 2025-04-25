@@ -19,7 +19,7 @@ public sealed class Renderer : IDisposable
 {
     private readonly IntPtr _window;
     
-    //private D3D11Target _depthTarget;
+    private IntPtr _depthTexture;
 
     private uint _targetSwapInterval;
     private Size<int> _swapchainSize;
@@ -29,6 +29,8 @@ public sealed class Renderer : IDisposable
     private readonly ImGuiRenderer _imGuiRenderer;*/
 
     internal readonly IntPtr Device;
+
+    internal readonly SDL.GPUTextureFormat MainTargetFormat;
     
     public readonly Texture WhiteTexture;
 
@@ -36,10 +38,10 @@ public sealed class Renderer : IDisposable
 
     public readonly Texture NormalTexture;
 
-    /*/// <summary>
+    /// <summary>
     /// The 3D <see cref="Crimson.Graphics.Camera"/> that will be used when drawing.
     /// </summary>
-    public Camera Camera;*/
+    public Camera Camera;
 
     /// <summary>
     /// Get the render area size in pixels.
@@ -81,7 +83,21 @@ public sealed class Renderer : IDisposable
         Logger.Trace("Claiming window for device.");
         SDL.ClaimWindowForGPUDevice(Device, _window).Check("Claim window for device");
 
-        //_depthTarget = new D3D11Target(Device, Format.D32_Float, size, false);
+        SDL.GPUTextureCreateInfo depthTargetInfo = new()
+        {
+            Type = SDL.GPUTextureType.Texturetype2D,
+            Format = SDL.GPUTextureFormat.D32Float,
+            Width = (uint) size.Width,
+            Height = (uint) size.Height,
+            LayerCountOrDepth = 1,
+            Usage = SDL.GPUTextureUsageFlags.DepthStencilTarget,
+            NumLevels = 1,
+            SampleCount = SDL.GPUSampleCount.SampleCount1
+        };
+
+        _depthTexture = SDL.CreateGPUTexture(Device, in depthTargetInfo).Check("Create depth texture");
+
+        MainTargetFormat = SDL.GetGPUSwapchainTextureFormat(Device, _window);
 
         Logger.Trace("Creating texture batcher.");
         _uiBatcher = new TextureBatcher(Device, SDL.GetGPUSwapchainTextureFormat(Device, _window));
@@ -97,12 +113,12 @@ public sealed class Renderer : IDisposable
         BlackTexture = new Texture(this, new Size<int>(1), [0, 0, 0, 255], PixelFormat.RGBA8);
         NormalTexture = new Texture(this, new Size<int>(1), [128, 128, 255, 255], PixelFormat.RGBA8);
 
-        /*Camera = new Camera()
+        Camera = new Camera()
         {
             ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(float.DegreesToRadians(45),
                 _swapchainSize.Width / (float)_swapchainSize.Height, 0.1f, 100f),
             ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(0, 0, 3), Vector3.Zero, Vector3.UnitY)
-        };*/
+        };
     }
 
     /// <summary>
@@ -118,7 +134,7 @@ public sealed class Renderer : IDisposable
         _deferredRenderer.Dispose();*/
         _uiBatcher.Dispose();
 
-        //_depthTarget.Dispose();
+        SDL.ReleaseGPUTexture(Device, _depthTexture);
         SDL.ReleaseWindowFromGPUDevice(Device, _window);
         SDL.DestroyGPUDevice(Device);
     }
@@ -182,13 +198,13 @@ public sealed class Renderer : IDisposable
         {
             Texture = swapchainTexture,
             ClearColor = new SDL.FColor(0.0f, 0.0f, 0.0f, 1.0f),
-            LoadOp = SDL.GPULoadOp.Clear,
+            LoadOp = SDL.GPULoadOp.Load,
             StoreOp = SDL.GPUStoreOp.Store
         };
         
         //_deferredRenderer.Render(Context, _swapchainTarget, Camera.Matrices);
 
-        //Camera.Skybox?.Render();
+        Camera.Skybox?.Render(cb, swapchainTexture, _depthTexture, Camera.Matrices);
         
         Matrix4x4 projection =
             Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);

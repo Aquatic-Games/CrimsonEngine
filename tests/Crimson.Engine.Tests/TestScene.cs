@@ -1,6 +1,7 @@
 using System.Numerics;
 using Crimson.Engine.Entities;
 using Crimson.Engine.Entities.Components;
+using Crimson.Graphics;
 using Crimson.Graphics.Materials;
 //using Crimson.Graphics.Materials;
 using Crimson.Graphics.Primitives;
@@ -54,13 +55,13 @@ public class TestScene : Scene
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());
         
-        /*Camera.Skybox = new Skybox(App.Renderer,
+        Camera.Skybox = new Skybox(App.Renderer,
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/right.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/left.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/top.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/bottom.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/front.png"),
-            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/back.png"));*/
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/back.png"));
         
         base.Initialize();
     }

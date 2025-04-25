@@ -1,4 +1,5 @@
-﻿using SDL3;
+﻿using System.Runtime.CompilerServices;
+using SDL3;
 
 namespace Crimson.Graphics.Utils;
 
@@ -32,6 +33,44 @@ internal static class SdlUtils
         };
 
         return SDL.CreateGPUBuffer(device, in bufferInfo).Check("Create buffer");
+    }
+
+    public static unsafe IntPtr CreateBuffer<T>(IntPtr device, SDL.GPUBufferUsageFlags usage, T[] data) where T : unmanaged
+    {
+        uint size = (uint) (data.Length * sizeof(T));
+        
+        IntPtr buffer = CreateBuffer(device, usage, size);
+        IntPtr transferBuffer = CreateTransferBuffer(device, SDL.GPUTransferBufferUsage.Upload, size);
+
+        void* mapData = (void*) SDL.MapGPUTransferBuffer(device, transferBuffer, false).Check("Map transfer buffer");
+        fixed (void* pData = data)
+            Unsafe.CopyBlock(mapData, pData, size);
+        SDL.UnmapGPUTransferBuffer(device, transferBuffer);
+
+        IntPtr cb = SDL.AcquireGPUCommandBuffer(device).Check("Acquire command buffer");
+        IntPtr pass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
+
+        SDL.GPUTransferBufferLocation source = new()
+        {
+            TransferBuffer = transferBuffer,
+            Offset = 0
+        };
+
+        SDL.GPUBufferRegion dest = new()
+        {
+            Buffer = buffer,
+            Offset = 0,
+            Size = size
+        };
+
+        SDL.UploadToGPUBuffer(pass, in source, in dest, false);
+        
+        SDL.EndGPUCopyPass(pass);
+        SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
+        
+        SDL.ReleaseGPUTransferBuffer(device, transferBuffer);
+        
+        return buffer;
     }
 
     public static IntPtr CreateTransferBuffer(IntPtr device, SDL.GPUTransferBufferUsage usage, uint size)

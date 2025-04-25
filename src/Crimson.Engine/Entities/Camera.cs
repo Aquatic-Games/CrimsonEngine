@@ -20,7 +20,7 @@ public class Camera : Entity
 
     public ref float FarPlane => ref _far;
 
-    //public Skybox? Skybox;
+    public Skybox? Skybox;
     
     public Camera(string name, float fieldOfView, float near, float far) : base(name)
     {
@@ -34,13 +34,13 @@ public class Camera : Entity
         Renderer renderer = App.Renderer;
         Size<int> size = renderer.RenderSize;
 
-        /*renderer.Camera = new Graphics.Camera()
+        renderer.Camera = new Graphics.Camera()
         {
             ProjectionMatrix =
                 Matrix4x4.CreatePerspectiveFieldOfView(_fov, size.Width / (float) size.Height, _near, _far),
             ViewMatrix =
                 Matrix4x4.CreateLookAt(Transform.Position, Transform.Position + Transform.Forward, Transform.Up),
             Skybox = Skybox
-        };*/
+        };
     }
 }

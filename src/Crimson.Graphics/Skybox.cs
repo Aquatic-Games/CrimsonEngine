@@ -1,29 +1,24 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Crimson.Core;
 using Crimson.Graphics.Primitives;
+using Crimson.Graphics.Renderers.Structs;
 using Crimson.Graphics.Utils;
-using Vortice.Direct3D;
-using Vortice.Direct3D11;
-using Vortice.DXGI;
+using SDL3;
 
 namespace Crimson.Graphics;
 
 public sealed class Skybox : IDisposable
 {
-    private readonly ID3D11DeviceContext _context;
+    private readonly IntPtr _device;
     
-    private readonly ID3D11Texture2D _textureHandle;
-    private readonly ID3D11ShaderResourceView _resourceView;
-    
-    private readonly ID3D11VertexShader _skyboxVtx;
-    private readonly ID3D11PixelShader _skyboxPxl;
-    private readonly ID3D11InputLayout _skyboxLayout;
+    private readonly IntPtr _textureHandle;
+    private readonly IntPtr _sampler;
 
-    private readonly ID3D11Buffer _vertexBuffer;
-    private readonly ID3D11Buffer _indexBuffer;
+    private readonly IntPtr _vertexBuffer;
+    private readonly IntPtr _indexBuffer;
 
-    private readonly ID3D11DepthStencilState _depthState;
-    private readonly ID3D11RasterizerState _rasterizerState;
+    private readonly IntPtr _pipeline;
 
     /// <summary>
     /// Create a <see cref="Skybox"/> consisting of 6 textures in a cube.
@@ -43,24 +38,47 @@ public sealed class Skybox : IDisposable
         Debug.Assert(right.Size == front.Size);
         Debug.Assert(right.Size == back.Size);
         
-        ID3D11Device device = renderer.Device;
-        _context = renderer.Context;
+        _device = renderer.Device;
 
-        Format fmt = right.Format.ToD3D((uint) right.Size.Width, out uint rowPitch);
+        SDL.GPUTextureFormat fmt = right.Format.ToSdl(out uint rowPitch);
 
-        Texture2DDescription textureDesc = new()
+        SDL.GPUTextureCreateInfo textureInfo = new()
         {
+            Format = fmt,
             Width = (uint) right.Size.Width,
             Height = (uint) right.Size.Height,
-            Format = fmt,
-            ArraySize = 6,
-            MipLevels = 1,
-            Usage = ResourceUsage.Default,
-            BindFlags = BindFlags.ShaderResource,
-            SampleDescription = new SampleDescription(1, 0),
-            CPUAccessFlags = CpuAccessFlags.None,
-            MiscFlags = ResourceOptionFlags.TextureCube
+            LayerCountOrDepth = 6,
+            NumLevels = 1,
+            Type = SDL.GPUTextureType.TexturetypeCube,
+            Usage = SDL.GPUTextureUsageFlags.Sampler,
+            SampleCount = SDL.GPUSampleCount.SampleCount1
         };
+
+        _textureHandle = SDL.CreateGPUTexture(_device, in textureInfo).Check("Create texture");
+
+        SDL.GPUSamplerCreateInfo samplerInfo = new()
+        {
+            MinFilter = SDL.GPUFilter.Linear,
+            MagFilter = SDL.GPUFilter.Linear,
+            MipmapMode = SDL.GPUSamplerMipmapMode.Linear,
+            AddressModeU = SDL.GPUSamplerAddressMode.ClampToEdge,
+            AddressModeV = SDL.GPUSamplerAddressMode.ClampToEdge,
+            AddressModeW = SDL.GPUSamplerAddressMode.ClampToEdge
+        };
+
+        _sampler = SDL.CreateGPUSampler(_device, in samplerInfo).Check("Create sampler");
+
+        // Multiply by 6 as we are uploading 6 textures.
+        uint textureSize = (uint) right.Size.Width * (uint) right.Size.Height * rowPitch;
+        SDL.GPUTransferBufferCreateInfo transferInfo = new()
+        {
+            Size = textureSize * 6,
+            Usage = SDL.GPUTransferBufferUsage.Upload
+        };
+
+        IntPtr transferBuffer = SDL.CreateGPUTransferBuffer(_device, in transferInfo).Check("Create transfer buffer");
+
+        void* data = (void*) SDL.MapGPUTransferBuffer(_device, transferBuffer, false).Check("Map transfer buffer");
         
         // lol
         fixed (void* pBitmap0 = right.Data)
@@ -70,82 +88,174 @@ public sealed class Skybox : IDisposable
         fixed (void* pBitmap4 = front.Data)
         fixed (void* pBitmap5 = back.Data)
         {
-            Span<SubresourceData> subData =
-            [
-                new SubresourceData(pBitmap0, rowPitch),
-                new SubresourceData(pBitmap1, rowPitch),
-                new SubresourceData(pBitmap2, rowPitch),
-                new SubresourceData(pBitmap3, rowPitch),
-                new SubresourceData(pBitmap4, rowPitch),
-                new SubresourceData(pBitmap5, rowPitch),
-            ];
+            Unsafe.CopyBlock((byte*) data + textureSize * 0, pBitmap0, textureSize);
+            Unsafe.CopyBlock((byte*) data + textureSize * 1, pBitmap1, textureSize);
+            Unsafe.CopyBlock((byte*) data + textureSize * 2, pBitmap2, textureSize);
+            Unsafe.CopyBlock((byte*) data + textureSize * 3, pBitmap3, textureSize);
+            Unsafe.CopyBlock((byte*) data + textureSize * 4, pBitmap4, textureSize);
+            Unsafe.CopyBlock((byte*) data + textureSize * 5, pBitmap5, textureSize);
+        }
+        
+        SDL.UnmapGPUTransferBuffer(_device, transferBuffer);
 
-            _textureHandle = device.CreateTexture2D(in textureDesc, subData);
+        IntPtr cb = SDL.AcquireGPUCommandBuffer(_device).Check("Acquire command buffer");
+        IntPtr copyPass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
+
+        SDL.GPUTextureTransferInfo source = new()
+        {
+            TransferBuffer = transferBuffer,
+            PixelsPerRow = (uint) right.Size.Width,
+            RowsPerLayer = (uint) right.Size.Height,
+            Offset = 0
+        };
+
+        for (uint i = 0; i < 6; i++)
+        {
+            source.Offset = textureSize * i;
+            
+            SDL.UploadToGPUTexture(copyPass, in source,
+                new SDL.GPUTextureRegion()
+                {
+                    Texture = _textureHandle,
+                    X = 0,
+                    Y = 0,
+                    W = (uint) right.Size.Width,
+                    H = (uint) right.Size.Height,
+                    D = 1,
+                    MipLevel = 0,
+                    Layer = i
+                }, false);
         }
 
-        ShaderResourceViewDescription viewDesc = new()
+        SDL.EndGPUCopyPass(copyPass);
+        SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
+        
+        SDL.ReleaseGPUTransferBuffer(_device, transferBuffer);
+
+        Cube cube = new Cube();
+        _vertexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Vertex, cube.Vertices);
+        _indexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Index, cube.Indices);
+
+        IntPtr vertexShader =
+            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Vertex, "Environment/Skybox", "VSMain", 1, 0);
+        IntPtr pixelShader = ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Fragment, "Environment/Skybox",
+            "PSMain", 0, 1);
+
+        SDL.GPUColorTargetDescription colorTarget = new()
         {
-            Format = fmt,
-            ViewDimension = ShaderResourceViewDimension.TextureCube,
-            TextureCube = new TextureCubeShaderResourceView()
+            Format = renderer.MainTargetFormat
+        };
+
+        SDL.GPUVertexBufferDescription vertexBufferDesc = new()
+        {
+            InputRate = SDL.GPUVertexInputRate.Vertex,
+            Pitch = Vertex.SizeInBytes,
+            InstanceStepRate = 0,
+            Slot = 0
+        };
+
+        SDL.GPUVertexAttribute vertexAttribute = new()
+        {
+            Format = SDL.GPUVertexElementFormat.Float3,
+            Offset = 0,
+            Location = 0,
+            BufferSlot = 0
+        };
+        
+        SDL.GPUGraphicsPipelineCreateInfo pipelineInfo = new()
+        {
+            VertexShader = vertexShader,
+            FragmentShader = pixelShader,
+            TargetInfo = new SDL.GPUGraphicsPipelineTargetInfo()
             {
-                MipLevels = 1,
-                MostDetailedMip = 0
+                NumColorTargets = 1,
+                ColorTargetDescriptions = new IntPtr(&colorTarget),
+                HasDepthStencilTarget = 1,
+                DepthStencilFormat = SDL.GPUTextureFormat.D32Float
+            },
+            VertexInputState = new SDL.GPUVertexInputState()
+            {
+                NumVertexBuffers = 1,
+                VertexBufferDescriptions = new IntPtr(&vertexBufferDesc),
+                NumVertexAttributes = 1,
+                VertexAttributes = new IntPtr(&vertexAttribute)
+            },
+            PrimitiveType = SDL.GPUPrimitiveType.TriangleList,
+            DepthStencilState = new SDL.GPUDepthStencilState()
+            {
+                EnableDepthTest = 1,
+                EnableDepthWrite = 0,
+                CompareOp = SDL.GPUCompareOp.LessOrEqual
+            },
+            RasterizerState = new SDL.GPURasterizerState()
+            {
+                CullMode = SDL.GPUCullMode.None
             }
         };
 
-        _resourceView = device.CreateShaderResourceView(_textureHandle, viewDesc);
-        
-        Logger.Trace("Creating skybox resources.");
-        ShaderUtils.LoadGraphicsShader(device, "Environment/Skybox", out _skyboxVtx!, out _skyboxPxl!,
-            out byte[] skyboxCode);
-        Debug.Assert(skyboxCode != null);
-
-        InputElementDescription[] skyboxLayout =
-            [new InputElementDescription("POSITION", 0, Format.R32G32B32_Float, 0, 0)];
-
-        _skyboxLayout = device.CreateInputLayout(skyboxLayout, skyboxCode);
-
-        Cube cube = new Cube();
-        _vertexBuffer = device.CreateBuffer(cube.Vertices, BindFlags.VertexBuffer);
-        _indexBuffer = device.CreateBuffer(cube.Indices, BindFlags.IndexBuffer);
-
-        _depthState =
-            device.CreateDepthStencilState(new DepthStencilDescription(true, DepthWriteMask.Zero,
-                ComparisonFunction.LessEqual));
-        _rasterizerState = device.CreateRasterizerState(RasterizerDescription.CullNone);
+        _pipeline = SDL.CreateGPUGraphicsPipeline(_device, in pipelineInfo).Check("Create pipeline");
     }
 
-    internal void Render()
+    internal unsafe void Render(IntPtr cb, IntPtr texture, IntPtr depthTarget, CameraMatrices matrices)
     {
-        _context.IASetInputLayout(_skyboxLayout);
-        _context.VSSetShader(_skyboxVtx);
-        _context.PSSetShader(_skyboxPxl);
+        SDL.GPUColorTargetInfo targetInfo = new()
+        {
+            Texture = texture,
+            LoadOp = SDL.GPULoadOp.Load,
+            StoreOp = SDL.GPUStoreOp.Store
+        };
         
-        _context.OMSetDepthStencilState(_depthState);
-        _context.RSSetState(_rasterizerState);
+        // TODO: Don't clear the depth target once ANY other form of rendering is done
+        SDL.GPUDepthStencilTargetInfo depthTargetInfo = new()
+        {
+            Texture = depthTarget,
+            LoadOp = SDL.GPULoadOp.Clear,
+            StoreOp = SDL.GPUStoreOp.Store,
+            ClearDepth = 1.0f
+        };
+
+        IntPtr pass = SDL.BeginGPURenderPass(cb, new IntPtr(&targetInfo), 1, in depthTargetInfo)
+            .Check("Begin render pass");
         
-        _context.IASetVertexBuffer(0, _vertexBuffer, Vertex.SizeInBytes);
-        _context.IASetIndexBuffer(_indexBuffer, Format.R32_UInt, 0);
+        SDL.PushGPUVertexUniformData(cb, 0, new IntPtr(&matrices), CameraMatrices.SizeInBytes);
+
+        SDL.GPUTextureSamplerBinding samplerBinding = new()
+        {
+            Sampler = _sampler,
+            Texture = _textureHandle
+        };
         
-        _context.PSSetShaderResource(0, _resourceView);
+        SDL.BindGPUFragmentSamplers(pass, 0, [samplerBinding], 1);
         
-        _context.DrawIndexed(36, 0, 0);
+        SDL.BindGPUGraphicsPipeline(pass, _pipeline);
+
+        SDL.GPUBufferBinding vertexBinding = new()
+        {
+            Buffer = _vertexBuffer,
+            Offset = 0
+        };
+        
+        SDL.BindGPUVertexBuffers(pass, 0, new IntPtr(&vertexBinding), 1);
+
+        SDL.GPUBufferBinding indexBinding = new()
+        {
+            Buffer = _indexBuffer,
+            Offset = 0
+        };
+        
+        SDL.BindGPUIndexBuffer(pass, in indexBinding, SDL.GPUIndexElementSize.IndexElementSize32Bit);
+        
+        SDL.DrawGPUIndexedPrimitives(pass, 36, 1, 0, 0, 0);
+        
+        SDL.EndGPURenderPass(pass);
     }
     
     public void Dispose()
     {
-        _rasterizerState.Dispose();
-        _depthState.Dispose();
-        
-        _indexBuffer.Dispose();
-        _vertexBuffer.Dispose();
-        
-        _skyboxLayout.Dispose();
-        _skyboxPxl.Dispose();
-        _skyboxVtx.Dispose();
-        
-        _resourceView.Dispose();
-        _textureHandle.Dispose();
+        SDL.ReleaseGPUGraphicsPipeline(_device, _pipeline);
+        SDL.ReleaseGPUBuffer(_device, _indexBuffer);
+        SDL.ReleaseGPUBuffer(_device, _vertexBuffer);
+        SDL.ReleaseGPUSampler(_device, _sampler);
+        SDL.ReleaseGPUTexture(_device, _textureHandle);
     }
 }
