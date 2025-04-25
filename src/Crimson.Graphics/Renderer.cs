@@ -91,7 +91,7 @@ public sealed class Renderer : IDisposable
         VSync = true;
 
         _depthTexture = SdlUtils.CreateTexture2D(Device, (uint) size.Width, (uint) size.Height,
-            SDL.GPUTextureFormat.D32Float, SDL.GPUTextureUsageFlags.DepthStencilTarget, 1);
+            SDL.GPUTextureFormat.D32Float, 1, SDL.GPUTextureUsageFlags.DepthStencilTarget);
 
         MainTargetFormat = SDL.GetGPUSwapchainTextureFormat(Device, _window);
 
@@ -226,7 +226,7 @@ public sealed class Renderer : IDisposable
         SDL.ReleaseGPUTexture(Device, _depthTexture);
 
         _depthTexture = SdlUtils.CreateTexture2D(Device, (uint) newSize.Width, (uint) newSize.Height,
-            SDL.GPUTextureFormat.D32Float, SDL.GPUTextureUsageFlags.DepthStencilTarget, 1);
+            SDL.GPUTextureFormat.D32Float, 1, SDL.GPUTextureUsageFlags.DepthStencilTarget);
         
         _deferredRenderer.Resize(newSize);
         /*_imGuiRenderer.Resize(newSize);*/

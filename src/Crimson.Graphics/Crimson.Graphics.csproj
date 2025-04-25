@@ -19,9 +19,5 @@
     <ItemGroup>
       <None Include="Shaders\**\*.spv" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
-
-    <ItemGroup>
-        <Compile Remove="Renderers\ImGuiRenderer.cs" />
-    </ItemGroup>
-
+    
 </Project>

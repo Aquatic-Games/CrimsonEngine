@@ -64,16 +64,7 @@ internal class TextureBatcher : IDisposable
         SDL.GPUColorTargetDescription targetDesc = new()
         {
             Format = format,
-            BlendState = new SDL.GPUColorTargetBlendState()
-            {
-                EnableBlend = 1,
-                SrcColorBlendfactor = SDL.GPUBlendFactor.SrcAlpha,
-                DstColorBlendfactor = SDL.GPUBlendFactor.OneMinusSrcAlpha,
-                DstAlphaBlendfactor = SDL.GPUBlendFactor.One,
-                SrcAlphaBlendfactor = SDL.GPUBlendFactor.One,
-                ColorBlendOp = SDL.GPUBlendOp.Add,
-                AlphaBlendOp = SDL.GPUBlendOp.Add,
-            }
+            BlendState = SdlUtils.NonPremultipliedBlend
         };
 
         SDL.GPUVertexAttribute* vertexAttributes = stackalloc SDL.GPUVertexAttribute[]

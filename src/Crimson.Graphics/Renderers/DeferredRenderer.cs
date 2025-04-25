@@ -22,13 +22,13 @@ internal class DeferredRenderer : IDisposable
     {
         _device = device;
 
-        _albedoTexture = SdlUtils.CreateTexture2D(device, (uint) size.Width, (uint) size.Height,
-            SDL.GPUTextureFormat.R32G32B32A32Float,
-            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget, 1);
-        
-        _positionTexture = SdlUtils.CreateTexture2D(device, (uint) size.Width, (uint) size.Height,
-            SDL.GPUTextureFormat.R32G32B32A32Float,
-            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget, 1);
+        _albedoTexture = SdlUtils.CreateTexture2D(_device, (uint) size.Width, (uint) size.Height,
+            SDL.GPUTextureFormat.R32G32B32A32Float, 1,
+            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget);
+
+        _positionTexture = SdlUtils.CreateTexture2D(_device, (uint) size.Width, (uint) size.Height,
+            SDL.GPUTextureFormat.R32G32B32A32Float, 1,
+            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget);
 
         IntPtr passVtx = ShaderUtils.LoadGraphicsShader(device, SDL.GPUShaderStage.Vertex, "Deferred/DeferredPass",
             "VSMain", 0, 0);
@@ -190,14 +190,14 @@ internal class DeferredRenderer : IDisposable
     {
         SDL.ReleaseGPUTexture(_device, _albedoTexture);
         SDL.ReleaseGPUTexture(_device, _positionTexture);
-        
+
         _albedoTexture = SdlUtils.CreateTexture2D(_device, (uint) newSize.Width, (uint) newSize.Height,
-            SDL.GPUTextureFormat.R32G32B32A32Float,
-            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget, 1);
-        
+            SDL.GPUTextureFormat.R32G32B32A32Float, 1,
+            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget);
+
         _positionTexture = SdlUtils.CreateTexture2D(_device, (uint) newSize.Width, (uint) newSize.Height,
-            SDL.GPUTextureFormat.R32G32B32A32Float,
-            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget, 1);
+            SDL.GPUTextureFormat.R32G32B32A32Float, 1,
+            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget);
     }
     
     public void Dispose()

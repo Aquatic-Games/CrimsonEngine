@@ -6,6 +6,17 @@ namespace Crimson.Graphics.Utils;
 
 internal static class SdlUtils
 {
+    public static SDL.GPUColorTargetBlendState NonPremultipliedBlend => new()
+    {
+        EnableBlend = 1,
+        SrcColorBlendfactor = SDL.GPUBlendFactor.SrcAlpha,
+        DstColorBlendfactor = SDL.GPUBlendFactor.OneMinusSrcAlpha,
+        DstAlphaBlendfactor = SDL.GPUBlendFactor.One,
+        SrcAlphaBlendfactor = SDL.GPUBlendFactor.One,
+        ColorBlendOp = SDL.GPUBlendOp.Add,
+        AlphaBlendOp = SDL.GPUBlendOp.Add,
+    };
+    
     public static IntPtr Check(this IntPtr ptr, string operation)
     {
         if (ptr == IntPtr.Zero)
@@ -98,7 +109,7 @@ internal static class SdlUtils
     }
 
     public static IntPtr CreateTexture2D(IntPtr device, uint width, uint height, SDL.GPUTextureFormat format,
-        SDL.GPUTextureUsageFlags usage = SDL.GPUTextureUsageFlags.Sampler, uint mipLevels = 0)
+        uint mipLevels, SDL.GPUTextureUsageFlags usage = SDL.GPUTextureUsageFlags.Sampler)
     {
         SDL.GPUTextureCreateInfo textureInfo = new()
         {
@@ -113,6 +124,49 @@ internal static class SdlUtils
         };
 
         return SDL.CreateGPUTexture(device, in textureInfo).Check("Create texture");
+    }
+
+    public static unsafe IntPtr CreateTexture2D(IntPtr device, nint data, uint width, uint height,
+        SDL.GPUTextureFormat format, uint mipLevels, SDL.GPUTextureUsageFlags usage = SDL.GPUTextureUsageFlags.Sampler)
+    {
+        IntPtr texture = CreateTexture2D(device, width, height, format, mipLevels, usage);
+
+        uint size = SDL.CalculateGPUTextureFormatSize(format, width, height, 1);
+        IntPtr transferBuffer = CreateTransferBuffer(device, SDL.GPUTransferBufferUsage.Upload, size);
+
+        void* transferData = (void*) SDL.MapGPUTransferBuffer(device, transferBuffer, false);
+        Unsafe.CopyBlock(transferData, (void*) data, size);
+        SDL.UnmapGPUTransferBuffer(device, transferBuffer);
+
+        IntPtr cb = SDL.AcquireGPUCommandBuffer(device).Check("Acquire command buffer");
+        IntPtr pass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
+
+        SDL.GPUTextureTransferInfo source = new()
+        {
+            TransferBuffer = transferBuffer,
+            PixelsPerRow = width,
+            RowsPerLayer = height,
+            Offset = 0
+        };
+
+        SDL.GPUTextureRegion dest = new()
+        {
+            Texture = texture,
+            X = 0,
+            Y = 0,
+            W = width,
+            H = height,
+            D = 1
+        };
+        
+        SDL.UploadToGPUTexture(pass, in source, in dest, false);
+        
+        SDL.EndGPUCopyPass(pass);
+        SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
+        
+        SDL.ReleaseGPUTransferBuffer(device, transferBuffer);
+        
+        return texture;
     }
 
     public static SDL.GPUTextureFormat ToSdl(this PixelFormat format, out uint rowPitch)
