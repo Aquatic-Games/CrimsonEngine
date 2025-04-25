@@ -24,19 +24,19 @@ struct PSOutput
     float4 Position: SV_Target1;
 };
 
-cbuffer CameraBuffer : register(b0)
+cbuffer CameraBuffer : register(b0, space1)
 {
     Camera gCamera;
 }
 
-cbuffer WorldMatrix : register(b2)
+cbuffer WorldMatrix : register(b2, space1)
 {
     float4x4 World;
 }
 
-SamplerState Sampler : register(s0);
+SamplerState Sampler : register(s0, space2);
 
-Texture2D Albedo : register(t0);
+Texture2D Albedo : register(t0, space2);
 
 VSOutput VSMain(const in VSInput input)
 {

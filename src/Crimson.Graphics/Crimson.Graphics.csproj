@@ -24,7 +24,6 @@
         <Compile Remove="Renderers\DeferredRenderer.cs" />
         <Compile Remove="Renderers\ImGuiRenderer.cs" />
         <Compile Remove="Renderers\Structs\WorldRenderable.cs" />
-        <Compile Remove="Materials\**\*" />
         <Compile Remove="Camera.cs" />
         <Compile Remove="Mesh.cs" />
         <Compile Remove="Model.cs" />
