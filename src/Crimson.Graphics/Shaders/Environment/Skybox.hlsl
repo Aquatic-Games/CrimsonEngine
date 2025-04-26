@@ -22,7 +22,7 @@ cbuffer CameraBuffer : register(b0, space1)
 TextureCube Cube : register(t0, space2);
 SamplerState Sampler : register(s0, space2);
 
-VSOutput VSMain(const in float3 position: POSITION0)
+VSOutput VSMain(const in float3 position: TEXCOORD0)
 {
     VSOutput output;
 

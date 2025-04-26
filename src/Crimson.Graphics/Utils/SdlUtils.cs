@@ -34,13 +34,13 @@ internal static class SdlUtils
     [Conditional("DEBUG")]
     public static void PushDebugGroup(IntPtr cb, string name)
     {
-        SDL.PushGPUDebugGroup(cb, name);
+        //SDL.PushGPUDebugGroup(cb, name);
     }
 
     [Conditional("DEBUG")]
     public static void PopDebugGroup(IntPtr cb)
     {
-        SDL.PopGPUDebugGroup(cb);
+        //SDL.PopGPUDebugGroup(cb);
     }
 
     public static uint CalculateMipLevels(uint width, uint height)

@@ -82,8 +82,25 @@ public sealed class Renderer : IDisposable
 
         SDL.SetAppMetadata(appName, null!, null!);
 
+        uint props = SDL.CreateProperties();
+        SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateDebugModeBoolean, true);
+        SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateShadersSPIRVBoolean, true);
+        
+#if DEBUG
+        SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreatePreferLowPowerBoolean, true);
+#endif
+
+        if (OperatingSystem.IsWindows())
+        {
+            SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateShadersDXILBoolean, true);
+            // Use D3D12 on windows
+            SDL.SetStringProperty(props, SDL.Props.GPUDeviceCreateNameString, "direct3d12");
+        }
+
         Logger.Trace("Creating device.");
-        Device = SDL.CreateGPUDevice(SDL.GPUShaderFormat.SPIRV, true, null!).Check("Create device");
+        Device = SDL.CreateGPUDeviceWithProperties(props).Check("Create device");
+        
+        Console.WriteLine($"Using SDL backend: {SDL.GetGPUDeviceDriver(Device)}");
         
         Logger.Trace("Claiming window for device.");
         SDL.ClaimWindowForGPUDevice(Device, _window).Check("Claim window for device");

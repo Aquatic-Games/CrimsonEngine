@@ -63,7 +63,7 @@ public class Material : IDisposable
             new SDL.GPUVertexAttribute // Color
                 { Format = SDL.GPUVertexElementFormat.Float4, Offset = 20, BufferSlot = 0, Location = 2 },
             new SDL.GPUVertexAttribute // Normal
-                { Format = SDL.GPUVertexElementFormat.Float3, Offset = 36, BufferSlot = 0, Location = 4 }
+                { Format = SDL.GPUVertexElementFormat.Float3, Offset = 36, BufferSlot = 0, Location = 3 }
         };
 
         SDL.GPUColorTargetDescription* colorTargets = stackalloc SDL.GPUColorTargetDescription[]

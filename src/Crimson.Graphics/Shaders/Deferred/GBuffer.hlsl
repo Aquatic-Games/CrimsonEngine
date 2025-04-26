@@ -5,10 +5,10 @@
 
 struct VSInput
 {
-    float3 Position: POSITION0;
-    float2 TexCoord: TEXCOORD0;
-    float4 Color:    COLOR0;
-    float3 Normal:   NORMAL0;
+    float3 Position: TEXCOORD0;
+    float2 TexCoord: TEXCOORD1;
+    float4 Color:    TEXCOORD2;
+    float3 Normal:   TEXCOORD3;
 };
 
 struct VSOutput

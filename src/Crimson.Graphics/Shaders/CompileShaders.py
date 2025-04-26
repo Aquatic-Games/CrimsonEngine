@@ -17,14 +17,14 @@ def compile_shader(path: Path, stage: str, entry_point: str):
         case _:
             raise Exception(f"Unknown shader stage '{stage}'.")
     
-    file_name += ".spv"
+    file_name += ".dxil"
     
     out_path = path.parent.joinpath(file_name)
     
     print(f"{path.resolve()} -> {out_path.resolve()}")
     
-    # replace forward slashes with backslashes on linux because fxc is fxc and uses forward slashes because thanks microsoft
     subprocess.run(['dxc', '-spirv', '-T', profile, '-E', entry_point, '-Fo', str(out_path), str(path)]).check_returncode()
+    subprocess.run(['dxc', '-T', profile, '-E', entry_point, '-Fo', str(out_path), str(path)]).check_returncode()
     
 if __name__ == "__main__":
     working_dir = Path('.')

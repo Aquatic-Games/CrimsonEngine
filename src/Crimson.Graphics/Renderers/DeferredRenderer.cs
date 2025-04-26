@@ -112,8 +112,6 @@ internal class DeferredRenderer : IDisposable
         foreach ((Renderable renderable, Matrix4x4 world) in _drawQueue)
         {
             SDL.PushGPUVertexUniformData(cb, 1, new IntPtr(&world), 64);
-            
-            SDL.BindGPUGraphicsPipeline(gBufferPass, renderable.Material.Pipeline);
 
             // TODO: Have a sampler per material.
             SDL.GPUTextureSamplerBinding albedoBinding = new()
@@ -124,6 +122,8 @@ internal class DeferredRenderer : IDisposable
 
             SDL.BindGPUFragmentSamplers(gBufferPass, 0, [albedoBinding], 1);
 
+            SDL.BindGPUGraphicsPipeline(gBufferPass, renderable.Material.Pipeline);
+            
             SDL.GPUBufferBinding vertexBinding = new()
             {
                 Buffer = renderable.VertexBuffer,

@@ -18,6 +18,11 @@
 
     <ItemGroup>
       <None Include="Shaders\**\*.spv" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="Shaders\**\*.dxil" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <Compile Remove="Renderers\ImGuiRenderer.cs" />
     </ItemGroup>
     
 </Project>

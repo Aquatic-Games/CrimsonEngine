@@ -62,10 +62,19 @@ internal static class ShaderUtils
 
         string path = stage switch
         {
-            SDL.GPUShaderStage.Vertex => basePath + "_v.spv",
-            SDL.GPUShaderStage.Fragment => basePath + "_p.spv",
+            SDL.GPUShaderStage.Vertex => basePath + "_v",
+            SDL.GPUShaderStage.Fragment => basePath + "_p",
             _ => throw new ArgumentOutOfRangeException(nameof(stage), stage, null)
         };
+
+        SDL.GPUShaderFormat shaderFormat = SDL.GetGPUShaderFormats(device);
+
+        if (shaderFormat.HasFlag(SDL.GPUShaderFormat.DXBC))
+            path += ".dxil";
+        else if (shaderFormat.HasFlag(SDL.GPUShaderFormat.SPIRV))
+            path += ".spv";
+        else
+            throw new NotSupportedException(shaderFormat.ToString());
         
         byte[] data = File.ReadAllBytes(path);
 
@@ -74,7 +83,7 @@ internal static class ShaderUtils
             SDL.GPUShaderCreateInfo shaderInfo = new()
             {
                 Stage = stage,
-                Format = SDL.GPUShaderFormat.SPIRV,
+                Format = shaderFormat,
                 Code = (nint) pData,
                 CodeSize = (nuint) data.Length,
                 NumUniformBuffers = numUniforms,
