@@ -215,15 +215,18 @@ public sealed class Renderer : IDisposable
 
         bool hasCleared = _deferredRenderer.Render(cb, swapchainTexture, _depthTexture, Camera.Matrices);
 
-        hasCleared = Camera.Skybox?.Render(cb, swapchainTexture, _depthTexture, !hasCleared, Camera.Matrices) ??
-                     hasCleared;
+        if (Camera.Skybox?.Render(cb, swapchainTexture, _depthTexture, !hasCleared, Camera.Matrices) ?? false)
+            hasCleared = true;
 
         Matrix4x4 projection =
             Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
 
-        hasCleared = _uiBatcher.Render(cb, swapchainTexture, !hasCleared, _swapchainSize,
-            new CameraMatrices(projection, Matrix4x4.Identity));
-        
+        if (_uiBatcher.Render(cb, swapchainTexture, !hasCleared, _swapchainSize,
+                new CameraMatrices(projection, Matrix4x4.Identity)))
+        {
+            hasCleared = true;
+        }
+
         _imGuiRenderer.Render(cb, swapchainTexture, !hasCleared);
 
         SDL.SubmitGPUCommandBuffer(cb);
