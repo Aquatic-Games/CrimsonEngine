@@ -204,20 +204,22 @@ public sealed class Skybox : IDisposable
         SDL.ReleaseGPUShader(_device, vertexShader);
     }
 
-    internal unsafe void Render(IntPtr cb, IntPtr texture, IntPtr depthTarget, CameraMatrices matrices)
+    internal unsafe bool Render(IntPtr cb, IntPtr texture, IntPtr depthTarget, bool shouldClear, CameraMatrices matrices)
     {
         SDL.GPUColorTargetInfo targetInfo = new()
         {
             Texture = texture,
-            LoadOp = SDL.GPULoadOp.Load,
+            ClearColor = new SDL.FColor(0.0f, 0.0f, 0.0f, 1.0f),
+            LoadOp = shouldClear ? SDL.GPULoadOp.Clear : SDL.GPULoadOp.Load,
             StoreOp = SDL.GPUStoreOp.Store
         };
         
         SDL.GPUDepthStencilTargetInfo depthTargetInfo = new()
         {
             Texture = depthTarget,
-            LoadOp = SDL.GPULoadOp.Load,
-            StoreOp = SDL.GPUStoreOp.Store
+            LoadOp = shouldClear ? SDL.GPULoadOp.Clear : SDL.GPULoadOp.Load,
+            StoreOp = SDL.GPUStoreOp.Store,
+            ClearDepth = 1.0f
         };
         
         SdlUtils.PushDebugGroup(cb, "Skybox Pass");
@@ -258,6 +260,8 @@ public sealed class Skybox : IDisposable
         SDL.EndGPURenderPass(pass);
         
         SdlUtils.PopDebugGroup(cb);
+
+        return true;
     }
     
     public void Dispose()

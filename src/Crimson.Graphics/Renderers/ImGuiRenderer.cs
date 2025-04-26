@@ -121,12 +121,19 @@ internal sealed class ImGuiRenderer : IDisposable
         ImGui.NewFrame();
     }
 
-    public unsafe void Render(IntPtr cb, IntPtr colorTarget)
+    public unsafe bool Render(IntPtr cb, IntPtr colorTarget, bool shouldClear)
     {
         ImGui.SetCurrentContext(_imguiContext);
         
         ImGui.Render();
         ImDrawDataPtr drawData = ImGui.GetDrawData();
+
+        // Don't bother rendering if there is nothing to draw.
+        if (drawData.CmdListsCount == 0)
+        {
+            ImGui.NewFrame();
+            return false;
+        }
         
         SdlUtils.PushDebugGroup(cb, "ImGUI Buffer Copy");
 
@@ -232,7 +239,8 @@ internal sealed class ImGuiRenderer : IDisposable
         SDL.GPUColorTargetInfo targetInfo = new()
         {
             Texture = colorTarget,
-            LoadOp = SDL.GPULoadOp.Load,
+            ClearColor = new SDL.FColor(0.0f, 0.0f, 0.0f, 1.0f),
+            LoadOp = shouldClear ? SDL.GPULoadOp.Clear : SDL.GPULoadOp.Load,
             StoreOp = SDL.GPUStoreOp.Store
         };
 
@@ -323,6 +331,8 @@ internal sealed class ImGuiRenderer : IDisposable
         SdlUtils.PopDebugGroup(cb);
         
         ImGui.NewFrame();
+
+        return true;
     }
 
     public void Resize(Size<int> size)

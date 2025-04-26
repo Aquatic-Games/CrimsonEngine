@@ -76,8 +76,12 @@ internal class DeferredRenderer : IDisposable
         _drawQueue.Add(new WorldRenderable(renderable, worldMatrix));
     }
 
-    public unsafe void Render(IntPtr cb, IntPtr compositeTarget, IntPtr depthTexture, CameraMatrices camera)
+    public unsafe bool Render(IntPtr cb, IntPtr compositeTarget, IntPtr depthTexture, CameraMatrices camera)
     {
+        // Don't bother rendering if there is nothing to draw.
+        if (_drawQueue.Count == 0)
+            return false;
+        
         SDL.PushGPUVertexUniformData(cb, 0, new IntPtr(&camera), CameraMatrices.SizeInBytes);
         
         #region GBuffer Pass
@@ -184,6 +188,8 @@ internal class DeferredRenderer : IDisposable
         
         // TODO: Multi camera support.
         _drawQueue.Clear();
+
+        return true;
     }
 
     public void Resize(Size<int> newSize)

@@ -139,11 +139,11 @@ internal class TextureBatcher : IDisposable
         _drawQueue.Add(draw);
     }
 
-    public unsafe void DispatchDrawQueue(IntPtr cb, SDL.GPUColorTargetInfo passTarget, Size<int> size, CameraMatrices matrices)
+    public unsafe bool Render(IntPtr cb, IntPtr colorTarget, bool shouldClear, Size<int> size, CameraMatrices matrices)
     {
         // Don't even try to draw if the draw count is 0.
         if (_drawQueue.Count == 0)
-            return;
+            return false;
         
         uint numDraws = 0;
         uint bufferOffset = 0;
@@ -237,7 +237,15 @@ internal class TextureBatcher : IDisposable
         
         SdlUtils.PushDebugGroup(cb, "TextureBatcher Pass");
 
-        IntPtr renderPass = SDL.BeginGPURenderPass(cb, new IntPtr(&passTarget), 1, IntPtr.Zero)
+        SDL.GPUColorTargetInfo targetInfo = new()
+        {
+            Texture = colorTarget,
+            ClearColor = new SDL.FColor(0.0f, 0.0f, 0.0f, 1.0f),
+            LoadOp = shouldClear ? SDL.GPULoadOp.Clear : SDL.GPULoadOp.Load,
+            StoreOp = SDL.GPUStoreOp.Store
+        };
+        
+        IntPtr renderPass = SDL.BeginGPURenderPass(cb, new IntPtr(&targetInfo), 1, IntPtr.Zero)
             .Check("Begin render pass");
 
         SDL.PushGPUVertexUniformData(cb, 0, new IntPtr(&matrices), CameraMatrices.SizeInBytes);
@@ -273,6 +281,8 @@ internal class TextureBatcher : IDisposable
         SdlUtils.PopDebugGroup(cb);
         
         _drawList.Clear();
+
+        return true;
     }
 
     private void Flush(IntPtr pass, ref readonly DrawList drawList)

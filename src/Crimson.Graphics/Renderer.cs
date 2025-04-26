@@ -208,24 +208,23 @@ public sealed class Renderer : IDisposable
         if (swapchainTexture == IntPtr.Zero)
             return;
         
-        _deferredRenderer.Render(cb, swapchainTexture, _depthTexture, Camera.Matrices);
+        // Each Render() method returns a boolean. If true, it means the renderer has cleared the target provided as the
+        // color/compositeTarget parameter. Each renderer has the ability to clear the render/depth targets (if applicable)
+        // if necessary.
+        // This acts as a small optimization. Each renderer will not bother rendering if there is nothing to do.
 
-        Camera.Skybox?.Render(cb, swapchainTexture, _depthTexture, Camera.Matrices);
-        
+        bool hasCleared = _deferredRenderer.Render(cb, swapchainTexture, _depthTexture, Camera.Matrices);
+
+        hasCleared = Camera.Skybox?.Render(cb, swapchainTexture, _depthTexture, !hasCleared, Camera.Matrices) ??
+                     hasCleared;
+
         Matrix4x4 projection =
             Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
+
+        hasCleared = _uiBatcher.Render(cb, swapchainTexture, !hasCleared, _swapchainSize,
+            new CameraMatrices(projection, Matrix4x4.Identity));
         
-        SDL.GPUColorTargetInfo targetInfo = new()
-        {
-            Texture = swapchainTexture,
-            ClearColor = new SDL.FColor(0.0f, 0.0f, 0.0f, 1.0f),
-            LoadOp = SDL.GPULoadOp.Load,
-            StoreOp = SDL.GPUStoreOp.Store
-        };
-        
-        _uiBatcher.DispatchDrawQueue(cb, targetInfo, _swapchainSize, new CameraMatrices(projection, Matrix4x4.Identity));
-        
-        _imGuiRenderer.Render(cb, swapchainTexture);
+        _imGuiRenderer.Render(cb, swapchainTexture, !hasCleared);
 
         SDL.SubmitGPUCommandBuffer(cb);
     }
