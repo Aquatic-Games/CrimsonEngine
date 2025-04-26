@@ -186,7 +186,7 @@ internal class TextureBatcher : IDisposable
         uint numVertexBytes = bufferOffset * NumVertices * Vertex.SizeInBytes;
         uint numIndexBytes = bufferOffset * NumIndices * sizeof(uint);
         
-        void* mapped = (void*) SDL.MapGPUTransferBuffer(_device, _transferBuffer, false).Check("Map transfer buffer");
+        void* mapped = (void*) SDL.MapGPUTransferBuffer(_device, _transferBuffer, true).Check("Map transfer buffer");
         
         fixed (Vertex* pVertices = _vertices)
         fixed (uint* pIndices = _indices)

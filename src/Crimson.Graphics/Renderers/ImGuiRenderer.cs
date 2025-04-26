@@ -173,7 +173,7 @@ internal sealed class ImGuiRenderer : IDisposable
         uint indexOffset = 0;
 
         void* mappedPtr =
-            (void*) SDL.MapGPUTransferBuffer(_device, _transferBuffer, false).Check("Map transfer buffer");
+            (void*) SDL.MapGPUTransferBuffer(_device, _transferBuffer, true).Check("Map transfer buffer");
         
         for (int i = 0; i < drawData.CmdListsCount; i++)
         {

@@ -34,13 +34,16 @@ internal static class SdlUtils
     [Conditional("DEBUG")]
     public static void PushDebugGroup(IntPtr cb, string name)
     {
-        SDL.PushGPUDebugGroup(cb, name);
+        // Doesn't work on directx?
+        if (!OperatingSystem.IsWindows())
+            SDL.PushGPUDebugGroup(cb, name);
     }
 
     [Conditional("DEBUG")]
     public static void PopDebugGroup(IntPtr cb)
     {
-        SDL.PopGPUDebugGroup(cb);
+        if (!OperatingSystem.IsWindows())
+            SDL.PopGPUDebugGroup(cb);
     }
 
     public static uint CalculateMipLevels(uint width, uint height)
