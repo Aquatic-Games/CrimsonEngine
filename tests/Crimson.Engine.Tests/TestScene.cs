@@ -30,7 +30,7 @@ public class TestScene : Scene
     {
         //App.FpsLimit = 240;
         //App.Renderer.VSync = false;
-        App.Surface.CursorVisible = false;
+        //App.Surface.CursorVisible = false;
 
         _texture = new Texture(App.Renderer, "DEBUG.png");
         _texture2 = new Texture(App.Renderer, "/home/aqua/Pictures/awesomeface.png");
@@ -86,7 +86,7 @@ public class TestScene : Scene
             AddEntity(entity);
         }
         
-        //ImGui.ShowDemoWindow();
+        ImGui.ShowDemoWindow();
     }
 
     public override void Draw()

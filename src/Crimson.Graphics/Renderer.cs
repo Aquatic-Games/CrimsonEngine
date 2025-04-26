@@ -1,9 +1,7 @@
-﻿using System.Diagnostics;
-using System.Numerics;
+﻿using System.Numerics;
 using Crimson.Core;
 using Crimson.Graphics.Renderers;
 using Crimson.Graphics.Renderers.Structs;
-//using Crimson.Graphics.Renderers;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
 using Hexa.NET.ImGui;
@@ -26,7 +24,7 @@ public sealed class Renderer : IDisposable
     
     private readonly TextureBatcher _uiBatcher;
     private readonly DeferredRenderer _deferredRenderer;
-    /*private readonly ImGuiRenderer _imGuiRenderer;*/
+    private readonly ImGuiRenderer _imGuiRenderer;
 
     internal readonly IntPtr Device;
 
@@ -63,10 +61,10 @@ public sealed class Renderer : IDisposable
         }
     }
 
-    /*/// <summary>
+    /// <summary>
     /// Gets the ImGUI context pointer.
     /// </summary>
-    public ImGuiContextPtr ImGuiContext => _imGuiRenderer.Context;*/
+    public ImGuiContextPtr ImGuiContext => _imGuiRenderer.Context;
     
     /// <summary>
     /// Create the graphics subsystem.
@@ -118,8 +116,8 @@ public sealed class Renderer : IDisposable
         Logger.Trace("Creating deferred renderer.");
         _deferredRenderer = new DeferredRenderer(Device, size, MainTargetFormat);
 
-        /*Logger.Trace("Creating ImGUI renderer.");
-        _imGuiRenderer = new ImGuiRenderer(Device, RenderSize);*/
+        Logger.Trace("Creating ImGUI renderer.");
+        _imGuiRenderer = new ImGuiRenderer(Device, RenderSize, MainTargetFormat);
 
         Logger.Trace("Creating default textures.");
         WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
@@ -143,7 +141,7 @@ public sealed class Renderer : IDisposable
         BlackTexture.Dispose();
         WhiteTexture.Dispose();
         
-        /*_imGuiRenderer.Dispose();*/
+        _imGuiRenderer.Dispose();
         _deferredRenderer.Dispose();
         _uiBatcher.Dispose();
 
@@ -227,7 +225,7 @@ public sealed class Renderer : IDisposable
         
         _uiBatcher.DispatchDrawQueue(cb, targetInfo, _swapchainSize, new CameraMatrices(projection, Matrix4x4.Identity));
         
-        //_imGuiRenderer.Render(Context);
+        _imGuiRenderer.Render(cb, swapchainTexture);
 
         SDL.SubmitGPUCommandBuffer(cb);
     }
@@ -246,6 +244,6 @@ public sealed class Renderer : IDisposable
             SDL.GPUTextureFormat.D32Float, 1, SDL.GPUTextureUsageFlags.DepthStencilTarget);
         
         _deferredRenderer.Resize(newSize);
-        /*_imGuiRenderer.Resize(newSize);*/
+        _imGuiRenderer.Resize(newSize);
     }
 }
