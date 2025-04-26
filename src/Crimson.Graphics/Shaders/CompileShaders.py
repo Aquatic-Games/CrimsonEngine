@@ -1,32 +1,50 @@
+#!/bin/python
 import subprocess
-import os
+import sys
 from pathlib import Path
 
-def compile_shader(path: Path, stage: str, entry_point: str):
+def compile_shader(path: Path, stage: str, entry_point: str, type: str):
     file_name = path.stem
     
     profile = None
     
     match stage:
         case "vertex":
-            profile = "vs_5_0"
+            profile = "vs_6_0"
             file_name += "_v"
         case "pixel":
-            profile = "ps_5_0"
+            profile = "ps_6_0"
             file_name += "_p"
         case _:
             raise Exception(f"Unknown shader stage '{stage}'.")
     
-    file_name += ".fxc"
+    args = ['dxc']
+    
+    match type:
+        case "dxil":
+            file_name += ".dxil"
+        case "spirv":
+            file_name += ".spv"
+            args.append('-spirv')
+        case _:
+            raise Exception(f"Unknown type '{type}', expected 'spirv' or 'dxil'")
     
     out_path = path.parent.joinpath(file_name)
     
     print(f"{path.resolve()} -> {out_path.resolve()}")
     
-    # replace forward slashes with backslashes on linux because fxc is fxc and uses forward slashes because thanks microsoft
-    subprocess.run(['fxc', '/T', profile, '/E', entry_point, '/Fo', str(out_path).replace('/', '\\'), str(path).replace('/', '\\')]).check_returncode()
+    args += ['-T', profile, '-E', entry_point, '-Fo', str(out_path), str(path)]
+    
+    subprocess.run(args).check_returncode()
     
 if __name__ == "__main__":
+    compile_type = "spirv"
+    
+    if len(sys.argv) > 1:
+        compile_type = sys.argv[1]
+    
+    print(f"Compiling {compile_type} shaders.")
+
     working_dir = Path('.')
     
     hlsl_files = working_dir.glob("**/*.hlsl")
@@ -59,7 +77,7 @@ if __name__ == "__main__":
                     break
         
         if vertex_entpt is not None:
-            compile_shader(path, "vertex", vertex_entpt)
+            compile_shader(path, "vertex", vertex_entpt, compile_type)
         if pixel_entpt is not None:
-            compile_shader(path, "pixel", pixel_entpt)
+            compile_shader(path, "pixel", pixel_entpt, compile_type)
         

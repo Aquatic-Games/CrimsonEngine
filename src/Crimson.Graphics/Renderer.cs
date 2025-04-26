@@ -1,14 +1,11 @@
-﻿using System.Diagnostics;
-using System.Numerics;
+﻿using System.Numerics;
 using Crimson.Core;
 using Crimson.Graphics.Renderers;
+using Crimson.Graphics.Renderers.Structs;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
 using Hexa.NET.ImGui;
-using Vortice.Direct3D;
-using Vortice.Direct3D11;
-using Vortice.DXGI;
-using Vortice.Mathematics;
+using SDL3;
 using Color = Crimson.Math.Color;
 
 namespace Crimson.Graphics;
@@ -18,21 +15,20 @@ namespace Crimson.Graphics;
 /// </summary>
 public sealed class Renderer : IDisposable
 {
-    private readonly IDXGISwapChain _swapchain;
-    private ID3D11Texture2D _swapchainTexture;
-    private ID3D11RenderTargetView _swapchainTarget;
+    private readonly IntPtr _window;
     
-    private D3D11Target _depthTarget;
+    private IntPtr _depthTexture;
 
-    private uint _targetSwapInterval;
+    private bool _vsyncEnabled;
     private Size<int> _swapchainSize;
     
     private readonly TextureBatcher _uiBatcher;
     private readonly DeferredRenderer _deferredRenderer;
     private readonly ImGuiRenderer _imGuiRenderer;
-    
-    internal readonly ID3D11Device Device;
-    internal readonly ID3D11DeviceContext Context;
+
+    internal readonly IntPtr Device;
+
+    internal readonly SDL.GPUTextureFormat MainTargetFormat;
     
     public readonly Texture WhiteTexture;
 
@@ -55,8 +51,14 @@ public sealed class Renderer : IDisposable
     /// </summary>
     public bool VSync
     {
-        get => _targetSwapInterval == 1;
-        set => _targetSwapInterval = value ? 1u : 0u;
+        get => _vsyncEnabled;
+        set
+        {
+            _vsyncEnabled = value;
+
+            SDL.SetGPUSwapchainParameters(Device, _window, SDL.GPUSwapchainComposition.SDR,
+                value ? SDL.GPUPresentMode.VSync : SDL.GPUPresentMode.Immediate).Check("Set swapchain parameters");
+        }
     }
 
     /// <summary>
@@ -73,52 +75,49 @@ public sealed class Renderer : IDisposable
     public Renderer(string appName, in SurfaceInfo info, Size<int> size)
     {
         _swapchainSize = size;
-        VSync = true;
 
-        SwapChainDescription swapchainDesc = new()
-        {
-            OutputWindow = info.NativeHandle,
-            Windowed = true,
-            BufferDescription = new ModeDescription((uint) size.Width, (uint) size.Height, Format.B8G8R8A8_UNorm),
-            BufferUsage = Usage.RenderTargetOutput,
-            BufferCount = 2,
-            SampleDescription = new SampleDescription(1, 0),
-            SwapEffect = SwapEffect.FlipDiscard,
-            Flags = SwapChainFlags.None
-        };
+        _window = info.NativeHandle;
 
-        DeviceCreationFlags flags = DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport;
-        FeatureLevel[] levels = [FeatureLevel.Level_11_1];
+        SDL.SetAppMetadata(appName, null!, null!);
 
-        Logger.Trace("Creating D3D11 device.");
-        D3D11.D3D11CreateDeviceAndSwapChain(null, DriverType.Hardware, flags, levels, swapchainDesc, out _swapchain!,
-            out Device!, out _, out Context!).CheckError();
+        uint props = SDL.CreateProperties();
+        SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateDebugModeBoolean, true);
+        SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateShadersSPIRVBoolean, true);
+        
+#if DEBUG
+        SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreatePreferLowPowerBoolean, true);
+#endif
 
-        // Does not work with DXVK-native.
         if (OperatingSystem.IsWindows())
         {
-            IDXGIAdapter adapter = Device.QueryInterface<IDXGIDevice>().GetAdapter();
-            AdapterDescription adapterDesc = adapter.Description;
-
-            Logger.Info("Adapter:");
-            Logger.Info($"    Name: {adapterDesc.Description}");
-            Logger.Info($"    Memory: {adapterDesc.DedicatedVideoMemory / 1024 / 1024}MB");
+            SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateShadersDXILBoolean, true);
+            // Use D3D12 on windows
+            SDL.SetStringProperty(props, SDL.Props.GPUDeviceCreateNameString, "direct3d12");
         }
 
-        Logger.Trace("Creating swapchain textures.");
-        _swapchainTexture = _swapchain.GetBuffer<ID3D11Texture2D>(0);
-        _swapchainTarget = Device.CreateRenderTargetView(_swapchainTexture);
+        Logger.Trace("Creating device.");
+        Device = SDL.CreateGPUDeviceWithProperties(props).Check("Create device");
         
-        _depthTarget = new D3D11Target(Device, Format.D32_Float, size, false);
+        Console.WriteLine($"Using SDL backend: {SDL.GetGPUDeviceDriver(Device)}");
+        
+        Logger.Trace("Claiming window for device.");
+        SDL.ClaimWindowForGPUDevice(Device, _window).Check("Claim window for device");
+        
+        VSync = true;
+
+        _depthTexture = SdlUtils.CreateTexture2D(Device, (uint) size.Width, (uint) size.Height,
+            SDL.GPUTextureFormat.D32Float, 1, SDL.GPUTextureUsageFlags.DepthStencilTarget);
+
+        MainTargetFormat = SDL.GetGPUSwapchainTextureFormat(Device, _window);
 
         Logger.Trace("Creating texture batcher.");
-        _uiBatcher = new TextureBatcher(Device);
-        
+        _uiBatcher = new TextureBatcher(Device, SDL.GetGPUSwapchainTextureFormat(Device, _window));
+
         Logger.Trace("Creating deferred renderer.");
-        _deferredRenderer = new DeferredRenderer(Device, size, _depthTarget);
-        
+        _deferredRenderer = new DeferredRenderer(Device, size, MainTargetFormat);
+
         Logger.Trace("Creating ImGUI renderer.");
-        _imGuiRenderer = new ImGuiRenderer(Device, RenderSize);
+        _imGuiRenderer = new ImGuiRenderer(Device, RenderSize, MainTargetFormat);
 
         Logger.Trace("Creating default textures.");
         WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
@@ -146,12 +145,9 @@ public sealed class Renderer : IDisposable
         _deferredRenderer.Dispose();
         _uiBatcher.Dispose();
 
-        _depthTarget.Dispose();
-        _swapchainTarget.Dispose();
-        _swapchainTexture.Dispose();
-        _swapchain.Dispose();
-        Context.Dispose();
-        Device.Dispose();
+        SDL.ReleaseGPUTexture(Device, _depthTexture);
+        SDL.ReleaseWindowFromGPUDevice(Device, _window);
+        SDL.DestroyGPUDevice(Device);
     }
 
     /// <summary>
@@ -202,25 +198,36 @@ public sealed class Renderer : IDisposable
     /// <summary>
     /// Render and present to the surface.
     /// </summary>
-    public void Render()
+    public unsafe void Render()
     {
-        Context.OMSetRenderTargets(_swapchainTarget);
-        Context.ClearRenderTargetView(_swapchainTarget, new Color4(0.0f, 0.0f, 0.0f));
+        IntPtr cb = SDL.AcquireGPUCommandBuffer(Device).Check("Acquire command buffer");
 
-        Context.RSSetViewport(0, 0, _swapchainSize.Width, _swapchainSize.Height);
+        SDL.WaitAndAcquireGPUSwapchainTexture(cb, _window, out IntPtr swapchainTexture, out _, out _)
+            .Check("Acquire swapchain texture");
+
+        if (swapchainTexture == IntPtr.Zero)
+            return;
         
-        _deferredRenderer.Render(Context, _swapchainTarget, Camera.Matrices);
+        _deferredRenderer.Render(cb, swapchainTexture, _depthTexture, Camera.Matrices);
 
-        Camera.Skybox?.Render();
+        Camera.Skybox?.Render(cb, swapchainTexture, _depthTexture, Camera.Matrices);
         
         Matrix4x4 projection =
             Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
         
-        _uiBatcher.DispatchDrawQueue(Context, projection, Matrix4x4.Identity);
+        SDL.GPUColorTargetInfo targetInfo = new()
+        {
+            Texture = swapchainTexture,
+            ClearColor = new SDL.FColor(0.0f, 0.0f, 0.0f, 1.0f),
+            LoadOp = SDL.GPULoadOp.Load,
+            StoreOp = SDL.GPUStoreOp.Store
+        };
         
-        _imGuiRenderer.Render(Context);
+        _uiBatcher.DispatchDrawQueue(cb, targetInfo, _swapchainSize, new CameraMatrices(projection, Matrix4x4.Identity));
         
-        _swapchain.Present(_targetSwapInterval);
+        _imGuiRenderer.Render(cb, swapchainTexture);
+
+        SDL.SubmitGPUCommandBuffer(cb);
     }
 
     /// <summary>
@@ -231,22 +238,12 @@ public sealed class Renderer : IDisposable
     {
         _swapchainSize = newSize;
         
-        Context.ClearState();
-        Context.Flush();
-        
-        _depthTarget.Dispose();
-        
-        _swapchainTarget.Dispose();
-        _swapchainTexture.Dispose();
+        SDL.ReleaseGPUTexture(Device, _depthTexture);
 
-        _swapchain.ResizeBuffers(0, (uint) newSize.Width, (uint) newSize.Height).CheckError();
-
-        _swapchainTexture = _swapchain.GetBuffer<ID3D11Texture2D>(0);
-        _swapchainTarget = Device.CreateRenderTargetView(_swapchainTexture);
-
-        _depthTarget = new D3D11Target(Device, Format.D32_Float, newSize, false);
+        _depthTexture = SdlUtils.CreateTexture2D(Device, (uint) newSize.Width, (uint) newSize.Height,
+            SDL.GPUTextureFormat.D32Float, 1, SDL.GPUTextureUsageFlags.DepthStencilTarget);
         
-        _deferredRenderer.Resize(_depthTarget, newSize);
+        _deferredRenderer.Resize(newSize);
         _imGuiRenderer.Resize(newSize);
     }
 }

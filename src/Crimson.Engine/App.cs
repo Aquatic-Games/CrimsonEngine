@@ -141,7 +141,7 @@ public static class App
         _physics = new PhysicsSystem();
         
         Logger.Debug("Creating imgui controller.");
-        _imGuiController = new ImGuiController(_renderer.ImGuiContext, _events);
+        _imGuiController = new ImGuiController(_renderer.ImGuiContext, _events, _surface);
         
         _deltaWatch = Stopwatch.StartNew();
         

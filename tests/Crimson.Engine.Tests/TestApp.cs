@@ -2,6 +2,7 @@ using System.Numerics;
 using Crimson.Engine;
 using Crimson.Graphics;
 using Crimson.Graphics.Materials;
+//using Crimson.Graphics.Materials;
 using Crimson.Math;
 using Plane = Crimson.Graphics.Primitives.Plane;
 
@@ -41,13 +42,13 @@ public class TestApp : GlobalApp
     {
         base.PreDraw();
         
-        App.Renderer.DrawRenderable(_renderable, Matrix4x4.CreateRotationY(_rotation));
+        //App.Renderer.DrawRenderable(_renderable, Matrix4x4.CreateRotationY(_rotation));
     }
 
     public override void Dispose()
     {
         base.Dispose();
         
-        _renderable.Dispose();
+        //_renderable.Dispose();
     }
 }

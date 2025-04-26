@@ -11,18 +11,14 @@
 
     <ItemGroup>
       <PackageReference Include="Hexa.NET.ImGui" Version="2.2.7" />
+      <PackageReference Include="SDL3-CS" Version="3.2.10" />
       <PackageReference Include="SharpGLTF.Core" Version="1.0.3" />
       <PackageReference Include="StbImageSharp" Version="2.30.15" />
-      <PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="Shaders\**\*.fxc" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="Shaders\**\*.spv" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="Shaders\**\*.dxil" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
-
-    <ItemGroup>
-      <ClCompile Include="Shaders\Debug\ImGui.hlsl" />
-      <ClCompile Include="Shaders\Environment\Skybox.hlsl" />
-    </ItemGroup>
-
+    
 </Project>

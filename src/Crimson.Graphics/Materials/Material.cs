@@ -1,4 +1,5 @@
-using Vortice.Direct3D11;
+using Crimson.Graphics.Utils;
+using SDL3;
 
 namespace Crimson.Graphics.Materials;
 
@@ -7,7 +8,9 @@ namespace Crimson.Graphics.Materials;
 /// </summary>
 public class Material : IDisposable
 {
-    internal ID3D11RasterizerState RasterizerState;
+    private readonly IntPtr _device;
+    
+    internal readonly IntPtr Pipeline;
     
     public Texture Albedo;
 
@@ -26,7 +29,7 @@ public class Material : IDisposable
     /// </summary>
     /// <param name="renderer">A <see cref="Renderer"/> instance.</param>
     /// <param name="definition">The <see cref="MaterialDefinition"/> that describes how the material should be created.</param>
-    public Material(Renderer renderer, in MaterialDefinition definition)
+    public unsafe Material(Renderer renderer, in MaterialDefinition definition)
     {
         Albedo = definition.Albedo;
         Normal = definition.Normal ?? renderer.NormalTexture;
@@ -35,22 +38,88 @@ public class Material : IDisposable
         Occlusion = definition.Occlusion ?? renderer.WhiteTexture;
         Emission = definition.Emission ?? renderer.BlackTexture;
 
-        CullMode cullMode = definition.RenderFace switch
+        _device = renderer.Device;
+
+        // TODO: Probably best not to load this shader every time a material is created.
+        IntPtr vertexShader =
+            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Vertex, "Deferred/GBuffer", "VSMain", 2, 0);
+        IntPtr pixelShader =
+            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Fragment, "Deferred/GBuffer", "PSMain", 0, 1);
+
+        SDL.GPUVertexBufferDescription vertexBufferDesc = new()
         {
-            RenderFace.Front => CullMode.Back,
-            RenderFace.Back => CullMode.Front,
-            RenderFace.Both => CullMode.None,
-            _ => throw new ArgumentOutOfRangeException()
+            Slot = 0,
+            InputRate = SDL.GPUVertexInputRate.Vertex,
+            InstanceStepRate = 0,
+            Pitch = Vertex.SizeInBytes
         };
 
-        RasterizerDescription rasterizerDesc = new()
+        SDL.GPUVertexAttribute* vertexAttributes = stackalloc SDL.GPUVertexAttribute[]
         {
-            FillMode = FillMode.Solid,
-            FrontCounterClockwise = definition.WindingOrder == WindingOrder.CounterClockwise,
-            CullMode = cullMode
+            new SDL.GPUVertexAttribute // Position
+                { Format = SDL.GPUVertexElementFormat.Float3, Offset = 0, BufferSlot = 0, Location = 0 },
+            new SDL.GPUVertexAttribute // TexCoord
+                { Format = SDL.GPUVertexElementFormat.Float2, Offset = 12, BufferSlot = 0, Location = 1 },
+            new SDL.GPUVertexAttribute // Color
+                { Format = SDL.GPUVertexElementFormat.Float4, Offset = 20, BufferSlot = 0, Location = 2 },
+            new SDL.GPUVertexAttribute // Normal
+                { Format = SDL.GPUVertexElementFormat.Float3, Offset = 36, BufferSlot = 0, Location = 3 }
         };
+
+        SDL.GPUColorTargetDescription* colorTargets = stackalloc SDL.GPUColorTargetDescription[]
+        {
+            new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R32G32B32A32Float }, // Albedo
+            new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R32G32B32A32Float } // Position
+        };
+
+        SDL.GPUGraphicsPipelineCreateInfo pipelineInfo = new()
+        {
+            VertexShader = vertexShader,
+            FragmentShader = pixelShader,
+            TargetInfo = new SDL.GPUGraphicsPipelineTargetInfo()
+            {
+                NumColorTargets = 2,
+                ColorTargetDescriptions = (nint) colorTargets,
+                HasDepthStencilTarget = 1,
+                DepthStencilFormat = SDL.GPUTextureFormat.D32Float
+            },
+            VertexInputState = new SDL.GPUVertexInputState()
+            {
+                NumVertexBuffers = 1,
+                VertexBufferDescriptions = new IntPtr(&vertexBufferDesc),
+                NumVertexAttributes = 4,
+                VertexAttributes = (nint) vertexAttributes
+            },
+            PrimitiveType = SDL.GPUPrimitiveType.TriangleList,
+            DepthStencilState = new SDL.GPUDepthStencilState()
+            {
+                EnableDepthTest = 1,
+                EnableDepthWrite = 1,
+                CompareOp = SDL.GPUCompareOp.Less
+            },
+            RasterizerState = new SDL.GPURasterizerState()
+            {
+                FillMode = SDL.GPUFillMode.Fill,
+                CullMode = definition.RenderFace switch
+                {
+                    RenderFace.Front => SDL.GPUCullMode.Back,
+                    RenderFace.Back => SDL.GPUCullMode.Front,
+                    RenderFace.Both => SDL.GPUCullMode.None,
+                    _ => throw new ArgumentOutOfRangeException()
+                },
+                FrontFace = definition.WindingOrder switch
+                {
+                    WindingOrder.CounterClockwise => SDL.GPUFrontFace.CounterClockwise,
+                    WindingOrder.Clockwise => SDL.GPUFrontFace.Clockwise,
+                    _ => throw new ArgumentOutOfRangeException()
+                },
+            }
+        };
+
+        Pipeline = SDL.CreateGPUGraphicsPipeline(_device, in pipelineInfo);
         
-        RasterizerState = renderer.Device.CreateRasterizerState(rasterizerDesc);
+        SDL.ReleaseGPUShader(_device, pixelShader);
+        SDL.ReleaseGPUShader(_device, vertexShader);
     }
 
     /// <summary>
@@ -58,6 +127,6 @@ public class Material : IDisposable
     /// </summary>
     public void Dispose()
     {
-        RasterizerState.Dispose();
+        SDL.ReleaseGPUGraphicsPipeline(_device, Pipeline);
     }
 }

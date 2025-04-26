@@ -1,4 +1,6 @@
-using Vortice.Direct3D11;
+using System.Runtime.InteropServices;
+using Crimson.Core;
+using SDL3;
 
 namespace Crimson.Graphics.Utils;
 
@@ -54,24 +56,43 @@ internal static class ShaderUtils
         }
     }*/
 
-    public static void LoadGraphicsShader(ID3D11Device device, string name, out ID3D11VertexShader? vertex,
-        out ID3D11PixelShader? pixel, out byte[]? vertexBytecode)
+    public static unsafe IntPtr LoadGraphicsShader(IntPtr device, SDL.GPUShaderStage stage, string name, string entryPoint, uint numUniforms, uint numSamplers)
     {
         string basePath = Path.Combine("Shaders", $"{name}");
 
-        vertex = null;
-        pixel = null;
-        vertexBytecode = null;
-        
-        string vertexPath = basePath + "_v.fxc";
-        if (File.Exists(vertexPath))
+        string path = stage switch
         {
-            vertexBytecode = File.ReadAllBytes(vertexPath);
-            vertex = device.CreateVertexShader(vertexBytecode);
-        }
+            SDL.GPUShaderStage.Vertex => basePath + "_v",
+            SDL.GPUShaderStage.Fragment => basePath + "_p",
+            _ => throw new ArgumentOutOfRangeException(nameof(stage), stage, null)
+        };
 
-        string pixelPath = basePath + "_p.fxc";
-        if (File.Exists(pixelPath))
-            pixel = device.CreatePixelShader(File.ReadAllBytes(pixelPath));
+        SDL.GPUShaderFormat shaderFormat = SDL.GetGPUShaderFormats(device);
+
+        if (shaderFormat.HasFlag(SDL.GPUShaderFormat.DXBC))
+            path += ".dxil";
+        else if (shaderFormat.HasFlag(SDL.GPUShaderFormat.SPIRV))
+            path += ".spv";
+        else
+            throw new NotSupportedException(shaderFormat.ToString());
+        
+        byte[] data = File.ReadAllBytes(path);
+
+        fixed (byte* pData = data)
+        {
+            SDL.GPUShaderCreateInfo shaderInfo = new()
+            {
+                Stage = stage,
+                Format = shaderFormat,
+                Code = (nint) pData,
+                CodeSize = (nuint) data.Length,
+                NumUniformBuffers = numUniforms,
+                NumSamplers = numSamplers,
+                Entrypoint = Marshal.StringToCoTaskMemAnsi(entryPoint)
+            };
+
+            Logger.Trace("Creating shader.");
+            return SDL.CreateGPUShader(device, in shaderInfo).Check("Create GPU shader");
+        }
     }
 }

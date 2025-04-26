@@ -1,17 +1,16 @@
 ﻿using Crimson.Core;
 using Crimson.Graphics;
 using Crimson.Math;
-using Silk.NET.SDL;
-using static Crimson.Platform.SdlUtils;
+using SDL3;
 
 namespace Crimson.Platform;
 
 /// <summary>
 /// The primary application surface that is being rendered to.
 /// </summary>
-public sealed unsafe class Surface : IDisposable
+public sealed class Surface : IDisposable
 {
-    private Window* _window;
+    private IntPtr _window;
 
     /// <summary>
     /// The surface's size, in pixels.
@@ -21,8 +20,7 @@ public sealed unsafe class Surface : IDisposable
     {
         get
         {
-            int w, h;
-            SDL.GetWindowSizeInPixels(_window, &w, &h);
+            SDL.GetWindowSizeInPixels(_window, out int w, out int h);
 
             return new Size<int>(w, h);
         }
@@ -35,8 +33,23 @@ public sealed unsafe class Surface : IDisposable
     /// <remarks>Only works on platforms that support mouse input.</remarks>
     public bool CursorVisible
     {
-        get => SDL.GetRelativeMouseMode() == SdlBool.True;
-        set => SDL.SetRelativeMouseMode(value ? SdlBool.False : SdlBool.True);
+        get => SDL.GetWindowRelativeMouseMode(_window);
+        set => SDL.SetWindowRelativeMouseMode(_window, !value);
+    }
+    
+    /// <summary>
+    /// Allow/disallow text input. This may cause on-screen keyboards to appear, etc.
+    /// </summary>
+    public bool AllowTextInput
+    {
+        get => SDL.TextInputActive(_window);
+        set
+        {
+            if (value)
+                SDL.StartTextInput(_window);
+            else
+                SDL.StopTextInput(_window);
+        }
     }
     
     /// <summary>
@@ -84,22 +97,7 @@ public sealed unsafe class Surface : IDisposable
 
             return info;*/
 
-            SurfaceInfo info;
-
-            if (OperatingSystem.IsWindows())
-            {
-                SysWMInfo wmInfo = new SysWMInfo();
-                SDL.GetVersion(&wmInfo.Version);
-                SDL.GetWindowWMInfo(_window, &wmInfo);
-
-                info = new SurfaceInfo(wmInfo.Info.Win.Hwnd);
-            }
-            else
-            {
-                info = new SurfaceInfo((nint) _window);
-            }
-
-            return info;
+            return new SurfaceInfo(_window);
         }
     }
 
@@ -110,23 +108,23 @@ public sealed unsafe class Surface : IDisposable
     /// <exception cref="Exception">Thrown if the surface failed to create.</exception>
     public Surface(in WindowOptions options)
     {
-        SDL.SetHint(Sdl.HintWindowsDpiAwareness, "system");
-        
         Logger.Trace("Initializing SDL.");
-        if (SDL.Init(Sdl.InitVideo) < 0)
-            throw new Exception($"Failed to initialize SDL: {SDL.GetErrorS()}");
+        if (!SDL.Init(SDL.InitFlags.Video))
+            throw new Exception($"Failed to initialize SDL: {SDL.GetError()}");
+        
+        SDL.WindowFlags flags = SDL.WindowFlags.InputFocus | SDL.WindowFlags.MouseFocus;
 
-        WindowFlags flags = WindowFlags.Resizable;
+        if (options.Resizable)
+            flags |= SDL.WindowFlags.Resizable;
 
-        if (!OperatingSystem.IsWindows())
-            flags |= WindowFlags.Vulkan;
+        if (options.FullScreen)
+            flags |= SDL.WindowFlags.Fullscreen;
         
         Logger.Trace("Creating window.");
-        _window = SDL.CreateWindow(options.Title, Sdl.WindowposCentered, Sdl.WindowposCentered, options.Size.Width,
-            options.Size.Height, (uint) flags);
+        _window = SDL.CreateWindow(options.Title, options.Size.Width, options.Size.Height, flags);
 
-        if (_window == null)
-            throw new Exception($"Failed to create window: {SDL.GetErrorS()}");
+        if (_window == IntPtr.Zero)
+            throw new Exception($"Failed to create window: {SDL.GetError()}");
     }
 
     /// <summary>

@@ -7,16 +7,19 @@ namespace Crimson.Engine;
 internal class ImGuiController
 {
     private readonly ImGuiContextPtr _context;
+    private readonly Surface _surface;
     
-    public ImGuiController(ImGuiContextPtr context, EventsManager events)
+    public ImGuiController(ImGuiContextPtr context, EventsManager events, Surface surface)
     {
         _context = context;
+        _surface = surface;
         events.KeyDown += OnKeyDown;
         events.KeyUp += OnKeyUp;
         events.MouseButtonDown += OnMouseButtonDown;
         events.MouseButtonUp += OnMouseButtonUp;
         events.MouseMove += OnMouseMove;
         events.MouseScroll += OnMouseScroll;
+        events.TextInput += OnTextInput;
     }
 
     public void Update(float dt)
@@ -25,6 +28,8 @@ internal class ImGuiController
 
         ImGuiIOPtr io = ImGui.GetIO();
         io.DeltaTime = dt;
+
+        _surface.AllowTextInput = io.WantTextInput;
     }
 
     private void OnKeyDown(Key key)
@@ -61,6 +66,12 @@ internal class ImGuiController
     {
         ImGui.SetCurrentContext(_context);
         ImGui.GetIO().AddMouseWheelEvent(scroll.X, scroll.Y);
+    }
+    
+    private void OnTextInput(char c)
+    {
+        ImGui.SetCurrentContext(_context);
+        ImGui.GetIO().AddInputCharacter(c);
     }
     
     private static ImGuiMouseButton MouseButtonToImGui(MouseButton button)

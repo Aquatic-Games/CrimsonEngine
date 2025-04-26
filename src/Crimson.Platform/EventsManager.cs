@@ -1,7 +1,6 @@
 using System.Numerics;
 using Crimson.Math;
-using Silk.NET.SDL;
-using static Crimson.Platform.SdlUtils;
+using SDL3;
 
 namespace Crimson.Platform;
 
@@ -31,13 +30,15 @@ public class EventsManager : IDisposable
 
     public event OnMouseScroll MouseScroll = delegate { };
 
+    public event OnTextInput TextInput = delegate { };
+
     /// <summary>
     /// Create a new <see cref="EventsManager"/>.
     /// </summary>
     public EventsManager()
     {
-        if (SDL.Init(Sdl.InitEvents) < 0)
-            throw new Exception($"Failed to initialize SDL: {SDL.GetErrorS()}");
+        if (!SDL.Init(SDL.InitFlags.Events))
+            throw new Exception($"Failed to initialize SDL: {SDL.GetError()}");
     }
 
     /// <summary>
@@ -45,60 +46,63 @@ public class EventsManager : IDisposable
     /// </summary>
     public unsafe void ProcessEvents()
     {
-        Event sdlEvent;
-        while (SDL.PollEvent(&sdlEvent) != 0)
+        SDL.Event sdlEvent;
+        while (SDL.PollEvent(out sdlEvent))
         {
-            switch ((EventType) sdlEvent.Type)
+            switch ((SDL.EventType) sdlEvent.Type)
             {
-                case EventType.Windowevent:
+                case SDL.EventType.WindowCloseRequested:
                 {
-                    switch ((WindowEventID) sdlEvent.Window.Event)
-                    {
-                        case WindowEventID.Close:
-                            WindowClose();
-                            break;
-                        case WindowEventID.Resized:
-                        {
-                            SurfaceSizeChanged(new Size<int>(sdlEvent.Window.Data1, sdlEvent.Window.Data2));
-                            break;
-                        }
-                    }
-                    
+                    WindowClose();
+                    break;
+                }
+                case SDL.EventType.WindowResized:
+                {
+                    SurfaceSizeChanged(new Size<int>(sdlEvent.Window.Data1, sdlEvent.Window.Data2));
                     break;
                 }
                 
-                case EventType.Keydown:
+                case SDL.EventType.KeyDown:
                 {
-                    if (sdlEvent.Key.Repeat != 0)
+                    if (sdlEvent.Key.Repeat)
                         break;
-                    KeyDown(KeycodeToKey((KeyCode) sdlEvent.Key.Keysym.Sym));
+                    KeyDown(SdlUtils.KeycodeToKey(sdlEvent.Key.Key));
                     break;
                 }
-                case EventType.Keyup:
+                case SDL.EventType.KeyUp:
                 {
-                    KeyUp(KeycodeToKey((KeyCode) sdlEvent.Key.Keysym.Sym));
+                    KeyUp(SdlUtils.KeycodeToKey(sdlEvent.Key.Key));
                     break;
                 }
 
-                case EventType.Mousebuttondown:
+                case SDL.EventType.MouseButtonDown:
                 {
-                    MouseButtonDown(ButtonIndexToButton(sdlEvent.Button.Button));
+                    MouseButtonDown(SdlUtils.ButtonIndexToButton(sdlEvent.Button.Button));
                     break;
                 }
-                case EventType.Mousebuttonup:
+                case SDL.EventType.MouseButtonUp:
                 {
-                    MouseButtonUp(ButtonIndexToButton(sdlEvent.Button.Button));
+                    MouseButtonUp(SdlUtils.ButtonIndexToButton(sdlEvent.Button.Button));
                     break;
                 }
-                case EventType.Mousemotion:
+                case SDL.EventType.MouseMotion:
                 {
                     MouseMove(new Vector2(sdlEvent.Motion.X, sdlEvent.Motion.Y),
-                        new Vector2(sdlEvent.Motion.Xrel, sdlEvent.Motion.Yrel));
+                        new Vector2(sdlEvent.Motion.XRel, sdlEvent.Motion.YRel));
                     break;
                 }
-                case EventType.Mousewheel:
+                case SDL.EventType.MouseWheel:
                 {
-                    MouseScroll(new Vector2(sdlEvent.Wheel.PreciseX, sdlEvent.Wheel.PreciseY));
+                    MouseScroll(new Vector2(sdlEvent.Wheel.X, sdlEvent.Wheel.Y));
+                    break;
+                }
+
+                case SDL.EventType.TextInput :
+                {
+                    string text = new string((sbyte*) sdlEvent.Text.Text);
+                    Console.WriteLine(text);
+                    foreach (char c in text)
+                        TextInput(c);
                     break;
                 }
             }
@@ -133,4 +137,6 @@ public class EventsManager : IDisposable
     public delegate void OnMouseMove(Vector2 position, Vector2 delta);
 
     public delegate void OnMouseScroll(Vector2 scroll);
+
+    public delegate void OnTextInput(char c);
 }

@@ -14,15 +14,15 @@ struct PSOutput
     float4 Color: SV_Target0;
 };
 
-cbuffer CameraBuffer : register(b0)
+cbuffer CameraBuffer : register(b0, space1)
 {
     Camera gCamera;
 }
 
-TextureCube Cube : register(t0);
-SamplerState Sampler : register(s0);
+TextureCube Cube : register(t0, space2);
+SamplerState Sampler : register(s0, space2);
 
-VSOutput VSMain(const in float3 position: POSITION0)
+VSOutput VSMain(const in float3 position: TEXCOORD0)
 {
     VSOutput output;
 
