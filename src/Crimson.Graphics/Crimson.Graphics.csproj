@@ -21,8 +21,4 @@
       <None Include="Shaders\**\*.dxil" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
     
-    <ItemGroup>
-        <Compile Remove="Renderers\ImGuiRenderer.cs" />
-    </ItemGroup>
-    
 </Project>
