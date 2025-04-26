@@ -30,6 +30,8 @@ public class EventsManager : IDisposable
 
     public event OnMouseScroll MouseScroll = delegate { };
 
+    public event OnTextInput TextInput = delegate { };
+
     /// <summary>
     /// Create a new <see cref="EventsManager"/>.
     /// </summary>
@@ -54,7 +56,6 @@ public class EventsManager : IDisposable
                     WindowClose();
                     break;
                 }
-
                 case SDL.EventType.WindowResized:
                 {
                     SurfaceSizeChanged(new Size<int>(sdlEvent.Window.Data1, sdlEvent.Window.Data2));
@@ -95,6 +96,15 @@ public class EventsManager : IDisposable
                     MouseScroll(new Vector2(sdlEvent.Wheel.X, sdlEvent.Wheel.Y));
                     break;
                 }
+
+                case SDL.EventType.TextInput :
+                {
+                    string text = new string((sbyte*) sdlEvent.Text.Text);
+                    Console.WriteLine(text);
+                    foreach (char c in text)
+                        TextInput(c);
+                    break;
+                }
             }
         }
     }
@@ -127,4 +137,6 @@ public class EventsManager : IDisposable
     public delegate void OnMouseMove(Vector2 position, Vector2 delta);
 
     public delegate void OnMouseScroll(Vector2 scroll);
+
+    public delegate void OnTextInput(char c);
 }

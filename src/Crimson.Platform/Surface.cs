@@ -38,6 +38,21 @@ public sealed class Surface : IDisposable
     }
     
     /// <summary>
+    /// Allow/disallow text input. This may cause on-screen keyboards to appear, etc.
+    /// </summary>
+    public bool AllowTextInput
+    {
+        get => SDL.TextInputActive(_window);
+        set
+        {
+            if (value)
+                SDL.StartTextInput(_window);
+            else
+                SDL.StopTextInput(_window);
+        }
+    }
+    
+    /// <summary>
     /// The underlying handle(s) to the surface, typically provided by the window manager.
     /// </summary>
     /// <exception cref="PlatformNotSupportedException">Thrown if the current platform does not support the surface.</exception>
