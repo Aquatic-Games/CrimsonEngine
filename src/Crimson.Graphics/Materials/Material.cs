@@ -44,7 +44,7 @@ public class Material : IDisposable
         IntPtr vertexShader =
             ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Vertex, "Deferred/GBuffer", "VSMain", 2, 0);
         IntPtr pixelShader =
-            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Fragment, "Deferred/GBuffer", "PSMain", 0, 1);
+            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Fragment, "Deferred/GBuffer", "PSMain", 0, 6);
 
         SDL.GPUVertexBufferDescription vertexBufferDesc = new()
         {
@@ -69,7 +69,9 @@ public class Material : IDisposable
         SDL.GPUColorTargetDescription* colorTargets = stackalloc SDL.GPUColorTargetDescription[]
         {
             new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R32G32B32A32Float }, // Albedo
-            new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R32G32B32A32Float } // Position
+            new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R32G32B32A32Float }, // Position
+            new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R32G32B32A32Float }, // Normal
+            new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R32G32B32A32Float } // MetallicRoughness
         };
 
         SDL.GPUGraphicsPipelineCreateInfo pipelineInfo = new()
@@ -78,7 +80,7 @@ public class Material : IDisposable
             FragmentShader = pixelShader,
             TargetInfo = new SDL.GPUGraphicsPipelineTargetInfo()
             {
-                NumColorTargets = 2,
+                NumColorTargets = 4,
                 ColorTargetDescriptions = (nint) colorTargets,
                 HasDepthStencilTarget = 1,
                 DepthStencilFormat = SDL.GPUTextureFormat.D32Float

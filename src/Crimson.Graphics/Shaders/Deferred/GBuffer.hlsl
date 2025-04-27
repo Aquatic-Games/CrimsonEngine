@@ -22,6 +22,8 @@ struct PSOutput
 {
     float4 Albedo: SV_Target0;
     float4 Position: SV_Target1;
+    float4 Normal: SV_Target2;
+    float4 MetallicRoughness: SV_Target3;
 };
 
 cbuffer CameraBuffer : register(b0, space1)
@@ -37,6 +39,11 @@ cbuffer WorldMatrix : register(b1, space1)
 SamplerState Sampler : register(s0, space2);
 
 Texture2D Albedo : register(t0, space2);
+Texture2D Normal : register(t1, space2);
+Texture2D Metallic : register(t2, space2);
+Texture2D Roughness : register(t3, space2);
+Texture2D Occlusion : register(t4, space2);
+Texture2D Emission : register(t5, space2);
 
 VSOutput VSMain(const in VSInput input)
 {
@@ -54,9 +61,16 @@ PSOutput PSMain(const in VSOutput input)
     PSOutput output;
 
     const float3 albedo = Albedo.Sample(Sampler, input.TexCoord).rgb;
+    const float3 normal = Normal.Sample(Sampler, input.TexCoord).rgb;
+    const float metallic = Metallic.Sample(Sampler, input.TexCoord).r;
+    const float roughness = Roughness.Sample(Sampler, input.TexCoord).r;
+    const float occlusion = Occlusion.Sample(Sampler, input.TexCoord).r;
+    const float emission = Emission.Sample(Sampler, input.TexCoord).r;
 
     output.Albedo = float4(albedo, 1.0);
     output.Position = float4(input.WorldSpace, 1.0);
+    output.Normal = float4(normal, 1.0);
+    output.MetallicRoughness = float4(metallic, roughness, occlusion, emission);
     
     return output;
 }

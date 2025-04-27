@@ -12,6 +12,8 @@ internal class DeferredRenderer : IDisposable
     
     private IntPtr _albedoTexture;
     private IntPtr _positionTexture;
+    private IntPtr _normalTexture;
+    private IntPtr _metallicRoughnessTexture;
 
     private readonly IntPtr _passPipeline;
     private readonly IntPtr _passSampler;
@@ -22,13 +24,14 @@ internal class DeferredRenderer : IDisposable
     {
         _device = device;
 
-        _albedoTexture = SdlUtils.CreateTexture2D(_device, (uint) size.Width, (uint) size.Height,
-            SDL.GPUTextureFormat.R32G32B32A32Float, 1,
-            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget);
-
-        _positionTexture = SdlUtils.CreateTexture2D(_device, (uint) size.Width, (uint) size.Height,
-            SDL.GPUTextureFormat.R32G32B32A32Float, 1,
-            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget);
+        _albedoTexture = CreateGBufferTexture(_device, size);
+        SDL.SetGPUTextureName(_device, _albedoTexture, "Albedo GBuffer");
+        _positionTexture = CreateGBufferTexture(_device, size);
+        SDL.SetGPUTextureName(_device, _positionTexture, "Position GBuffer");
+        _normalTexture = CreateGBufferTexture(_device, size);
+        SDL.SetGPUTextureName(_device, _normalTexture, "Normal GBuffer");
+        _metallicRoughnessTexture = CreateGBufferTexture(_device, size);
+        SDL.SetGPUTextureName(_device, _metallicRoughnessTexture, "Metallic-Roughness-Occlusion GBuffer");
 
         IntPtr passVtx = ShaderUtils.LoadGraphicsShader(device, SDL.GPUShaderStage.Vertex, "Deferred/DeferredPass",
             "VSMain", 0, 0);
@@ -99,6 +102,16 @@ internal class DeferredRenderer : IDisposable
             {
                 Texture = _positionTexture, ClearColor = new SDL.FColor(), LoadOp = SDL.GPULoadOp.Clear,
                 StoreOp = SDL.GPUStoreOp.Store
+            },
+            new SDL.GPUColorTargetInfo
+            {
+                Texture = _normalTexture, ClearColor = new SDL.FColor(), LoadOp = SDL.GPULoadOp.Clear,
+                StoreOp = SDL.GPUStoreOp.Store
+            },
+            new SDL.GPUColorTargetInfo
+            {
+                Texture = _metallicRoughnessTexture, ClearColor = new SDL.FColor(), LoadOp = SDL.GPULoadOp.Clear,
+                StoreOp = SDL.GPUStoreOp.Store
             }
         };
 
@@ -110,7 +123,7 @@ internal class DeferredRenderer : IDisposable
             StoreOp = SDL.GPUStoreOp.Store
         };
 
-        IntPtr gBufferPass = SDL.BeginGPURenderPass(cb, (nint) gBufferTargets, 2, in depthInfo)
+        IntPtr gBufferPass = SDL.BeginGPURenderPass(cb, (nint) gBufferTargets, 4, in depthInfo)
             .Check("Begin gbuffer pass");
         
         foreach ((Renderable renderable, Matrix4x4 world) in _drawQueue)
@@ -118,13 +131,41 @@ internal class DeferredRenderer : IDisposable
             SDL.PushGPUVertexUniformData(cb, 1, new IntPtr(&world), 64);
 
             // TODO: Have a sampler per material.
-            SDL.GPUTextureSamplerBinding albedoBinding = new()
-            {
-                Texture = renderable.Material.Albedo.TextureHandle,
-                Sampler = _passSampler
-            };
+            SDL.GPUTextureSamplerBinding[] bindings =
+            [
+                new()
+                {
+                    Texture = renderable.Material.Albedo.TextureHandle,
+                    Sampler = _passSampler
+                },
+                new()
+                {
+                    Texture = renderable.Material.Normal.TextureHandle,
+                    Sampler = _passSampler,
+                },
+                new()
+                {
+                    Texture = renderable.Material.Metallic.TextureHandle,
+                    Sampler = _passSampler,
+                },
+                new()
+                {
+                    Texture = renderable.Material.Roughness.TextureHandle,
+                    Sampler = _passSampler,
+                },
+                new()
+                {
+                    Texture = renderable.Material.Occlusion.TextureHandle,
+                    Sampler = _passSampler,
+                },
+                new()
+                {
+                    Texture = renderable.Material.Emission.TextureHandle,
+                    Sampler = _passSampler,
+                }
+            ];
 
-            SDL.BindGPUFragmentSamplers(gBufferPass, 0, [albedoBinding], 1);
+            SDL.BindGPUFragmentSamplers(gBufferPass, 0, bindings, (uint) bindings.Length);
 
             SDL.BindGPUGraphicsPipeline(gBufferPass, renderable.Material.Pipeline);
             
@@ -196,21 +237,29 @@ internal class DeferredRenderer : IDisposable
     {
         SDL.ReleaseGPUTexture(_device, _albedoTexture);
         SDL.ReleaseGPUTexture(_device, _positionTexture);
+        SDL.ReleaseGPUTexture(_device, _normalTexture);
+        SDL.ReleaseGPUTexture(_device, _metallicRoughnessTexture);
 
-        _albedoTexture = SdlUtils.CreateTexture2D(_device, (uint) newSize.Width, (uint) newSize.Height,
-            SDL.GPUTextureFormat.R32G32B32A32Float, 1,
-            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget);
-
-        _positionTexture = SdlUtils.CreateTexture2D(_device, (uint) newSize.Width, (uint) newSize.Height,
-            SDL.GPUTextureFormat.R32G32B32A32Float, 1,
-            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget);
+        _albedoTexture = CreateGBufferTexture(_device, newSize);
+        _positionTexture = CreateGBufferTexture(_device, newSize);
+        _normalTexture = CreateGBufferTexture(_device, newSize);
+        _metallicRoughnessTexture = CreateGBufferTexture(_device, newSize);
     }
     
     public void Dispose()
     {
         SDL.ReleaseGPUSampler(_device, _passSampler);
         SDL.ReleaseGPUGraphicsPipeline(_device, _passPipeline);
+        SDL.ReleaseGPUTexture(_device, _metallicRoughnessTexture);
+        SDL.ReleaseGPUTexture(_device, _normalTexture);
         SDL.ReleaseGPUTexture(_device, _positionTexture);
         SDL.ReleaseGPUTexture(_device, _albedoTexture);
+    }
+
+    private static IntPtr CreateGBufferTexture(IntPtr device, Size<int> size)
+    {
+        return SdlUtils.CreateTexture2D(device, (uint) size.Width, (uint) size.Height,
+            SDL.GPUTextureFormat.R32G32B32A32Float, 1,
+            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget);
     }
 }
