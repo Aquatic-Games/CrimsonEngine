@@ -125,8 +125,10 @@ internal class DeferredRenderer : IDisposable
 
         IntPtr gBufferPass = SDL.BeginGPURenderPass(cb, (nint) gBufferTargets, 4, in depthInfo)
             .Check("Begin gbuffer pass");
-        
-        foreach ((Renderable renderable, Matrix4x4 world) in _drawQueue)
+
+        Vector3 cameraPosition = camera.View.Translation;
+        foreach ((Renderable renderable, Matrix4x4 world) in _drawQueue.OrderBy(renderable =>
+                     Vector3.Distance(cameraPosition, renderable.WorldMatrix.Translation)))
         {
             SDL.PushGPUVertexUniformData(cb, 1, new IntPtr(&world), 64);
 
