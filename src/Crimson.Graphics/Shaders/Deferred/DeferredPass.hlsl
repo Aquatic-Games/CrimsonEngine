@@ -16,6 +16,8 @@ SamplerState Sampler : register(s0, space2);
 
 Texture2D Albedo : register(t0, space2);
 Texture2D Position : register(t1, space2);
+Texture2D Normal : register(t2, space2);
+Texture2D MetallicRoughness : register(t3, space2);
 
 VSOutput VSMain(const uint vertexId: SV_VertexID)
 {
@@ -52,7 +54,7 @@ PSOutput PSMain(const in VSOutput input)
 
     const float4 albedo = Albedo.Sample(Sampler, input.TexCoord);
 
-    output.Color = float4(albedo.rgb, 1.0);
+    output.Color = float4(albedo.rgb * 0.2, 1.0);
     
     return output;
 }

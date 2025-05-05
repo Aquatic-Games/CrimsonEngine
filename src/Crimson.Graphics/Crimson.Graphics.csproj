@@ -5,6 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\lib\grabs\src\grabs.ShaderCompiler\grabs.ShaderCompiler.csproj" />
       <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
       <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
     </ItemGroup>
@@ -16,9 +17,14 @@
       <PackageReference Include="StbImageSharp" Version="2.30.15" />
     </ItemGroup>
 
-    <ItemGroup>
+    <!--<ItemGroup>
       <None Include="Shaders\**\*.spv" CopyToOutputDirectory="PreserveNewest" />
       <None Include="Shaders\**\*.dxil" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>-->
+    
+    <ItemGroup>
+        <None Include="Shaders\**\*.hlsl" CopyToOutputDirectory="PreserveNewest" />
+        <None Include="Shaders\**\*.hlsli" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
     
 </Project>

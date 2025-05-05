@@ -1,5 +1,8 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Crimson.Core;
+using grabs.Graphics;
+using grabs.ShaderCompiler;
 using SDL3;
 
 namespace Crimson.Graphics.Utils;
@@ -55,8 +58,59 @@ internal static class ShaderUtils
             pixel = device.CreateShaderModule(ShaderStage.Pixel, spirv, pixelEntryPoint);
         }
     }*/
-
+    
     public static unsafe IntPtr LoadGraphicsShader(IntPtr device, SDL.GPUShaderStage stage, string name, string entryPoint, uint numUniforms, uint numSamplers)
+    {
+        Logger.Trace($"Compiling shader '{name}'.");
+
+        string fullPath = Path.GetFullPath(Path.Combine("Shaders", $"{name}.hlsl"));
+        
+        string hlsl = File.ReadAllText(fullPath);
+
+        ShaderStage grabsStage = stage switch
+        {
+            SDL.GPUShaderStage.Vertex => ShaderStage.Vertex,
+            SDL.GPUShaderStage.Fragment => ShaderStage.Pixel,
+            _ => throw new ArgumentOutOfRangeException(nameof(stage), stage, null)
+        };
+        
+        SDL.GPUShaderFormat shaderFormat = SDL.GetGPUShaderFormats(device);
+
+        ShaderFormat grabsFormat = shaderFormat switch
+        {
+            SDL.GPUShaderFormat.Invalid => throw new NotSupportedException(),
+            SDL.GPUShaderFormat.Private => throw new NotSupportedException(),
+            SDL.GPUShaderFormat.SPIRV => ShaderFormat.Spirv,
+            SDL.GPUShaderFormat.DXBC => ShaderFormat.Dxbc,
+            SDL.GPUShaderFormat.DXIL => ShaderFormat.Dxil,
+            SDL.GPUShaderFormat.MSL => throw new NotSupportedException(),
+            SDL.GPUShaderFormat.MetalLib => throw new NotSupportedException(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        Logger.Trace("Compiling shader.");
+        byte[] compiled =
+            Compiler.CompileHlsl(grabsStage, grabsFormat, hlsl, entryPoint, Path.GetDirectoryName(fullPath));
+        
+        fixed (byte* pData = compiled)
+        {
+            SDL.GPUShaderCreateInfo shaderInfo = new()
+            {
+                Stage = stage,
+                Format = shaderFormat,
+                Code = (nint) pData,
+                CodeSize = (nuint) compiled.Length,
+                NumUniformBuffers = numUniforms,
+                NumSamplers = numSamplers,
+                Entrypoint = Marshal.StringToCoTaskMemAnsi(entryPoint)
+            };
+
+            Logger.Trace("Creating shader.");
+            return SDL.CreateGPUShader(device, in shaderInfo).Check("Create GPU shader");
+        }
+    }
+
+    /*public static unsafe IntPtr LoadGraphicsShader(IntPtr device, SDL.GPUShaderStage stage, string name, string entryPoint, uint numUniforms, uint numSamplers)
     {
         string basePath = Path.Combine("Shaders", $"{name}");
 
@@ -94,5 +148,5 @@ internal static class ShaderUtils
             Logger.Trace("Creating shader.");
             return SDL.CreateGPUShader(device, in shaderInfo).Check("Create GPU shader");
         }
-    }
+    }*/
 }
