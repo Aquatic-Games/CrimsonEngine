@@ -42,9 +42,9 @@ public class Material : IDisposable
 
         // TODO: Probably best not to load this shader every time a material is created.
         IntPtr vertexShader =
-            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Vertex, "Deferred/GBuffer", "VSMain", 2, 0);
+            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Vertex, "Materials/Standard", "VSMain", 2, 0);
         IntPtr pixelShader =
-            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Fragment, "Deferred/GBuffer", "PSMain", 0, 6);
+            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Fragment, "Materials/Standard", "PSMain", 0, 6);
 
         SDL.GPUVertexBufferDescription vertexBufferDesc = new()
         {

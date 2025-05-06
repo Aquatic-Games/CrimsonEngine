@@ -27,4 +27,8 @@
         <None Include="Shaders\**\*.hlsli" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
     
+    <ItemGroup>
+      <ClCompile Include="Shaders\Materials\Standard.hlsl" />
+    </ItemGroup>
+    
 </Project>

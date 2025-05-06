@@ -76,17 +76,16 @@ internal static class ShaderUtils
         
         SDL.GPUShaderFormat shaderFormat = SDL.GetGPUShaderFormats(device);
 
-        ShaderFormat grabsFormat = shaderFormat switch
-        {
-            SDL.GPUShaderFormat.Invalid => throw new NotSupportedException(),
-            SDL.GPUShaderFormat.Private => throw new NotSupportedException(),
-            SDL.GPUShaderFormat.SPIRV => ShaderFormat.Spirv,
-            SDL.GPUShaderFormat.DXBC => ShaderFormat.Dxbc,
-            SDL.GPUShaderFormat.DXIL => ShaderFormat.Dxil,
-            SDL.GPUShaderFormat.MSL => throw new NotSupportedException(),
-            SDL.GPUShaderFormat.MetalLib => throw new NotSupportedException(),
-            _ => throw new ArgumentOutOfRangeException()
-        };
+        ShaderFormat grabsFormat;
+
+        if (shaderFormat.HasFlag(SDL.GPUShaderFormat.SPIRV))
+            grabsFormat = ShaderFormat.Spirv;
+        else if (shaderFormat.HasFlag(SDL.GPUShaderFormat.DXIL))
+            grabsFormat = ShaderFormat.Dxil;
+        else if (shaderFormat.HasFlag(SDL.GPUShaderFormat.DXBC))
+            grabsFormat = ShaderFormat.Dxbc;
+        else
+            throw new NotSupportedException();
 
         Logger.Trace("Compiling shader.");
         byte[] compiled =

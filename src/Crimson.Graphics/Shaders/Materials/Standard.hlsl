@@ -1,15 +1,8 @@
-#pragma vertex VSMain
+﻿#pragma vertex VSMain
 #pragma pixel PSMain
 
-#include "../Common.hlsli"
-
-struct VSInput
-{
-    float3 Position: TEXCOORD0;
-    float2 TexCoord: TEXCOORD1;
-    float4 Color:    TEXCOORD2;
-    float3 Normal:   TEXCOORD3;
-};
+#include "../GBuffer.hlsli"
+#include "../Crimson.hlsli"
 
 struct VSOutput
 {
@@ -17,24 +10,6 @@ struct VSOutput
     float2 TexCoord: TEXCOORD0;
     float3 WorldSpace: POSITION0;
 };
-
-struct PSOutput
-{
-    float4 Albedo: SV_Target0;
-    float4 Position: SV_Target1;
-    float4 Normal: SV_Target2;
-    float4 MetallicRoughness: SV_Target3;
-};
-
-cbuffer CameraBuffer : register(b0, space1)
-{
-    Camera gCamera;
-}
-
-cbuffer WorldMatrix : register(b1, space1)
-{
-    float4x4 World;
-}
 
 SamplerState Sampler : register(s0, space2);
 
@@ -45,20 +20,20 @@ Texture2D Roughness : register(t3, space2);
 Texture2D Occlusion : register(t4, space2);
 Texture2D Emission : register(t5, space2);
 
-VSOutput VSMain(const in VSInput input)
+VSOutput VSMain(const in Vertex input)
 {
     VSOutput output;
 
-    output.WorldSpace = mul(World, float4(input.Position, 1.0)).xyz;
+    output.WorldSpace = mul(gWorld, float4(input.Position, 1.0)).xyz;
     output.Position = mul(gCamera.Projection, mul(gCamera.View, float4(output.WorldSpace, 1.0)));
     output.TexCoord = input.TexCoord;
     
     return output;
 }
 
-PSOutput PSMain(const in VSOutput input)
+GBufferOutput PSMain(const in VSOutput input)
 {
-    PSOutput output;
+    GBufferOutput output;
 
     const float3 albedo = Albedo.Sample(Sampler, input.TexCoord).rgb;
     const float3 normal = Normal.Sample(Sampler, input.TexCoord).rgb;

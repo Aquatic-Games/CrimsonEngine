@@ -54,7 +54,7 @@ PSOutput PSMain(const in VSOutput input)
 
     const float4 albedo = Albedo.Sample(Sampler, input.TexCoord);
 
-    output.Color = float4(albedo.rgb * 0.2, 1.0);
+    output.Color = float4(albedo.rgb, 1.0);
     
     return output;
 }
