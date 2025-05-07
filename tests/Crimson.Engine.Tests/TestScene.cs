@@ -33,7 +33,7 @@ public class TestScene : Scene
         App.Surface.CursorVisible = false;
 
         _texture = new Texture(App.Renderer, "DEBUG.png");
-        _texture2 = new Texture(App.Renderer, "C:/Users/aqua/Pictures/awesomeface.png");
+        _texture2 = new Texture(App.Renderer, "/home/aqua/Pictures/awesomeface.png");
         
         MaterialDefinition def = new(_texture)
         {
@@ -57,12 +57,12 @@ public class TestScene : Scene
         Camera.AddComponent(new CameraMove());
         
         Camera.Skybox = new Skybox(App.Renderer,
-            new Bitmap("C:/Users/aqua/Pictures/skybox/spacebox/nizzine/right.png"),
-            new Bitmap("C:/Users/aqua/Pictures/skybox/spacebox/nizzine/left.png"),
-            new Bitmap("C:/Users/aqua/Pictures/skybox/spacebox/nizzine/top.png"),
-            new Bitmap("C:/Users/aqua/Pictures/skybox/spacebox/nizzine/bottom.png"),
-            new Bitmap("C:/Users/aqua/Pictures/skybox/spacebox/nizzine/front.png"),
-            new Bitmap("C:/Users/aqua/Pictures/skybox/spacebox/nizzine/back.png"));
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/right.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/left.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/top.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/bottom.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/front.png"),
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/back.png"));
         
         base.Initialize();
     }
