@@ -12,7 +12,8 @@
 
     <ItemGroup>
       <PackageReference Include="Hexa.NET.ImGui" Version="2.2.7" />
-      <PackageReference Include="SDL3-CS" Version="3.2.10" />
+      <PackageReference Include="SDL3-CS" Version="3.2.12.3" />
+      <PackageReference Include="SDL3-CS.Native" Version="3.2.12" />
       <PackageReference Include="SharpGLTF.Core" Version="1.0.3" />
       <PackageReference Include="StbImageSharp" Version="2.30.15" />
     </ItemGroup>
