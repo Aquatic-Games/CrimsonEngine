@@ -235,7 +235,7 @@ public sealed class Skybox : IDisposable
             Texture = _textureHandle
         };
         
-        SDL.BindGPUFragmentSamplers(pass, 0, [samplerBinding], 1);
+        SDL.BindGPUFragmentSamplers(pass, 0, new IntPtr(&samplerBinding), 1);
         
         SDL.BindGPUGraphicsPipeline(pass, _pipeline);
 

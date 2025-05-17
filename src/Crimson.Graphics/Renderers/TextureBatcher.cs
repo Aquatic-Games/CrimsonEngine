@@ -32,7 +32,6 @@ internal class TextureBatcher : IDisposable
     private readonly IntPtr _pipeline;
 
     private readonly IntPtr _sampler;
-    private readonly SDL.GPUTextureSamplerBinding[] _samplerBinding;
 
     private readonly List<Draw> _drawQueue;
     private readonly List<DrawList> _drawList;
@@ -128,7 +127,6 @@ internal class TextureBatcher : IDisposable
         };
 
         _sampler = SDL.CreateGPUSampler(_device, in samplerInfo).Check("Create GPU sampler");
-        _samplerBinding = new SDL.GPUTextureSamplerBinding[1];
 
         _drawQueue = [];
         _drawList = [];
@@ -285,7 +283,7 @@ internal class TextureBatcher : IDisposable
         return true;
     }
 
-    private void Flush(IntPtr pass, ref readonly DrawList drawList)
+    private unsafe void Flush(IntPtr pass, ref readonly DrawList drawList)
     {
         Debug.Assert(drawList.NumDraws != 0);
         Debug.Assert(drawList.Texture != null);
@@ -296,10 +294,8 @@ internal class TextureBatcher : IDisposable
             Texture = drawList.Texture.TextureHandle
         };
         
-        _samplerBinding[0] = samplerBinding;
-        
         // Yikes.. Why does this one not have an IntPre overload?
-        SDL.BindGPUFragmentSamplers(pass, 0, _samplerBinding, 1);
+        SDL.BindGPUFragmentSamplers(pass, 0, new IntPtr(&samplerBinding), 1);
             
         SDL.DrawGPUIndexedPrimitives(pass, drawList.NumDraws * NumIndices, 1, drawList.Offset * NumIndices, 0, 0);
     }

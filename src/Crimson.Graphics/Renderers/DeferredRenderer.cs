@@ -133,46 +133,47 @@ internal class DeferredRenderer : IDisposable
         
         IOrderedEnumerable<WorldRenderable> frontToBack = _drawQueue.OrderBy(renderable =>
             Vector3.Distance(cameraPosition, renderable.WorldMatrix.Translation));
+
+        const int numSamplerBindings = 6;
+        SDL.GPUTextureSamplerBinding* bindings = stackalloc SDL.GPUTextureSamplerBinding[numSamplerBindings];
+        
         foreach ((Renderable renderable, Matrix4x4 world) in frontToBack)
         {
             SDL.PushGPUVertexUniformData(cb, 1, new IntPtr(&world), 64);
 
             // TODO: Have a sampler per material.
-            SDL.GPUTextureSamplerBinding[] bindings =
-            [
-                new()
-                {
-                    Texture = renderable.Material.Albedo.TextureHandle,
-                    Sampler = _passSampler
-                },
-                new()
-                {
-                    Texture = renderable.Material.Normal.TextureHandle,
-                    Sampler = _passSampler,
-                },
-                new()
-                {
-                    Texture = renderable.Material.Metallic.TextureHandle,
-                    Sampler = _passSampler,
-                },
-                new()
-                {
-                    Texture = renderable.Material.Roughness.TextureHandle,
-                    Sampler = _passSampler,
-                },
-                new()
-                {
-                    Texture = renderable.Material.Occlusion.TextureHandle,
-                    Sampler = _passSampler,
-                },
-                new()
-                {
-                    Texture = renderable.Material.Emission.TextureHandle,
-                    Sampler = _passSampler,
-                }
-            ];
+            bindings[0] = new SDL.GPUTextureSamplerBinding
+            {
+                Texture = renderable.Material.Albedo.TextureHandle,
+                Sampler = _passSampler
+            };
+            bindings[1] = new SDL.GPUTextureSamplerBinding
+            {
+                Texture = renderable.Material.Normal.TextureHandle,
+                Sampler = _passSampler,
+            };
+            bindings[2] = new SDL.GPUTextureSamplerBinding
+            {
+                Texture = renderable.Material.Metallic.TextureHandle,
+                Sampler = _passSampler,
+            };
+            bindings[3] = new SDL.GPUTextureSamplerBinding
+            {
+                Texture = renderable.Material.Roughness.TextureHandle,
+                Sampler = _passSampler,
+            };
+            bindings[4] = new SDL.GPUTextureSamplerBinding
+            {
+                Texture = renderable.Material.Occlusion.TextureHandle,
+                Sampler = _passSampler,
+            };
+            bindings[5] = new SDL.GPUTextureSamplerBinding
+            {
+                Texture = renderable.Material.Emission.TextureHandle,
+                Sampler = _passSampler,
+            };
 
-            SDL.BindGPUFragmentSamplers(gBufferPass, 0, bindings, (uint) bindings.Length);
+            SDL.BindGPUFragmentSamplers(gBufferPass, 0, (nint) bindings, numSamplerBindings);
 
             SDL.BindGPUGraphicsPipeline(gBufferPass, renderable.Material.Pipeline);
             
@@ -224,7 +225,7 @@ internal class DeferredRenderer : IDisposable
             Sampler = _passSampler
         };
 
-        SDL.BindGPUFragmentSamplers(lightingPass, 0, [albedoTargetBinding], 1);
+        SDL.BindGPUFragmentSamplers(lightingPass, 0, new IntPtr(&albedoTargetBinding), 1);
         
         SDL.DrawGPUPrimitives(lightingPass, 6, 1, 0, 0);
         

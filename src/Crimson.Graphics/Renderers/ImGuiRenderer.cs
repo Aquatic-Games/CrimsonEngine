@@ -316,7 +316,7 @@ internal sealed class ImGuiRenderer : IDisposable
                     Sampler = _sampler
                 };
 
-                SDL.BindGPUFragmentSamplers(renderPass, 0, [samplerBinding], 1);
+                SDL.BindGPUFragmentSamplers(renderPass, 0, new IntPtr(&samplerBinding), 1);
 
                 SDL.DrawGPUIndexedPrimitives(renderPass, drawCmd.ElemCount, 1, drawCmd.IdxOffset + indexOffset,
                     (short) (drawCmd.VtxOffset + vertexOffset), 0);
