@@ -33,7 +33,7 @@ public class TestScene : Scene
         App.Surface.CursorVisible = false;
 
         _texture = new Texture(App.Renderer, "DEBUG.png");
-        _texture2 = new Texture(App.Renderer, "/home/aqua/Pictures/awesomeface.png");
+        //_texture2 = new Texture(App.Renderer, "/home/aqua/Pictures/awesomeface.png");
         
         MaterialDefinition def = new(_texture)
         {
