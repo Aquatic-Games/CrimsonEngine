@@ -49,6 +49,9 @@ public abstract class Scene : IDisposable
 
     public bool TryGetEntity(string name, [NotNullWhen(true)] out Entity? entity)
     {
+        if (name.Contains('/'))
+            return Entity.TryResolveEntityPath(name, _entitiesMap, out entity);
+        
         return _entitiesMap.TryGetValue(name, out entity);
     }
 

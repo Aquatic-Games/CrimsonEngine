@@ -43,15 +43,14 @@ public class TestScene : Scene
         _material = new Material(App.Renderer, in def);
         _mesh = Mesh.FromPrimitive(new Cube(), _material);
 
-        Entity staticCube = new Entity("StaticCube", new Transform(new Vector3(0, -5, 0)));
-        staticCube.AddComponent(new Rigidbody(new BoxShape(new Vector3(0.5f)), 0));
-        staticCube.AddComponent(new MeshRenderer(_mesh));
-        AddEntity(staticCube);
+        Entity mainCube = new Entity("MainCube");
+        mainCube.AddComponent(new MeshRenderer(_mesh));
 
-        Entity dynamicCube = new Entity("DynamicCube");
-        dynamicCube.AddComponent(new Rigidbody(new BoxShape(new Vector3(0.5f)), 1));
-        dynamicCube.AddComponent(new MeshRenderer(_mesh));
-        AddEntity(dynamicCube);
+        Entity secondCube = new Entity("Cube1", new Transform(new Vector3(1, 0, 0)));
+        secondCube.AddComponent(new MeshRenderer(_mesh));
+        mainCube.AddChild(secondCube);
+        
+        AddEntity(mainCube);
         
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());
@@ -85,6 +84,9 @@ public class TestScene : Scene
             
             AddEntity(entity);
         }
+
+        GetEntity("MainCube").Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitY, dt);
+        GetEntity("MainCube/Cube1").Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitX, dt);
     }
 
     public override void Draw()

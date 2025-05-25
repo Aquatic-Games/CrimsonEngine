@@ -294,9 +294,8 @@ internal class TextureBatcher : IDisposable
             Texture = drawList.Texture.TextureHandle
         };
         
-        // Yikes.. Why does this one not have an IntPre overload?
         SDL.BindGPUFragmentSamplers(pass, 0, new IntPtr(&samplerBinding), 1);
-            
+
         SDL.DrawGPUIndexedPrimitives(pass, drawList.NumDraws * NumIndices, 1, drawList.Offset * NumIndices, 0, 0);
     }
     
