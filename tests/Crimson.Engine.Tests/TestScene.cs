@@ -42,9 +42,11 @@ public class TestScene : Scene
         
         _material = new Material(App.Renderer, in def);
         _mesh = Mesh.FromPrimitive(new Cube(), _material);
+        
+        Model model = Model.FromGltf(App.Renderer, "/home/aqua/Downloads/Lantern.glb");
 
-        Entity mainCube = new Entity("MainCube");
-        mainCube.AddComponent(new MeshRenderer(_mesh));
+        Entity mainCube = new Entity("MainCube", new Transform() { Scale = new Vector3(0.1f) });
+        model.AddToEntity(mainCube);
 
         Entity secondCube = new Entity("Cube1", new Transform(new Vector3(1, 0, 0)));
         secondCube.AddComponent(new MeshRenderer(_mesh));

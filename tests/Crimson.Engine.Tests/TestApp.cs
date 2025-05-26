@@ -27,8 +27,7 @@ public class TestApp : GlobalApp
         Model model = Model.FromGltf(renderer, "/home/aqua/Documents/test.glb");
         
         //Mesh mesh = Mesh.FromPrimitive(new Cube(), material);
-        Mesh mesh = model.Meshes[0];
-        _renderable = new Renderable(renderer, mesh);
+        //_renderable = new Renderable(renderer, mesh);
     }
 
     public override void PreUpdate(float dt)
