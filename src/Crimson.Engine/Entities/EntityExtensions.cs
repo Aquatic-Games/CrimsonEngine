@@ -30,8 +30,7 @@ public static class EntityExtensions
 
         if (mesh.Children.Count > 0)
         {
-            counter = 0;
-            Entity submesh = new Entity("SubMesh");
+            Entity submesh = new Entity($"Mesh{counter++}");
             entity.AddChild(submesh);
             
             foreach (ModelMesh m in mesh.Children)

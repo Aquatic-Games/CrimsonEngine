@@ -11,12 +11,12 @@ public class PhysicsSystem : IDisposable
 {
     private readonly JobSystem _jobSystem;
     
-    internal readonly JoltPhysics Physics;
+    public readonly JoltPhysics Jolt;
 
     public Vector3 Gravity
     {
-        get => Physics.Gravity;
-        set => Physics.Gravity = value;
+        get => Jolt.Gravity;
+        set => Jolt.Gravity = value;
     }
     
     public PhysicsSystem()
@@ -52,12 +52,12 @@ public class PhysicsSystem : IDisposable
 
         _jobSystem = new JobSystemThreadPool();
 
-        Physics = new JoltPhysics(settings);
+        Jolt = new JoltPhysics(settings);
     }
 
     public void Step(float deltaTime)
     {
-        PhysicsUpdateError error = Physics.Update(deltaTime, 1, _jobSystem);
+        PhysicsUpdateError error = Jolt.Update(deltaTime, 1, _jobSystem);
         Debug.Assert(error == PhysicsUpdateError.None);
     }
 
@@ -70,9 +70,9 @@ public class PhysicsSystem : IDisposable
             Restitution = 0.2f
         };
         
-        Body body = Physics.BodyInterface.CreateBody(bodySettings);
+        Body body = Jolt.BodyInterface.CreateBody(bodySettings);
         
-        Physics.BodyInterface.AddBody(body, Activation.Activate);
+        Jolt.BodyInterface.AddBody(body, Activation.Activate);
 
         return body;
     }
@@ -82,15 +82,15 @@ public class PhysicsSystem : IDisposable
         BodyCreationSettings bodySettings =
             new BodyCreationSettings(shape, position, rotation, MotionType.Static, Layers.NonMoving);
 
-        Body body = Physics.BodyInterface.CreateBody(bodySettings);
-        Physics.BodyInterface.AddBody(body, Activation.DontActivate);
+        Body body = Jolt.BodyInterface.CreateBody(bodySettings);
+        Jolt.BodyInterface.AddBody(body, Activation.DontActivate);
 
         return body;
     }
 
     public void Dispose()
     {
-        Physics.Dispose();
+        Jolt.Dispose();
         Foundation.Shutdown();
     }
     

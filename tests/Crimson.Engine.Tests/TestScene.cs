@@ -30,7 +30,7 @@ public class TestScene : Scene
     {
         //App.FpsLimit = 240;
         //App.Renderer.VSync = false;
-        App.Surface.CursorVisible = false;
+        //App.Surface.CursorVisible = false;
 
         _texture = new Texture(App.Renderer, "DEBUG.png");
         //_texture2 = new Texture(App.Renderer, "/home/aqua/Pictures/awesomeface.png");
@@ -43,7 +43,7 @@ public class TestScene : Scene
         _material = new Material(App.Renderer, in def);
         _mesh = Mesh.FromPrimitive(new Cube(), _material);
         
-        Model model = Model.FromGltf(App.Renderer, "/home/aqua/Downloads/Lantern.glb");
+        Model model = Model.FromGltf(App.Renderer, "/home/aqua/Downloads/Fox.glb");
 
         Entity mainCube = new Entity("MainCube", new Transform() { Scale = new Vector3(0.1f) });
         model.AddToEntity(mainCube);
