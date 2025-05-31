@@ -4,6 +4,8 @@ namespace Crimson.Math.Tests;
 
 public class MatrixTests
 {
+    #region Struct
+    
     [Test]
     public void TestConstruct()
     {
@@ -225,27 +227,91 @@ public class MatrixTests
         Matrix<int> testB = new Matrix<int>(17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32);
         Matrix<int> testC = testA * testB;
         
+        CompareControlWithTest(controlC, testC);
+    }
+
+    [Test]
+    public void TestEquals()
+    {
+        Matrix<int> a = new Matrix<int>(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+        Matrix<int> b = new Matrix<int>(17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32);
+
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(testC.Row0.X, Is.EqualTo(controlC.M11));
-            Assert.That(testC.Row0.Y, Is.EqualTo(controlC.M12));
-            Assert.That(testC.Row0.Z, Is.EqualTo(controlC.M13));
-            Assert.That(testC.Row0.W, Is.EqualTo(controlC.M14));
+            Assert.That(a == a, Is.True);
+            Assert.That(a == b, Is.False);
+        }
+    }
+    
+    [Test]
+    public void TestNotEquals()
+    {
+        Matrix<int> a = new Matrix<int>(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+        Matrix<int> b = new Matrix<int>(17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32);
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(a != a, Is.False);
+            Assert.That(a != b, Is.True);
+        }
+    }
+    
+    #endregion
+    
+    #region Operations
+
+    [Test]
+    public void TestRotateX()
+    {
+        Matrix4x4 control = Matrix4x4.CreateRotationX(1);
+        Matrix<float> test = Matrix.RotateX<float>(1);
+        
+        CompareControlWithTest(control, test);
+    }
+    
+    [Test]
+    public void TestRotateY()
+    {
+        Matrix4x4 control = Matrix4x4.CreateRotationY(1);
+        Matrix<float> test = Matrix.RotateY<float>(1);
+        
+        CompareControlWithTest(control, test);
+    }
+    
+    [Test]
+    public void TestRotateZ()
+    {
+        Matrix4x4 control = Matrix4x4.CreateRotationZ(1);
+        Matrix<float> test = Matrix.RotateZ<float>(1);
+        
+        CompareControlWithTest(control, test);
+    }
+    
+    #endregion
+
+    private static void CompareControlWithTest<T>(Matrix4x4 control, Matrix<T> test) where T : INumber<T>
+    {
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(float.CreateChecked(test.Row0.X), Is.EqualTo(control.M11));
+            Assert.That(float.CreateChecked(test.Row0.Y), Is.EqualTo(control.M12));
+            Assert.That(float.CreateChecked(test.Row0.Z), Is.EqualTo(control.M13));
+            Assert.That(float.CreateChecked(test.Row0.W), Is.EqualTo(control.M14));
             
-            Assert.That(testC.Row1.X, Is.EqualTo(controlC.M21));
-            Assert.That(testC.Row1.Y, Is.EqualTo(controlC.M22));
-            Assert.That(testC.Row1.Z, Is.EqualTo(controlC.M23));
-            Assert.That(testC.Row1.W, Is.EqualTo(controlC.M24));
+            Assert.That(float.CreateChecked(test.Row1.X), Is.EqualTo(control.M21));
+            Assert.That(float.CreateChecked(test.Row1.Y), Is.EqualTo(control.M22));
+            Assert.That(float.CreateChecked(test.Row1.Z), Is.EqualTo(control.M23));
+            Assert.That(float.CreateChecked(test.Row1.W), Is.EqualTo(control.M24));
             
-            Assert.That(testC.Row2.X, Is.EqualTo(controlC.M31));
-            Assert.That(testC.Row2.Y, Is.EqualTo(controlC.M32));
-            Assert.That(testC.Row2.Z, Is.EqualTo(controlC.M33));
-            Assert.That(testC.Row2.W, Is.EqualTo(controlC.M34));
+            Assert.That(float.CreateChecked(test.Row2.X), Is.EqualTo(control.M31));
+            Assert.That(float.CreateChecked(test.Row2.Y), Is.EqualTo(control.M32));
+            Assert.That(float.CreateChecked(test.Row2.Z), Is.EqualTo(control.M33));
+            Assert.That(float.CreateChecked(test.Row2.W), Is.EqualTo(control.M34));
             
-            Assert.That(testC.Row3.X, Is.EqualTo(controlC.M41));
-            Assert.That(testC.Row3.Y, Is.EqualTo(controlC.M42));
-            Assert.That(testC.Row3.Z, Is.EqualTo(controlC.M43));
-            Assert.That(testC.Row3.W, Is.EqualTo(controlC.M44));
+            Assert.That(float.CreateChecked(test.Row3.X), Is.EqualTo(control.M41));
+            Assert.That(float.CreateChecked(test.Row3.Y), Is.EqualTo(control.M42));
+            Assert.That(float.CreateChecked(test.Row3.Z), Is.EqualTo(control.M43));
+            Assert.That(float.CreateChecked(test.Row3.W), Is.EqualTo(control.M44));
         }
     }
 }
