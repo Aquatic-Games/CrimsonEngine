@@ -4,9 +4,9 @@ using System.Runtime.CompilerServices;
 namespace Crimson.Math;
 
 /// <summary>
-/// Contains operations for a <see cref="Vector2T{T}"/>.
+/// Contains operations for a <see cref="Vector4T{T}"/>.
 /// </summary>
-public static class Vector2T
+public static class Vector4T
 {
     /// <summary>
     /// Calculate the dot product of two vectors.
@@ -16,8 +16,8 @@ public static class Vector2T
     /// <typeparam name="T">A numeric type.</typeparam>
     /// <returns>The dot product.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T Dot<T>(in Vector2T<T> a, in Vector2T<T> b) where T : INumber<T>
-        => a.X * b.X + a.Y * b.Y;
+    public static T Dot<T>(in Vector4T<T> a, in Vector4T<T> b) where T : INumber<T>
+        => a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;
 
     /// <summary>
     /// Calculate the squared magnitude/length of a vector. This does not perform the sqrt operation.
@@ -26,7 +26,7 @@ public static class Vector2T
     /// <typeparam name="T">A numeric type.</typeparam>
     /// <returns>The squared magnitude.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T MagnitudeSquared<T>(in Vector2T<T> vector) where T : INumber<T>
+    public static T MagnitudeSquared<T>(in Vector4T<T> vector) where T : INumber<T>
         => Dot(in vector, in vector);
 
     /// <summary>
@@ -36,6 +36,6 @@ public static class Vector2T
     /// <typeparam name="T">A numeric type.</typeparam>
     /// <returns>The magnitude.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T Magnitude<T>(in Vector2T<T> vector) where T : INumber<T>, IRootFunctions<T>
+    public static T Magnitude<T>(in Vector4T<T> vector) where T : INumber<T>, IRootFunctions<T>
         => T.Sqrt(MagnitudeSquared(in vector));
 }
