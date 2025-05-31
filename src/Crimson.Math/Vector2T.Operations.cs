@@ -38,4 +38,23 @@ public static class Vector2T
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T Magnitude<T>(in Vector2T<T> vector) where T : INumber<T>, IRootFunctions<T>
         => T.Sqrt(MagnitudeSquared(in vector));
+
+    // https://github.com/microsoft/referencesource/blob/master/System.Numerics/System/Numerics/Vector2.cs#L290-L296
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Vector2T<T> Transform<T>(in Vector2T<T> vector, in Matrix<T> matrix) where T : INumber<T>
+    {
+        return new Vector2T<T>(
+            vector.X * matrix.Row0.X + vector.Y * matrix.Row1.X + matrix.Row3.X,
+            vector.X * matrix.Row0.Y + vector.Y * matrix.Row1.Y + matrix.Row3.Y
+        );
+    }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Vector2T<T> TransformNormal<T>(in Vector2T<T> vector, in Matrix<T> matrix) where T : INumber<T>
+    {
+        return new Vector2T<T>(
+            vector.X * matrix.Row0.X + vector.Y * matrix.Row1.X,
+            vector.X * matrix.Row0.Y + vector.Y * matrix.Row1.Y
+        );
+    }
 }

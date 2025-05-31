@@ -15,6 +15,7 @@ public readonly struct Vector2T<T> :
     IUnaryNegationOperators<Vector2T<T>, Vector2T<T>>,
     IMultiplyOperators<Vector2T<T>, Vector2T<T>, Vector2T<T>>,
     IMultiplyOperators<Vector2T<T>, T, Vector2T<T>>,
+    IMultiplyOperators<Vector2T<T>, Matrix<T>, Vector2T<T>>,
     IDivisionOperators<Vector2T<T>, Vector2T<T>, Vector2T<T>>,
     IDivisionOperators<Vector2T<T>, T, Vector2T<T>>,
     IFormattable 
@@ -111,6 +112,9 @@ public readonly struct Vector2T<T> :
 
     public static Vector2T<T> operator *(Vector2T<T> left, T right)
         => new Vector2T<T>(left.X * right, left.Y * right);
+    
+    public static Vector2T<T> operator *(Vector2T<T> left, Matrix<T> right)
+        => Vector2T.Transform(left, right);
 
     public static Vector2T<T> operator /(Vector2T<T> left, Vector2T<T> right)
         => new Vector2T<T>(left.X / right.X, left.Y / right.Y);

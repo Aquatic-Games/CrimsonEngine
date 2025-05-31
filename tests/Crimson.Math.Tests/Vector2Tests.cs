@@ -149,6 +149,15 @@ public class Vector2Tests
     }
     
     [Test]
+    public void TestVectorMatrixMultiplication()
+    {
+        Vector2T<float> control = Vector2T.Transform(new Vector2T<float>(5, 10), Matrix.RotateZ<float>(3));
+        Vector2T<float> test = new Vector2T<float>(5, 10) * Matrix.RotateZ<float>(3);
+        
+        Assert.That(test, Is.EqualTo(control));
+    }
+    
+    [Test]
     public void TestVectorScalarMultiplication()
     {
         Vector2T<int> a = new Vector2T<int>(1, 2);
@@ -255,6 +264,36 @@ public class Vector2Tests
         float test = Vector2T.Magnitude(new Vector2T<float>(1, 2));
         
         Assert.That(test, Is.EqualTo(control));
+    }
+
+    [Test]
+    public void TestTransform()
+    {
+        Vector2 control = Vector2.Transform(new Vector2(5, 10), Matrix4x4.CreateRotationZ(3));
+        Vector2T<float> test = Vector2T.Transform(new Vector2T<float>(5, 10), Matrix.RotateZ<float>(3));
+
+        using (Assert.EnterMultipleScope())
+        {
+            // System.Numerics has a different impl meaning its output is very slightly different, but only by a few
+            // decimal points. Cast to int to remove this difference while being a "good enough" test.
+            Assert.That((int) test.X, Is.EqualTo((int) control.X));
+            Assert.That((int) test.Y, Is.EqualTo((int) control.Y));
+        }
+    }
+    
+    [Test]
+    public void TestTransformNormal()
+    {
+        Vector2 control = Vector2.TransformNormal(new Vector2(5, 10), Matrix4x4.CreateRotationZ(3));
+        Vector2T<float> test = Vector2T.TransformNormal(new Vector2T<float>(5, 10), Matrix.RotateZ<float>(3));
+
+        using (Assert.EnterMultipleScope())
+        {
+            // System.Numerics has a different impl meaning its output is very slightly different, but only by a few
+            // decimal points. Cast to int to remove this difference while being a "good enough" test.
+            Assert.That((int) test.X, Is.EqualTo((int) control.X));
+            Assert.That((int) test.Y, Is.EqualTo((int) control.Y));
+        }
     }
 
     #endregion

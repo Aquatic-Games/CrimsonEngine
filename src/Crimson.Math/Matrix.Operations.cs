@@ -4,6 +4,7 @@ namespace Crimson.Math;
 
 public static class Matrix
 {
+    // https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
     public static Matrix<T> RotateX<T>(T rotation) where T : INumber<T>, ITrigonometricFunctions<T>
     {
         T sinTheta = T.Sin(rotation);
