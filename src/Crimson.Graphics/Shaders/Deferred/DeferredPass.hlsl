@@ -1,6 +1,8 @@
 #pragma vertex VSMain
 #pragma pixel PSMain
 
+#include "../Common.hlsli"
+
 struct VSOutput
 {
     float4 Position: SV_Position;
@@ -12,12 +14,10 @@ struct PSOutput
     float4 Color: SV_Target0;
 };
 
-SamplerState Sampler : register(s0, space2);
-
-Texture2D Albedo : register(t0, space2);
-Texture2D Position : register(t1, space2);
-Texture2D Normal : register(t2, space2);
-Texture2D MetallicRoughness : register(t3, space2);
+SAMPLER2D(Albedo, 0)
+SAMPLER2D(Position, 1)
+SAMPLER2D(Normal, 2)
+SAMPLER2D(MetallicRoughness, 3)
 
 VSOutput VSMain(const uint vertexId: SV_VertexID)
 {
@@ -52,7 +52,7 @@ PSOutput PSMain(const in VSOutput input)
 {
     PSOutput output;
 
-    const float4 albedo = Albedo.Sample(Sampler, input.TexCoord);
+    const float4 albedo = SAMPLE(Albedo, input.TexCoord);
 
     output.Color = float4(albedo.rgb, 1.0);
     

@@ -10,12 +10,5 @@ struct Vertex
     float3 Normal:   TEXCOORD3;
 };
 
-cbuffer CameraBuffer : register(b0, space1)
-{
-    Camera gCamera;
-}
-
-cbuffer WorldMatrix : register(b1, space1)
-{
-    float4x4 gWorld;
-}
+CBUFFER(gCamera, 0, Camera)
+CBUFFER(gWorld, 1, float4x4)

@@ -1,7 +1,7 @@
 #pragma vertex VSMain
 #pragma pixel PSMain
 
-#include "../Common.hlsli"
+#include "../Crimson.hlsli"
 
 struct VSOutput
 {
@@ -14,13 +14,7 @@ struct PSOutput
     float4 Color: SV_Target0;
 };
 
-cbuffer CameraBuffer : register(b0, space1)
-{
-    Camera gCamera;
-}
-
-TextureCube Cube : register(t0, space2);
-SamplerState Sampler : register(s0, space2);
+SAMPLERCUBE(Cube, 0)
 
 VSOutput VSMain(const in float3 position: TEXCOORD0)
 {
@@ -36,7 +30,7 @@ PSOutput PSMain(const in VSOutput input)
 {
     PSOutput output;
 
-    output.Color = Cube.Sample(Sampler, input.TexCoord);
+    output.Color = SAMPLE(Cube, input.TexCoord);
 
     return output;
 }

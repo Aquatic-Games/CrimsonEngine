@@ -11,14 +11,12 @@ struct VSOutput
     float3 WorldSpace: POSITION0;
 };
 
-SamplerState Sampler : register(s0, space2);
-
-Texture2D Albedo : register(t0, space2);
-Texture2D Normal : register(t1, space2);
-Texture2D Metallic : register(t2, space2);
-Texture2D Roughness : register(t3, space2);
-Texture2D Occlusion : register(t4, space2);
-Texture2D Emission : register(t5, space2);
+SAMPLER2D(Albedo, 0)
+SAMPLER2D(Normal, 1)
+SAMPLER2D(Metallic, 2)
+SAMPLER2D(Roughness, 3)
+SAMPLER2D(Occlusion, 4)
+SAMPLER2D(Emission, 5)
 
 VSOutput VSMain(const in Vertex input)
 {
@@ -35,12 +33,12 @@ GBufferOutput PSMain(const in VSOutput input)
 {
     GBufferOutput output;
 
-    const float3 albedo = Albedo.Sample(Sampler, input.TexCoord).rgb;
-    const float3 normal = Normal.Sample(Sampler, input.TexCoord).rgb;
-    const float metallic = Metallic.Sample(Sampler, input.TexCoord).r;
-    const float roughness = Roughness.Sample(Sampler, input.TexCoord).r;
-    const float occlusion = Occlusion.Sample(Sampler, input.TexCoord).r;
-    const float emission = Emission.Sample(Sampler, input.TexCoord).r;
+    const float3 albedo = SAMPLE(Albedo, input.TexCoord).rgb;
+    const float3 normal = SAMPLE(Normal, input.TexCoord).rgb;
+    const float metallic = SAMPLE(Metallic, input.TexCoord).r;
+    const float roughness = SAMPLE(Roughness, input.TexCoord).r;
+    const float occlusion = SAMPLE(Occlusion, input.TexCoord).r;
+    const float emission = SAMPLE(Emission, input.TexCoord).r;
 
     output.Albedo = float4(albedo, 1.0);
     output.Position = float4(input.WorldSpace, 1.0);

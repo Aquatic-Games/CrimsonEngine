@@ -68,10 +68,10 @@ public class Material : IDisposable
 
         SDL.GPUColorTargetDescription* colorTargets = stackalloc SDL.GPUColorTargetDescription[]
         {
-            new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R32G32B32A32Float }, // Albedo
+            new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R8G8B8A8Unorm }, // Albedo
             new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R32G32B32A32Float }, // Position
-            new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R32G32B32A32Float }, // Normal
-            new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R32G32B32A32Float } // MetallicRoughness
+            new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R8G8B8A8Unorm }, // Normal
+            new SDL.GPUColorTargetDescription { Format = SDL.GPUTextureFormat.R8G8B8A8Unorm } // MetallicRoughness
         };
 
         SDL.GPUGraphicsPipelineCreateInfo pipelineInfo = new()
