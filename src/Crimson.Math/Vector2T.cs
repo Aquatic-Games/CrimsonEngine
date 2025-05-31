@@ -8,10 +8,11 @@ namespace Crimson.Math;
 /// </summary>
 /// <typeparam name="T">A numeric type.</typeparam>
 [StructLayout(LayoutKind.Sequential)]
-public struct Vector2T<T> : 
+public readonly struct Vector2T<T> : 
     IEquatable<Vector2T<T>>,
     IAdditionOperators<Vector2T<T>, Vector2T<T>, Vector2T<T>>,
     ISubtractionOperators<Vector2T<T>, Vector2T<T>, Vector2T<T>>,
+    IUnaryNegationOperators<Vector2T<T>, Vector2T<T>>,
     IMultiplyOperators<Vector2T<T>, Vector2T<T>, Vector2T<T>>,
     IMultiplyOperators<Vector2T<T>, T, Vector2T<T>>,
     IDivisionOperators<Vector2T<T>, Vector2T<T>, Vector2T<T>>,
@@ -83,6 +84,9 @@ public struct Vector2T<T> :
 
     public static Vector2T<T> operator -(Vector2T<T> left, Vector2T<T> right)
         => new Vector2T<T>(left.X - right.X, left.Y - right.Y);
+
+    public static Vector2T<T> operator -(Vector2T<T> value)
+        => new Vector2T<T>(-value.X, -value.Y);
 
     public static Vector2T<T> operator *(Vector2T<T> left, Vector2T<T> right)
         => new Vector2T<T>(left.X * right.X, left.Y * right.Y);
