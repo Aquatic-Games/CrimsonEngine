@@ -70,6 +70,24 @@ public readonly struct Vector2T<T> :
         X = scalar;
         Y = scalar;
     }
+    
+    /// <summary>
+    /// Get the value at the given index.
+    /// </summary>
+    /// <param name="index">The index to get the value.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if an invalid index is given.</exception>
+    public T this[int index]
+    {
+        get
+        {
+            return index switch
+            {
+                0 => X,
+                1 => Y,
+                _ => throw new ArgumentOutOfRangeException(nameof(index), index, null)
+            };
+        }
+    }
 
     /// <summary>
     /// Cast this vector to a <see cref="Vector2T{T}"/> with a different component type.

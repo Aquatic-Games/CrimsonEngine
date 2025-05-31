@@ -65,6 +65,10 @@ public class TestScene : Scene
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/front.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/back.png"));
         
+        Console.WriteLine(Matrix<float>.Identity);
+        
+        Console.WriteLine(Matrix<double>.Identity[3][3]);
+        
         base.Initialize();
     }
 
@@ -98,8 +102,6 @@ public class TestScene : Scene
         //App.Renderer.DrawImage(_texture2, Vector2.Zero);
         //App.Renderer.DrawImage(_texture, Vector2.Zero);
         //App.Renderer.DrawImage(_texture, new Vector2(100));
-        
-        Console.WriteLine("Egg");
         
         App.Renderer.DrawLine(new Vector2(0, 0), new Vector2(1280, 720), Color.White, 5);
     }

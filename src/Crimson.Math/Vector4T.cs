@@ -98,6 +98,26 @@ public readonly struct Vector4T<T> :
     }
 
     /// <summary>
+    /// Get the value at the given index.
+    /// </summary>
+    /// <param name="index">The index to get the value.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if an invalid index is given.</exception>
+    public T this[int index]
+    {
+        get
+        {
+            return index switch
+            {
+                0 => X,
+                1 => Y,
+                2 => Z,
+                3 => W,
+                _ => throw new ArgumentOutOfRangeException(nameof(index), index, null)
+            };
+        }
+    }
+
+    /// <summary>
     /// Cast this vector to a <see cref="Vector4T{T}"/> with a different component type.
     /// </summary>
     /// <typeparam name="TOther">A numeric type.</typeparam>
