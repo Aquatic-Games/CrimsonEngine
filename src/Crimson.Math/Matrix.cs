@@ -78,9 +78,9 @@ public readonly struct Matrix<T> :
     )
     {
         Row0 = new Vector4T<T>(m00, m01, m02, m03);
-        Row0 = new Vector4T<T>(m10, m11, m12, m13);
-        Row0 = new Vector4T<T>(m20, m21, m22, m23);
-        Row0 = new Vector4T<T>(m30, m31, m32, m33);
+        Row1 = new Vector4T<T>(m10, m11, m12, m13);
+        Row2 = new Vector4T<T>(m20, m21, m22, m23);
+        Row3 = new Vector4T<T>(m30, m31, m32, m33);
     }
     
     /// <summary>

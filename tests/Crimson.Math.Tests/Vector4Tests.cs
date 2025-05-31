@@ -1,9 +1,13 @@
-﻿namespace Crimson.Math.Tests;
+﻿using System.Numerics;
+
+namespace Crimson.Math.Tests;
 
 public class Vector4Tests
 {
+    #region Struct
+    
     [Test]
-    public void CreateVector()
+    public void TestConstruct()
     {
         Vector4T<int> vector = new Vector4T<int>(1, 2, 3, 4);
 
@@ -17,7 +21,7 @@ public class Vector4Tests
     }
 
     [Test]
-    public void CreateVectorScalar()
+    public void TestConstructScalar()
     {
         Vector4T<int> vector = new Vector4T<int>(2);
 
@@ -277,4 +281,37 @@ public class Vector4Tests
         Vector4T<int> vector = new Vector4T<int>(1, 2, 3, 4);
         Assert.That(vector.ToString(), Is.EqualTo("X: 1, Y: 2, Z: 3, W: 4"));
     }
+    
+    #endregion
+
+    #region Operations
+
+    [Test]
+    public void TestDot()
+    {
+        float control = Vector4.Dot(new Vector4(1, 2, 3, 4), new Vector4(4, 3, 2, 1));
+        float test = Vector4T.Dot(new Vector4T<float>(1, 2, 3, 4), new Vector4T<float>(4, 3, 2, 1));
+        
+        Assert.That(test, Is.EqualTo(control));
+    }
+
+    [Test]
+    public void TestMagnitudeSquared()
+    {
+        float control = new Vector4(1, 2, 3, 4).LengthSquared();
+        float test = Vector4T.MagnitudeSquared(new Vector4T<float>(1, 2, 3, 4));
+        
+        Assert.That(test, Is.EqualTo(control));
+    }
+
+    [Test]
+    public void TestMagnitude()
+    {
+        float control = new Vector4(1, 2, 3, 4).Length();
+        float test = Vector4T.Magnitude(new Vector4T<float>(1, 2, 3, 4));
+        
+        Assert.That(test, Is.EqualTo(control));
+    }
+
+    #endregion
 }
