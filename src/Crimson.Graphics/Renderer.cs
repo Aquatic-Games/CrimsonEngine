@@ -196,6 +196,54 @@ public sealed class Renderer : IDisposable
     }
 
     /// <summary>
+    /// Draw a line from a to b.
+    /// </summary>
+    /// <param name="a">The first point.</param>
+    /// <param name="b">The second point.</param>
+    /// <param name="color">The line color.</param>
+    /// <param name="thickness">The line thickness in pixels.</param>
+    public void DrawLine(Vector2 a, Vector2 b, Color color, int thickness)
+    {
+        float halfThickness = thickness / 2.0f;
+
+        Vector2 topLeft;
+        Vector2 bottomLeft;
+        Vector2 topRight;
+        Vector2 bottomRight;
+
+        // Use fast paths if drawing hline or vline as it avoids the complex matrix calculations
+        if (a.X == b.X)
+        {
+            topLeft = new Vector2(a.X - halfThickness, a.Y);
+            topRight = new Vector2(a.X + halfThickness, a.Y);
+            bottomLeft = new Vector2(b.X - halfThickness, b.Y);
+            bottomRight = new Vector2(b.X + halfThickness, b.Y);
+        }
+        else if (a.Y == b.Y)
+        {
+            topLeft = new Vector2(a.X, a.Y - halfThickness);
+            bottomLeft = new Vector2(a.X, a.Y + halfThickness);
+            topRight = new Vector2(b.X, b.Y - halfThickness);
+            bottomRight = new Vector2(b.X, b.Y + halfThickness);
+        }
+        else
+        {
+            float rot = float.Atan2(b.Y - a.Y, b.X - a.X);
+            float dist = Vector2.Distance(a, b);
+
+            Matrix3x2 rotMatrix = Matrix3x2.CreateRotation(rot);
+
+            topLeft = Vector2.Transform(new Vector2(0, -halfThickness), rotMatrix) + a;
+            bottomLeft = Vector2.Transform(new Vector2(0, +halfThickness), rotMatrix) + a;
+            topRight = Vector2.Transform(new Vector2(dist, -halfThickness), rotMatrix) + a;
+            bottomRight = Vector2.Transform(new Vector2(dist, +halfThickness), rotMatrix) + a;
+        }
+
+        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(WhiteTexture, topLeft, topRight, bottomLeft, bottomRight,
+            color));
+    }
+
+    /// <summary>
     /// Render and present to the surface.
     /// </summary>
     public unsafe void Render()
