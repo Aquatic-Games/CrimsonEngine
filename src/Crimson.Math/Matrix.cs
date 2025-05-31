@@ -37,6 +37,26 @@ public readonly struct Matrix<T> :
     public readonly Vector4T<T> Row3;
 
     /// <summary>
+    /// Get the first column.
+    /// </summary>
+    public Vector4T<T> Column0 => new Vector4T<T>(Row0.X, Row1.X, Row2.X, Row3.X);
+    
+    /// <summary>
+    /// Get the second column.
+    /// </summary>
+    public Vector4T<T> Column1 => new Vector4T<T>(Row0.Y, Row1.Y, Row2.Y, Row3.Y);
+    
+    /// <summary>
+    /// Get the third column.
+    /// </summary>
+    public Vector4T<T> Column2 => new Vector4T<T>(Row0.Z, Row1.Z, Row2.Z, Row3.Z);
+    
+    /// <summary>
+    /// Get the fourth column.
+    /// </summary>
+    public Vector4T<T> Column3 => new Vector4T<T>(Row0.W, Row1.W, Row2.W, Row3.W);
+
+    /// <summary>
     /// Create a <see cref="Matrix{T}"/> with 4 rows.
     /// </summary>
     /// <param name="row0">The first row.</param>
@@ -111,7 +131,22 @@ public readonly struct Matrix<T> :
     
     public static Matrix<T> operator *(Matrix<T> left, Matrix<T> right)
     {
-        throw new NotImplementedException();
+        Vector4T<T> row0 = left.Row0;
+        Vector4T<T> row1 = left.Row1;
+        Vector4T<T> row2 = left.Row2;
+        Vector4T<T> row3 = left.Row3;
+        
+        Vector4T<T> column0 = right.Column0;
+        Vector4T<T> column1 = right.Column1;
+        Vector4T<T> column2 = right.Column2;
+        Vector4T<T> column3 = right.Column3;
+
+        return new Matrix<T>(
+            new Vector4T<T>(Vector4T.Dot(row0, column0), Vector4T.Dot(row0, column1), Vector4T.Dot(row0, column2), Vector4T.Dot(row0, column3)),
+            new Vector4T<T>(Vector4T.Dot(row1, column0), Vector4T.Dot(row1, column1), Vector4T.Dot(row1, column2), Vector4T.Dot(row1, column3)),
+            new Vector4T<T>(Vector4T.Dot(row2, column0), Vector4T.Dot(row2, column1), Vector4T.Dot(row2, column2), Vector4T.Dot(row2, column3)),
+            new Vector4T<T>(Vector4T.Dot(row3, column0), Vector4T.Dot(row3, column1), Vector4T.Dot(row3, column2), Vector4T.Dot(row3, column3))
+        );
     }
 
     public bool Equals(Matrix<T> other)

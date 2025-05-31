@@ -93,6 +93,35 @@ public class MatrixTests
     }
 
     [Test]
+    public void TestColumns()
+    {
+        Matrix<int> matrix = new Matrix<int>(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
+        
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(matrix.Column0.X, Is.EqualTo(1));
+            Assert.That(matrix.Column0.Y, Is.EqualTo(5));
+            Assert.That(matrix.Column0.Z, Is.EqualTo(9));
+            Assert.That(matrix.Column0.W, Is.EqualTo(13));
+            
+            Assert.That(matrix.Column1.X, Is.EqualTo(2));
+            Assert.That(matrix.Column1.Y, Is.EqualTo(6));
+            Assert.That(matrix.Column1.Z, Is.EqualTo(10));
+            Assert.That(matrix.Column1.W, Is.EqualTo(14));
+            
+            Assert.That(matrix.Column2.X, Is.EqualTo(3));
+            Assert.That(matrix.Column2.Y, Is.EqualTo(7));
+            Assert.That(matrix.Column2.Z, Is.EqualTo(11));
+            Assert.That(matrix.Column2.W, Is.EqualTo(15));
+            
+            Assert.That(matrix.Column3.X, Is.EqualTo(4));
+            Assert.That(matrix.Column3.Y, Is.EqualTo(8));
+            Assert.That(matrix.Column3.Z, Is.EqualTo(12));
+            Assert.That(matrix.Column3.W, Is.EqualTo(16));
+        }
+    }
+
+    [Test]
     public void TestIndexer()
     {
         Matrix<int> matrix = new Matrix<int>(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
