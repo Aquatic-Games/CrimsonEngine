@@ -1,4 +1,5 @@
 using System.Numerics;
+using Crimson.Data;
 using Crimson.Engine.Entities;
 using Crimson.Engine.Entities.Components;
 using Crimson.Graphics;
@@ -34,6 +35,26 @@ public class TestScene : Scene
 
         _texture = new Texture(App.Renderer, "DEBUG.png");
         //_texture2 = new Texture(App.Renderer, "/home/aqua/Pictures/awesomeface.png");
+
+        /*QuickConfig config = new QuickConfig();
+        config.SetOption("window.size", [1280, 720]);
+        config.SetOption("window.fullscreen", true);
+        config.SetOption("user.name", "Graphics");
+        config.SetOption("test", ["Hello", "There", "This", "Is", "Some", "Text"]);*/
+
+        QuickConfig config = QuickConfig.Deserialize("""
+                                                     window.size=1280,720
+                                                     window.fullscreen=true
+                                                     user.name="Graphics"
+                                                     test="Hello","There","This","Is","Some","Text"
+                                                     input.forward=W
+                                                     input.crouch=LeftControl,C
+                                                     """);
+        
+        Console.WriteLine(config);
+        
+        Console.WriteLine(config.GetEnum<Key>("input.forward"));
+        Console.WriteLine(config.GetEnum<Key>("input.crouch", 1));
         
         MaterialDefinition def = new(_texture)
         {
