@@ -313,5 +313,33 @@ public class Vector4Tests
         Assert.That(test, Is.EqualTo(control));
     }
 
+    [Test]
+    public void TestDistanceSquared()
+    {
+        Vector4 controlA = new Vector4(1, 2, 3, 4);
+        Vector4 controlB = new Vector4(5, 6, 7, 8);
+        float control = Vector4.DistanceSquared(controlA, controlB);
+
+        Vector4T<float> testA = new Vector4T<float>(1, 2, 3, 4);
+        Vector4T<float> testB = new Vector4T<float>(5, 6, 7, 8);
+        float test = Vector4T.DistanceSquared(testA, testB);
+        
+        Assert.That(test, Is.EqualTo(control));
+    }
+    
+    [Test]
+    public void TestDistance()
+    {
+        Vector4 controlA = new Vector4(1, 2, 3, 4);
+        Vector4 controlB = new Vector4(5, 6, 7, 8);
+        float control = Vector4.Distance(controlA, controlB);
+
+        Vector4T<float> testA = new Vector4T<float>(1, 2, 3, 4);
+        Vector4T<float> testB = new Vector4T<float>(5, 6, 7, 8);
+        float test = Vector4T.Distance(testA, testB);
+        
+        Assert.That(test, Is.EqualTo(control));
+    }
+
     #endregion
 }

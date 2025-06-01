@@ -38,6 +38,29 @@ public static class Vector2T
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T Magnitude<T>(in Vector2T<T> vector) where T : INumber<T>, IRootFunctions<T>
         => T.Sqrt(MagnitudeSquared(in vector));
+    
+    /// <summary>
+    /// Calculate the squared Euclidean distance between two vectors. This does not perform the sqrt operation.
+    /// </summary>
+    /// <param name="a">The first vector.</param>
+    /// <param name="b">The second vector.</param>
+    /// <typeparam name="T">A numeric type.</typeparam>
+    /// <returns>The squared distance.</returns>
+    // https://www.geeksforgeeks.org/euclidean-distance/
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T DistanceSquared<T>(in Vector2T<T> a, in Vector2T<T> b) where T : INumber<T>
+        => Dot(b - a, b - a);
+
+    /// <summary>
+    /// Calculate the Euclidean distance between two vectors.
+    /// </summary>
+    /// <param name="a">The first vector.</param>
+    /// <param name="b">The second vector.</param>
+    /// <typeparam name="T">A numeric type implementing <see cref="IRootFunctions{TSelf}"/>.</typeparam>
+    /// <returns>The distance.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T Distance<T>(in Vector2T<T> a, in Vector2T<T> b) where T : INumber<T>, IRootFunctions<T>
+        => T.Sqrt(DistanceSquared(in a, in b));
 
     // https://github.com/microsoft/referencesource/blob/master/System.Numerics/System/Numerics/Vector2.cs#L290-L296
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

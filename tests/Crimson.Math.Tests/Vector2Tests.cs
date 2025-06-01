@@ -265,6 +265,34 @@ public class Vector2Tests
         
         Assert.That(test, Is.EqualTo(control));
     }
+    
+    [Test]
+    public void TestDistanceSquared()
+    {
+        Vector2 controlA = new Vector2(1, 2);
+        Vector2 controlB = new Vector2(5, 6);
+        float control = Vector2.DistanceSquared(controlA, controlB);
+
+        Vector2T<float> testA = new Vector2T<float>(1, 2);
+        Vector2T<float> testB = new Vector2T<float>(5, 6);
+        float test = Vector2T.DistanceSquared(testA, testB);
+        
+        Assert.That(test, Is.EqualTo(control));
+    }
+    
+    [Test]
+    public void TestDistance()
+    {
+        Vector2 controlA = new Vector2(1, 2);
+        Vector2 controlB = new Vector2(5, 6);
+        float control = Vector2.Distance(controlA, controlB);
+
+        Vector2T<float> testA = new Vector2T<float>(1, 2);
+        Vector2T<float> testB = new Vector2T<float>(5, 6);
+        float test = Vector2T.Distance(testA, testB);
+        
+        Assert.That(test, Is.EqualTo(control));
+    }
 
     [Test]
     public void TestTransform()
