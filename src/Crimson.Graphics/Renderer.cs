@@ -166,16 +166,17 @@ public sealed class Renderer : IDisposable
     /// <param name="texture">The texture to use as the image.</param>
     /// <param name="position">The position, in pixels.</param>
     /// <param name="tint">The tint to use, if any.</param>
-    public void DrawImage(Texture texture, in Vector2 position, Color? tint = null)
+    public void DrawImage(Texture texture, in Vector2T<int> position, in Color? tint = null)
     {
         Size<int> size = texture.Size;
         
-        Vector2 topLeft = position;
-        Vector2 topRight = position + new Vector2(size.Width, 0);
-        Vector2 bottomLeft = position + new Vector2(0, size.Height);
-        Vector2 bottomRight = position + new Vector2(size.Width, size.Height);
+        Vector2T<int> topLeft = position;
+        Vector2T<int> topRight = position + new Vector2T<int>(size.Width, 0);
+        Vector2T<int> bottomLeft = position + new Vector2T<int>(0, size.Height);
+        Vector2T<int> bottomRight = position + new Vector2T<int>(size.Width, size.Height);
 
-        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft, topRight, bottomLeft, bottomRight, tint ?? Color.White));
+        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft.As<float>(), topRight.As<float>(),
+            bottomLeft.As<float>(), bottomRight.As<float>(), tint ?? Color.White));
     }
 
     /// <summary>
@@ -185,14 +186,15 @@ public sealed class Renderer : IDisposable
     /// <param name="position">The position, in pixels.</param>
     /// <param name="size">The size, in pixels.</param>
     /// <param name="tint">The tint to use, if any.</param>
-    public void DrawImage(Texture texture, in Vector2 position, Size<int> size, Color? tint = null)
+    public void DrawImage(Texture texture, in Vector2T<int> position, in Size<int> size, Color? tint = null)
     {
-        Vector2 topLeft = position;
-        Vector2 topRight = position + new Vector2(size.Width, 0);
-        Vector2 bottomLeft = position + new Vector2(0, size.Height);
-        Vector2 bottomRight = position + new Vector2(size.Width, size.Height);
-        
-        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft, topRight, bottomLeft, bottomRight, tint ?? Color.White));
+        Vector2T<int> topLeft = position;
+        Vector2T<int> topRight = position + new Vector2T<int>(size.Width, 0);
+        Vector2T<int> bottomLeft = position + new Vector2T<int>(0, size.Height);
+        Vector2T<int> bottomRight = position + new Vector2T<int>(size.Width, size.Height);
+
+        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft.As<float>(), topRight.As<float>(),
+            bottomLeft.As<float>(), bottomRight.As<float>(), tint ?? Color.White));
     }
 
     /// <summary>
@@ -202,41 +204,44 @@ public sealed class Renderer : IDisposable
     /// <param name="b">The second point.</param>
     /// <param name="color">The line color.</param>
     /// <param name="thickness">The line thickness in pixels.</param>
-    public void DrawLine(Vector2 a, Vector2 b, Color color, int thickness)
+    public void DrawLine(in Vector2T<int> a, in Vector2T<int> b, in Color color, int thickness)
     {
         float halfThickness = thickness / 2.0f;
 
-        Vector2 topLeft;
-        Vector2 bottomLeft;
-        Vector2 topRight;
-        Vector2 bottomRight;
+        Vector2T<float> topLeft;
+        Vector2T<float> bottomLeft;
+        Vector2T<float> topRight;
+        Vector2T<float> bottomRight;
 
         // Use fast paths if drawing hline or vline as it avoids the complex matrix calculations
         if (a.X == b.X)
         {
-            topLeft = new Vector2(a.X - halfThickness, a.Y);
-            topRight = new Vector2(a.X + halfThickness, a.Y);
-            bottomLeft = new Vector2(b.X - halfThickness, b.Y);
-            bottomRight = new Vector2(b.X + halfThickness, b.Y);
+            topLeft = new Vector2T<float>(a.X - halfThickness, a.Y);
+            topRight = new Vector2T<float>(a.X + halfThickness, a.Y);
+            bottomLeft = new Vector2T<float>(b.X - halfThickness, b.Y);
+            bottomRight = new Vector2T<float>(b.X + halfThickness, b.Y);
         }
         else if (a.Y == b.Y)
         {
-            topLeft = new Vector2(a.X, a.Y - halfThickness);
-            bottomLeft = new Vector2(a.X, a.Y + halfThickness);
-            topRight = new Vector2(b.X, b.Y - halfThickness);
-            bottomRight = new Vector2(b.X, b.Y + halfThickness);
+            topLeft = new Vector2T<float>(a.X, a.Y - halfThickness);
+            bottomLeft = new Vector2T<float>(a.X, a.Y + halfThickness);
+            topRight = new Vector2T<float>(b.X, b.Y - halfThickness);
+            bottomRight = new Vector2T<float>(b.X, b.Y + halfThickness);
         }
         else
         {
+            Vector2T<float> fA = a.As<float>();
+            Vector2T<float> fB = b.As<float>();
+            
             float rot = float.Atan2(b.Y - a.Y, b.X - a.X);
-            float dist = Vector2.Distance(a, b);
+            float dist = Vector2T.Distance(fA, fB);
 
-            Matrix3x2 rotMatrix = Matrix3x2.CreateRotation(rot);
+            Matrix<float> rotMatrix = Matrix.RotateZ(rot);
 
-            topLeft = Vector2.Transform(new Vector2(0, -halfThickness), rotMatrix) + a;
-            bottomLeft = Vector2.Transform(new Vector2(0, +halfThickness), rotMatrix) + a;
-            topRight = Vector2.Transform(new Vector2(dist, -halfThickness), rotMatrix) + a;
-            bottomRight = Vector2.Transform(new Vector2(dist, +halfThickness), rotMatrix) + a;
+            topLeft = Vector2T.Transform(new Vector2T<float>(0, -halfThickness), rotMatrix) + fA;
+            bottomLeft = Vector2T.Transform(new Vector2T<float>(0, +halfThickness), rotMatrix) + fA;
+            topRight = Vector2T.Transform(new Vector2T<float>(dist, -halfThickness), rotMatrix) + fA;
+            bottomRight = Vector2T.Transform(new Vector2T<float>(dist, +halfThickness), rotMatrix) + fA;
         }
 
         _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(WhiteTexture, topLeft, topRight, bottomLeft, bottomRight,

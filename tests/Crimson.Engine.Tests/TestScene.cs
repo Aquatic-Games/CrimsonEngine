@@ -103,6 +103,6 @@ public class TestScene : Scene
         //App.Renderer.DrawImage(_texture, Vector2.Zero);
         //App.Renderer.DrawImage(_texture, new Vector2(100));
         
-        App.Renderer.DrawLine(new Vector2(0, 0), new Vector2(1280, 720), Color.White, 5);
+        App.Renderer.DrawLine(new Vector2T<int>(0, 0), new Vector2T<int>(1280, 720), Color.White, 5);
     }
 }

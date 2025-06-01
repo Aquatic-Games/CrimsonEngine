@@ -49,7 +49,7 @@ public class IntroScene : Scene
     {
         Renderer renderer = App.Renderer;
 
-        renderer.DrawImage(_logo, Vector2.Zero, renderer.RenderSize, Color.White with { A = _logoAlpha });
-        renderer.DrawImage(_logo2, Vector2.Zero, renderer.RenderSize, Color.White with { A = _logo2Alpha });
+        renderer.DrawImage(_logo, Vector2T<int>.Zero, renderer.RenderSize, Color.White with { A = _logoAlpha });
+        renderer.DrawImage(_logo2, Vector2T<int>.Zero, renderer.RenderSize, Color.White with { A = _logo2Alpha });
     }
 }
