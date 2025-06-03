@@ -30,7 +30,7 @@ public static class App
     private static InputManager _input;
     private static PhysicsSystem _physics;
 
-    private static ImGuiController _imGuiController;
+    private static ImGuiController? _imGuiController;
     
     /// <summary>
     /// The app name.
@@ -132,17 +132,20 @@ public static class App
         _events.SurfaceSizeChanged += OnSurfaceSizeChanged;
         
         Logger.Debug("Initializing graphics subsystem.");
-        _renderer = new Renderer(_appName, Surface.Info, Surface.Size);
+        _renderer = new Renderer(_appName, in options.Renderer, Surface.Info);
         
         Logger.Debug("Initializing input manager.");
         _input = new InputManager(_events);
         
         Logger.Debug("Initializing physics system.");
         _physics = new PhysicsSystem();
-        
-        Logger.Debug("Creating imgui controller.");
-        _imGuiController = new ImGuiController(_renderer.ImGuiContext, _events, _surface);
-        
+
+        if (_renderer.ImGuiContext is { } context)
+        {
+            Logger.Debug("Creating imgui controller.");
+            _imGuiController = new ImGuiController(context, _events, _surface);
+        }
+
         _deltaWatch = Stopwatch.StartNew();
         
         _isRunning = true;
@@ -172,7 +175,7 @@ public static class App
                 _currentScene.Initialize();
             }
             
-            _imGuiController.Update(dt);
+            _imGuiController?.Update(dt);
             
             _globalApp.PreUpdate(dt);
             _physics.Step(1 / 60.0f);

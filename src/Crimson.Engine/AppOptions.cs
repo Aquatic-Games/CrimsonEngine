@@ -1,3 +1,4 @@
+using Crimson.Graphics;
 using Crimson.Platform;
 using Version = Crimson.Core.Version;
 
@@ -24,4 +25,13 @@ public record struct AppOptions(string Name, Version Version)
     /// The <see cref="WindowOptions"/> to use when the <see cref="Surface"/> is created.
     /// </summary>
     public WindowOptions Window = new WindowOptions() with { Title = Name };
+
+    public RendererOptions Renderer = new RendererOptions
+    {
+        Type = RendererType.Create3D,
+#if DEBUG
+        Debug = true,
+#endif
+        CreateImGuiRenderer = true
+    };
 }

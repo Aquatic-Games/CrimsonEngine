@@ -97,7 +97,7 @@ public sealed class Surface : IDisposable
 
             return info;*/
 
-            return new SurfaceInfo(_window);
+            return new SurfaceInfo(_window, Size);
         }
     }
 
