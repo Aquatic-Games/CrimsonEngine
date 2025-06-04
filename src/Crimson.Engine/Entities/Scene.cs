@@ -8,6 +8,9 @@ public abstract class Scene : IDisposable
 {
     private readonly List<Entity> _entities;
     private readonly Dictionary<string, Entity> _entitiesMap;
+
+    private readonly List<Entity> _entitiesToAdd;
+    
     private bool _isInitialized;
 
     public Camera Camera => (Camera) GetEntity("Camera");
@@ -17,6 +20,8 @@ public abstract class Scene : IDisposable
         _entities = [];
         _entitiesMap = [];
         _isInitialized = false;
+
+        _entitiesToAdd = [];
         
         AddEntity(new Camera("Camera", 75, 0.1f, 100f));
     }
@@ -31,7 +36,10 @@ public abstract class Scene : IDisposable
         if (!_entitiesMap.TryAdd(entity.Name, entity))
             return false;
         
-        _entities.Add(entity);
+        if (_isInitialized)
+            _entitiesToAdd.Add(entity);
+        else
+            _entities.Add(entity);
 
         return true;
     }
@@ -85,6 +93,11 @@ public abstract class Scene : IDisposable
     {
         foreach (Entity entity in _entities)
             entity.Update(dt);
+        
+        foreach (Entity entity in _entitiesToAdd)
+            _entities.Add(entity);
+        
+        _entitiesToAdd.Clear();
     }
 
     /// <summary>
