@@ -1,3 +1,5 @@
+using System.Reflection;
+using Crimson.Content;
 using Crimson.Core;
 using Crimson.Math;
 using StbImageSharp;
@@ -31,9 +33,25 @@ public class Bitmap
     public Bitmap(string path)
     {
         Logger.Trace($"Loading bitmap from path \"{path}\".");
+
+        ImageResult result;
         
-        using FileStream stream = File.OpenRead(path); 
-        ImageResult result = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+#if !DEBUG
+        if (!File.Exists(path))
+        {
+            Logger.Error($"Could not find bitmap with path \"{path}\"!");
+            
+            result = ImageResult.FromMemory(
+                Resources.LoadEmbeddedResource("Crimson.Graphics.DEBUG.png", Assembly.GetExecutingAssembly()),
+                ColorComponents.RedGreenBlueAlpha);
+        }
+        else
+#endif
+        {
+            using FileStream stream = File.OpenRead(path); 
+            result = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+        }
+        
         Size = new Size<int>(result.Width, result.Height);
         Data = result.Data;
         Format = PixelFormat.RGBA8;
