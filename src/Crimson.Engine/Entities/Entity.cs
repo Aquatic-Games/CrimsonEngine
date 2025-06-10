@@ -48,6 +48,23 @@ public class Entity : IDisposable
             throw new Exception($"Component of type {component.GetType()} is already added to the entity.");
     }
 
+    public bool TryRemoveComponent<T>() where T : Component
+    {
+        if (!_components.Remove(typeof(T), out Component? component))
+            return false;
+        
+        Debug.Assert(component != null);
+        component.Dispose();
+
+        return true;
+    }
+
+    public void RemoveComponent<T>() where T : Component
+    {
+        if (!TryRemoveComponent<T>())
+            throw new Exception($"Component of type {typeof(T)} has not been added to the entity.");
+    }
+
     public bool TryGetComponent<T>([NotNullWhen(true)] out T? component) where T : Component
     {
         Type type = typeof(T);
@@ -63,7 +80,7 @@ public class Entity : IDisposable
     public T GetComponent<T>() where T : Component
     {
         if (!TryGetComponent(out T? component))
-            throw new Exception($"Component of type {component.GetType()} has not been added to the entity.");
+            throw new Exception($"Component of type {typeof(T)} has not been added to the entity.");
 
         return component;
     }

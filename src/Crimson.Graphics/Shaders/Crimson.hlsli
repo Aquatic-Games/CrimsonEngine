@@ -10,5 +10,5 @@ struct Vertex
     float3 Normal:   TEXCOORD3;
 };
 
-CBUFFER(gCamera, 0, Camera)
-CBUFFER(gWorld, 1, float4x4)
+CBUFFER_VTX(gCamera, 0, Camera)
+CBUFFER_VTX(gWorld, 1, float4x4)

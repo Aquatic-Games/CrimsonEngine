@@ -3,6 +3,7 @@
 
 #include "../GBuffer.hlsli"
 #include "../Crimson.hlsli"
+#include "Material.hlsli"
 
 struct VSOutput
 {
@@ -35,14 +36,14 @@ GBufferOutput PSMain(const in VSOutput input)
 {
     GBufferOutput output;
 
-    const float3 albedo = SAMPLE(Albedo, input.TexCoord).rgb;
+    const float3 albedo = SAMPLE(Albedo, input.TexCoord).rgb * input.Color.rgb * gMaterial.AlbedoTint.rgb;
     const float3 normal = SAMPLE(Normal, input.TexCoord).rgb;
-    const float metallic = SAMPLE(Metallic, input.TexCoord).r;
-    const float roughness = SAMPLE(Roughness, input.TexCoord).r;
+    const float metallic = SAMPLE(Metallic, input.TexCoord).r * gMaterial.MetallicMultiplier;
+    const float roughness = SAMPLE(Roughness, input.TexCoord).r * gMaterial.RoughnessMultiplier;
     const float occlusion = SAMPLE(Occlusion, input.TexCoord).r;
     const float emission = SAMPLE(Emission, input.TexCoord).r;
 
-    output.Albedo = float4(albedo * input.Color.rgb, 1.0);
+    output.Albedo = float4(albedo, 1.0);
     output.Position = float4(input.WorldSpace, 1.0);
     output.Normal = float4(normal, 1.0);
     output.MetallicRoughness = float4(metallic, roughness, occlusion, emission);

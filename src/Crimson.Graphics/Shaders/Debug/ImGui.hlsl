@@ -22,7 +22,7 @@ struct PSOutput
     float4 Color: SV_Target0;
 };
 
-CBUFFER(Projection, 0, float4x4)
+CBUFFER_VTX(Projection, 0, float4x4)
 
 SAMPLER2D(Texture, 0)
 

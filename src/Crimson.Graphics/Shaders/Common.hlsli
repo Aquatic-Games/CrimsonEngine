@@ -9,7 +9,8 @@
 
 #define SAMPLE(Texture, TexCoord) Texture.Sample(Texture##Sampler, TexCoord)
 
-#define CBUFFER(Name, Index, Type) cbuffer Name##Buffer : register(b##Index, space1) { Type Name; };
+#define CBUFFER_VTX(Name, Index, Type) cbuffer Name##Buffer : register(b##Index, space1) { Type Name; };
+#define CBUFFER_PXL(Name, Index, Type) cbuffer Name##Buffer : register(b##Index, space3) { Type Name; };
 
 struct Camera
 {
