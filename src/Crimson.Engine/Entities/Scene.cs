@@ -93,10 +93,13 @@ public abstract class Scene : IDisposable
     {
         foreach (Entity entity in _entities)
             entity.Update(dt);
-        
+
         foreach (Entity entity in _entitiesToAdd)
+        {
+            entity.Initialize();
             _entities.Add(entity);
-        
+        }
+
         _entitiesToAdd.Clear();
     }
 
