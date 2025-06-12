@@ -2,5 +2,7 @@ namespace Crimson.Physics;
 
 public enum Mobility
 {
-    Dynamic
+    Dynamic,
+    Kinematic,
+    Static
 }

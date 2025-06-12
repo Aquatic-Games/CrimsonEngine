@@ -4,7 +4,7 @@ using Crimson.Physics.Shapes.Descriptions;
 
 namespace Crimson.Physics.Shapes;
 
-public class BoxShape : Shape
+public sealed class BoxShape : Shape
 {
     internal BoxShape(Simulation simulation, TypedIndex index) : base(simulation, index) { }
     

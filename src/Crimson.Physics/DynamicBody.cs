@@ -3,7 +3,7 @@ using BepuPhysics;
 
 namespace Crimson.Physics;
 
-internal class DynamicBody : Body
+internal sealed class DynamicBody : Body
 {
     private readonly BodyHandle _handle;
 

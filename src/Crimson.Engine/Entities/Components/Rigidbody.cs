@@ -13,7 +13,7 @@ public class Rigidbody : Component
         _body = App.Physics.CreateBody(new BodyDescription()
         {
             Shape = shape,
-            Mobility = Mobility.Dynamic,
+            Mobility = mass == 0 ? Mobility.Static : Mobility.Dynamic,
             Position = Vector3.Zero,
             Rotation = Quaternion.Identity,
             Mass = mass

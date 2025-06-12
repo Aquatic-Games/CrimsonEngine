@@ -58,6 +58,7 @@ public class TestScene : Scene
 
         Entity secondCube = new Entity("Cube1", new Transform(new Vector3(0, -5, 0)));
         secondCube.AddComponent(new MeshRenderer(_mesh));
+        secondCube.AddComponent(new Rigidbody(new BoxShapeDescription(new Vector3(0.5f)).Create(App.Physics), 0));
         //mainCube.AddChild(secondCube);
         AddEntity(secondCube);
         

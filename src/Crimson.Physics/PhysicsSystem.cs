@@ -42,17 +42,27 @@ public class PhysicsSystem : IDisposable
 
     public Body CreateBody(in BodyDescription description)
     {
+        RigidPose pose = new RigidPose(description.Position, description.Rotation);
+        TypedIndex index = description.Shape.Index;
+        
         switch (description.Mobility)
         {
             case Mobility.Dynamic:
             {
-                BepuPhysics.BodyDescription bepuDesc = BepuPhysics.BodyDescription.CreateDynamic(
-                    new RigidPose(description.Position, description.Rotation),
-                    description.Shape.CalculateInertia(description.Mass),
-                    new CollidableDescription(description.Shape.Index), new BodyActivityDescription(0.01f));
+                BepuPhysics.BodyDescription bepuDesc = BepuPhysics.BodyDescription.CreateDynamic(pose,
+                    description.Shape.CalculateInertia(description.Mass), new CollidableDescription(index),
+                    new BodyActivityDescription(0.01f));
 
                 BodyHandle handle = Simulation.Bodies.Add(in bepuDesc);
                 return new DynamicBody(Simulation, in handle);
+            }
+            case Mobility.Kinematic:
+                throw new NotImplementedException();
+            case Mobility.Static:
+            {
+                StaticDescription bepuDesc = new StaticDescription(pose, index);
+                StaticHandle handle = Simulation.Statics.Add(in bepuDesc);
+                return new StaticBody(Simulation, handle);
             }
             default:
                 throw new ArgumentOutOfRangeException();
