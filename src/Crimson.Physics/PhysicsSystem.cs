@@ -1,107 +1,54 @@
-﻿global using JoltPhysics = JoltPhysicsSharp.PhysicsSystem;
-using System.Diagnostics;
-using System.Numerics;
+﻿using System.Numerics;
+using BepuPhysics;
+using BepuUtilities;
+using BepuUtilities.Memory;
 using Crimson.Core;
 using Crimson.Physics.Internal;
-using JoltPhysicsSharp;
 
 namespace Crimson.Physics;
 
 public class PhysicsSystem : IDisposable
 {
-    private readonly JobSystem _jobSystem;
-    
-    public readonly JoltPhysics Jolt;
+    private readonly NarrowPhaseCallbacks _narrowPhaseCallbacks;
+    private readonly PoseIntegratorCallbacks _poseIntegratorCallbacks;
 
-    public Vector3 Gravity
-    {
-        get => Jolt.Gravity;
-        set => Jolt.Gravity = value;
-    }
+    private readonly BufferPool _bufferPool;
+    private readonly ThreadDispatcher _threadDispatcher;
+    
+    public readonly Simulation Simulation;
+    
+    public Vector3 Gravity { get; set; }
     
     public PhysicsSystem()
     {
-        if (!Foundation.Init())
-            throw new Exception("Failed to initialize Jolt Physics");
-        
-        Foundation.SetTraceHandler(TraceHandler);
-        Foundation.SetAssertFailureHandler(AssertFailedHandler);
+        _narrowPhaseCallbacks = new NarrowPhaseCallbacks();
+        _poseIntegratorCallbacks = new PoseIntegratorCallbacks(new Vector3(0, -9.81f, 0));
 
-        PhysicsSystemSettings settings = new()
-        {
-            MaxBodies = ushort.MaxValue,
-            MaxBodyPairs = ushort.MaxValue,
-            MaxContactConstraints = ushort.MaxValue,
-            NumBodyMutexes = 0,
-        };
+        _bufferPool = new BufferPool();
+        _threadDispatcher = new ThreadDispatcher(Environment.ProcessorCount);
 
-        ObjectLayerPairFilterTable objectFilter = new ObjectLayerPairFilterTable(2);
-        objectFilter.EnableCollision(Layers.NonMoving, Layers.Moving);
-        objectFilter.EnableCollision(Layers.Moving, Layers.Moving);
-
-        BroadPhaseLayerInterfaceTable broadPhaseInterface = new BroadPhaseLayerInterfaceTable(2, 2);
-        broadPhaseInterface.MapObjectToBroadPhaseLayer(Layers.NonMoving, Layers.NonMoving);
-        broadPhaseInterface.MapObjectToBroadPhaseLayer(Layers.Moving, Layers.Moving);
-
-        ObjectVsBroadPhaseLayerFilterTable objectBroadPhaseTable =
-            new ObjectVsBroadPhaseLayerFilterTable(broadPhaseInterface, 2, objectFilter, 2);
-
-        settings.ObjectLayerPairFilter = objectFilter;
-        settings.BroadPhaseLayerInterface = broadPhaseInterface;
-        settings.ObjectVsBroadPhaseLayerFilter = objectBroadPhaseTable;
-
-        _jobSystem = new JobSystemThreadPool();
-
-        Jolt = new JoltPhysics(settings);
+        Logger.Trace("Creating simulation.");
+        Simulation = Simulation.Create(_bufferPool, _narrowPhaseCallbacks, _poseIntegratorCallbacks,
+            new SolveDescription(8, 1));
     }
 
     public void Step(float deltaTime)
     {
-        PhysicsUpdateError error = Jolt.Update(deltaTime, 1, _jobSystem);
-        Debug.Assert(error == PhysicsUpdateError.None);
+        Simulation.Timestep(deltaTime, _threadDispatcher);
     }
 
-    public Body CreateDynamicBody(Shape shape, Vector3 position, Quaternion rotation, float mass)
+    /*public Body CreateDynamicBody(Shape shape, Vector3 position, Quaternion rotation, float mass)
     {
-        BodyCreationSettings bodySettings = new BodyCreationSettings(shape, position, rotation, MotionType.Dynamic, Layers.Moving)
-        {
-            MassPropertiesOverride = new MassProperties() { Mass = mass },
-            OverrideMassProperties = OverrideMassProperties.CalculateInertia,
-            Restitution = 0.2f
-        };
-        
-        Body body = Jolt.BodyInterface.CreateBody(bodySettings);
-        
-        Jolt.BodyInterface.AddBody(body, Activation.Activate);
-
-        return body;
+        throw new NotImplementedException();
     }
 
     public Body CreateStaticBody(Shape shape, Vector3 position, Quaternion rotation)
     {
-        BodyCreationSettings bodySettings =
-            new BodyCreationSettings(shape, position, rotation, MotionType.Static, Layers.NonMoving);
-
-        Body body = Jolt.BodyInterface.CreateBody(bodySettings);
-        Jolt.BodyInterface.AddBody(body, Activation.DontActivate);
-
-        return body;
-    }
+        throw new NotImplementedException();
+    }*/
 
     public void Dispose()
     {
-        Jolt.Dispose();
-        Foundation.Shutdown();
-    }
-    
-    private void TraceHandler(string message)
-    {
-        Logger.Trace(message);
-    }
-    
-    private bool AssertFailedHandler(string expression, string message, string file, uint line)
-    {
-        Logger.Fatal(message, (int) line, file);
-        throw new Exception(expression);
+        Simulation.Dispose();
     }
 }

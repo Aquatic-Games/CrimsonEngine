@@ -10,7 +10,6 @@ using Crimson.Input;
 using Crimson.Math;
 using Crimson.Platform;
 using Hexa.NET.ImGui;
-using JoltPhysicsSharp;
 using SharpGLTF.Schema2;
 using Material = Crimson.Graphics.Materials.Material;
 using Mesh = Crimson.Graphics.Mesh;

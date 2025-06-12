@@ -1,11 +1,8 @@
-using System.Diagnostics;
-using JoltPhysicsSharp;
-
 namespace Crimson.Engine.Entities.Components;
 
 public class Rigidbody : Component
 {
-    private readonly Shape _shape;
+    /*private readonly Shape _shape;
     private readonly float _mass;
     
     private Body? _body;
@@ -30,5 +27,5 @@ public class Rigidbody : Component
         
         Transform.Position = _body.Position;
         Transform.Rotation = _body.Rotation;
-    }
+    }*/
 }
