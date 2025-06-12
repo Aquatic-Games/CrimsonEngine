@@ -1,33 +1,33 @@
-using System.Diagnostics;
-using JoltPhysicsSharp;
+using System.Numerics;
+using Crimson.Physics;
+using Crimson.Physics.Shapes;
 
 namespace Crimson.Engine.Entities.Components;
 
 public class Rigidbody : Component
 {
-    private readonly Shape _shape;
-    private readonly float _mass;
-    
-    private Body? _body;
+    private Body _body;
     
     public Rigidbody(Shape shape, float mass)
     {
-        _shape = shape;
-        _mass = mass;
+        _body = App.Physics.CreateBody(new BodyDescription()
+        {
+            Shape = shape,
+            Mobility = mass == 0 ? Mobility.Static : Mobility.Dynamic,
+            Position = Vector3.Zero,
+            Rotation = Quaternion.Identity,
+            Mass = mass
+        });
     }
 
     public override void Initialize()
     {
-        if (_mass == 0)
-            _body = App.Physics.CreateStaticBody(_shape, Transform.Position, Transform.Rotation);
-        else
-            _body = App.Physics.CreateDynamicBody(_shape, Transform.Position, Transform.Rotation, _mass);
+        _body.Position = Transform.Position;
+        _body.Rotation = Transform.Rotation;
     }
 
     public override void Update(float dt)
     {
-        Debug.Assert(_body != null);
-        
         Transform.Position = _body.Position;
         Transform.Rotation = _body.Rotation;
     }

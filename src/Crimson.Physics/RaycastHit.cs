@@ -1,27 +1,33 @@
 using System.Numerics;
-using JoltPhysicsSharp;
 
 namespace Crimson.Physics;
 
-/// <summary>
-/// Contains data about a raycast hit.
-/// </summary>
 public struct RaycastHit
 {
-    public BodyID BodyID;
-    
+    public uint BodyID;
+
     /// <summary>
     /// The world-space position that the hit occurred.
     /// </summary>
-    public Vector3 HitPosition;
+    public Vector3 WorldPosition;
 
     /// <summary>
-    /// The object normal that the hit occurred on.
+    /// The surface normal that the hit occurred on.
     /// </summary>
     public Vector3 SurfaceNormal;
 
     /// <summary>
-    /// The world space position of the object the ray hit.
+    /// The world space position of the body the ray hit.
     /// </summary>
-    public Vector3 ObjectPosition;
+    public Vector3 BodyPosition;
+
+    /// <summary>
+    /// The rotation of the body that the ray hit.
+    /// </summary>
+    public Quaternion BodyRotation;
+
+    /// <summary>
+    /// The child index of the hit, if any. Used for shapes with children, such as compound shapes.
+    /// </summary>
+    public int ChildIndex;
 }

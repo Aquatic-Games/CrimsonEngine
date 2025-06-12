@@ -8,9 +8,11 @@ using Crimson.Graphics.Materials;
 using Crimson.Graphics.Primitives;
 using Crimson.Input;
 using Crimson.Math;
+using Crimson.Physics;
+using Crimson.Physics.Shapes;
+using Crimson.Physics.Shapes.Descriptions;
 using Crimson.Platform;
 using Hexa.NET.ImGui;
-using JoltPhysicsSharp;
 using SharpGLTF.Schema2;
 using Material = Crimson.Graphics.Materials.Material;
 using Mesh = Crimson.Graphics.Mesh;
@@ -35,26 +37,6 @@ public class TestScene : Scene
 
         _texture = new Texture(App.Renderer, "DEBUG.png");
         //_texture2 = new Texture(App.Renderer, "/home/aqua/Pictures/awesomeface.png");
-
-        /*QuickConfig config = new QuickConfig();
-        config.SetOption("window.size", [1280, 720]);
-        config.SetOption("window.fullscreen", true);
-        config.SetOption("user.name", "Graphics");
-        config.SetOption("test", ["Hello", "There", "This", "Is", "Some", "Text"]);*/
-
-        QuickConfig config = QuickConfig.Deserialize("""
-                                                     window.size=1280,720
-                                                     window.fullscreen=true
-                                                     user.name="Graphics"
-                                                     test="Hello","There","This","Is","Some","Text"
-                                                     input.forward=W
-                                                     input.crouch=LeftControl,C
-                                                     """);
-        
-        Console.WriteLine(config);
-        
-        Console.WriteLine(config.GetEnum<Key>("input.forward"));
-        Console.WriteLine(config.GetEnum<Key>("input.crouch", 1));
         
         MaterialDefinition def = new(_texture)
         {
@@ -66,14 +48,26 @@ public class TestScene : Scene
         
         Model model = Model.FromGltf(App.Renderer, "/home/aqua/Downloads/Fox.glb");
 
-        Entity mainCube = new Entity("MainCube", new Transform() { Scale = new Vector3(0.1f) });
-        model.AddToEntity(mainCube);
-
-        Entity secondCube = new Entity("Cube1", new Transform(new Vector3(1, 0, 0)));
-        secondCube.AddComponent(new MeshRenderer(_mesh));
-        mainCube.AddChild(secondCube);
+        BoxShapeDescription desc = new BoxShapeDescription(new Vector3(0.5f));
+        BoxShape shape = desc.Create(App.Physics);
         
+        Entity mainCube = new Entity("MainCube");
+        mainCube.AddComponent(new MeshRenderer(_mesh));
+        mainCube.AddComponent(new Rigidbody(new BoxShapeDescription(new Vector3(0.5f)).Create(App.Physics), 1));
+        //model.AddToEntity(mainCube);
         AddEntity(mainCube);
+
+        Entity secondCube = new Entity("Cube1", new Transform(new Vector3(0, -5, 0)));
+        secondCube.AddComponent(new MeshRenderer(_mesh));
+        secondCube.AddComponent(new Rigidbody(new BoxShapeDescription(new Vector3(0.5f)).Create(App.Physics), 0));
+        //mainCube.AddChild(secondCube);
+        AddEntity(secondCube);
+
+        Entity rayCube = new Entity("RayCube", new Transform() { Scale = new Vector3(0.1f) });
+        rayCube.AddComponent(new MeshRenderer(_mesh));
+        AddEntity(rayCube);
+        
+        //AddEntity(mainCube);
         
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());
@@ -102,6 +96,13 @@ public class TestScene : Scene
         if (input.IsKeyPressed(Key.Escape))
             App.Close();
 
+        if (App.Physics.Raycast(Camera.Transform.Position, Camera.Transform.Forward, 100, out RaycastHit hit))
+        {
+            Entity rayCube = GetEntity("RayCube");
+            //rayCube.Transform.Position = hit.BodyPosition + hit.SurfaceNormal;
+            rayCube.Transform.Position = hit.WorldPosition;
+        }
+
         if (input.IsMouseButtonPressed(MouseButton.Left) || input.IsMouseButtonDown(MouseButton.Right))
         {
             Entity entity = new Entity(Random.Shared.NextInt64().ToString(),
@@ -112,8 +113,8 @@ public class TestScene : Scene
             AddEntity(entity);
         }
 
-        GetEntity("MainCube").Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitY, dt);
-        GetEntity("MainCube/Cube1").Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitX, dt);
+        /*GetEntity("MainCube").Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitY, dt);
+        GetEntity("MainCube/Cube1").Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitX, dt);*/
     }
 
     public override void Draw()
