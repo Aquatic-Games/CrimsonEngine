@@ -145,6 +145,9 @@ internal class DeferredRenderer : IDisposable
         foreach ((Renderable renderable, Matrix4x4 world) in frontToBack)
         {
             SDL.PushGPUVertexUniformData(cb, 1, new IntPtr(&world), 64);
+            
+            MaterialProperties matProps = MaterialProperties.FromMaterial(renderable.Material);
+            SDL.PushGPUFragmentUniformData(cb, 0, new IntPtr(&matProps), (uint) sizeof(MaterialProperties));
 
             // TODO: Have a sampler per material.
             bindings[0] = new SDL.GPUTextureSamplerBinding

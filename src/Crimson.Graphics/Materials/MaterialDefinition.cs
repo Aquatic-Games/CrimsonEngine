@@ -1,4 +1,6 @@
-﻿namespace Crimson.Graphics.Materials;
+﻿using Crimson.Math;
+
+namespace Crimson.Graphics.Materials;
 
 /// <summary>
 /// Defines how a material will be created.
@@ -36,6 +38,21 @@ public struct MaterialDefinition
     public Texture? Emission;
 
     /// <summary>
+    /// Tints the <see cref="Albedo"/> texture to the given color. Use <see cref="Color.White"/> for no tint.
+    /// </summary>
+    public Color AlbedoTint;
+
+    /// <summary>
+    /// The multiplier for the <see cref="Metallic"/> texture.
+    /// </summary>
+    public float MetallicMultiplier;
+
+    /// <summary>
+    /// The multiplier for the <see cref="Roughness"/> texture.
+    /// </summary>
+    public float RoughnessMultiplier;
+
+    /// <summary>
     /// The face(s) to render.
     /// </summary>
     public RenderFace RenderFace;
@@ -56,6 +73,9 @@ public struct MaterialDefinition
         Metallic = null;
         Roughness = null;
         Occlusion = null;
+        AlbedoTint = Color.White;
+        MetallicMultiplier = 1;
+        RoughnessMultiplier = 1;
         RenderFace = RenderFace.Front;
         WindingOrder = WindingOrder.CounterClockwise;
     }

@@ -1,4 +1,5 @@
 using Crimson.Graphics.Utils;
+using Crimson.Math;
 using SDL3;
 
 namespace Crimson.Graphics.Materials;
@@ -23,6 +24,12 @@ public class Material : IDisposable
     public Texture Occlusion;
 
     public Texture Emission;
+
+    public Color AlbedoTint;
+
+    public float MetallicMultiplier;
+
+    public float RoughnessMultiplier;
     
     /// <summary>
     /// Create a <see cref="Material"/> from the given definition.
@@ -38,13 +45,17 @@ public class Material : IDisposable
         Occlusion = definition.Occlusion ?? renderer.WhiteTexture;
         Emission = definition.Emission ?? renderer.BlackTexture;
 
+        AlbedoTint = definition.AlbedoTint;
+        MetallicMultiplier = definition.MetallicMultiplier;
+        RoughnessMultiplier = definition.RoughnessMultiplier;
+
         _device = renderer.Device;
 
         // TODO: Probably best not to load this shader every time a material is created.
         IntPtr vertexShader =
             ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Vertex, "Materials/Standard", "VSMain", 2, 0);
         IntPtr pixelShader =
-            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Fragment, "Materials/Standard", "PSMain", 0, 6);
+            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Fragment, "Materials/Standard", "PSMain", 1, 6);
 
         SDL.GPUVertexBufferDescription vertexBufferDesc = new()
         {

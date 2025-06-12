@@ -3,10 +3,12 @@
 
 #include "../GBuffer.hlsli"
 #include "../Crimson.hlsli"
+#include "Material.hlsli"
 
 struct VSOutput
 {
     float4 Position: SV_Position;
+    float4 Color: COLOR0;
     float2 TexCoord: TEXCOORD0;
     float3 WorldSpace: POSITION0;
 };
@@ -22,6 +24,7 @@ VSOutput VSMain(const in Vertex input)
 {
     VSOutput output;
 
+    output.Color = input.Color;
     output.WorldSpace = mul(gWorld, float4(input.Position, 1.0)).xyz;
     output.Position = mul(gCamera.Projection, mul(gCamera.View, float4(output.WorldSpace, 1.0)));
     output.TexCoord = input.TexCoord;
@@ -33,10 +36,10 @@ GBufferOutput PSMain(const in VSOutput input)
 {
     GBufferOutput output;
 
-    const float3 albedo = SAMPLE(Albedo, input.TexCoord).rgb;
+    const float3 albedo = SAMPLE(Albedo, input.TexCoord).rgb * input.Color.rgb * gMaterial.AlbedoTint.rgb;
     const float3 normal = SAMPLE(Normal, input.TexCoord).rgb;
-    const float metallic = SAMPLE(Metallic, input.TexCoord).r;
-    const float roughness = SAMPLE(Roughness, input.TexCoord).r;
+    const float metallic = SAMPLE(Metallic, input.TexCoord).r * gMaterial.MetallicMultiplier;
+    const float roughness = SAMPLE(Roughness, input.TexCoord).r * gMaterial.RoughnessMultiplier;
     const float occlusion = SAMPLE(Occlusion, input.TexCoord).r;
     const float emission = SAMPLE(Emission, input.TexCoord).r;
 

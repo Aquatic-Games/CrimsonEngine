@@ -121,6 +121,36 @@ public class PhysicsSystem : IDisposable
         return true;
     }
 
+    public bool Raycast(Vector3 position, Vector3 direction, float maxDistance, out RaycastHit hit)
+    {
+        Ray ray = new Ray(in position, direction * maxDistance);
+
+        if (!Jolt.NarrowPhaseQuery.CastRay(in ray, out RayCastResult result))
+        {
+            hit = default;
+            return false;
+        }
+
+        Jolt.BodyLockInterfaceNoLock.LockRead(in result.BodyID, out BodyLockRead read);
+
+        // Is there a situation Body would be null?
+        Debug.Assert(read.Body != null);
+        
+        Body body = read.Body;
+        Vector3 hitPosition = ray.GetPointOnRay(result.Fraction);
+        Vector3 normal = body.GetWorldSpaceSurfaceNormal(result.subShapeID2, hitPosition);
+
+        hit = new RaycastHit()
+        {
+            BodyID = result.BodyID,
+            HitPosition = hitPosition,
+            SurfaceNormal = normal,
+            ObjectPosition = body.Position
+        };
+        
+        return true;
+    }
+
     public void Dispose()
     {
         Simulation.Dispose();
