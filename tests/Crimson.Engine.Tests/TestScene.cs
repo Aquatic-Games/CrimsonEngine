@@ -8,6 +8,7 @@ using Crimson.Graphics.Materials;
 using Crimson.Graphics.Primitives;
 using Crimson.Input;
 using Crimson.Math;
+using Crimson.Physics;
 using Crimson.Physics.Shapes;
 using Crimson.Physics.Shapes.Descriptions;
 using Crimson.Platform;
@@ -61,6 +62,10 @@ public class TestScene : Scene
         secondCube.AddComponent(new Rigidbody(new BoxShapeDescription(new Vector3(0.5f)).Create(App.Physics), 0));
         //mainCube.AddChild(secondCube);
         AddEntity(secondCube);
+
+        Entity rayCube = new Entity("RayCube", new Transform() { Scale = new Vector3(0.1f) });
+        rayCube.AddComponent(new MeshRenderer(_mesh));
+        AddEntity(rayCube);
         
         //AddEntity(mainCube);
         
@@ -90,6 +95,13 @@ public class TestScene : Scene
         
         if (input.IsKeyPressed(Key.Escape))
             App.Close();
+
+        if (App.Physics.Raycast(Camera.Transform.Position, Camera.Transform.Forward, 100, out RaycastHit hit))
+        {
+            Entity rayCube = GetEntity("RayCube");
+            //rayCube.Transform.Position = hit.BodyPosition + hit.SurfaceNormal;
+            rayCube.Transform.Position = hit.WorldPosition;
+        }
 
         if (input.IsMouseButtonPressed(MouseButton.Left) || input.IsMouseButtonDown(MouseButton.Right))
         {

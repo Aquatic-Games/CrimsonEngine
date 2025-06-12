@@ -111,10 +111,11 @@ public class PhysicsSystem : IDisposable
         hit = new RaycastHit()
         {
             BodyID = handler.Collidable.Packed,
-            HitPosition = position + direction * handler.RayDistance,
+            WorldPosition = position + direction * handler.RayDistance,
             SurfaceNormal = handler.Normal,
             BodyPosition = bodyPos,
-            BodyRotation = bodyRot
+            BodyRotation = bodyRot,
+            ChildIndex = handler.ChildIndex
         };
         
         return true;
