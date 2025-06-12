@@ -50,14 +50,18 @@ public class TestScene : Scene
         BoxShapeDescription desc = new BoxShapeDescription(new Vector3(0.5f));
         BoxShape shape = desc.Create(App.Physics);
         
-        Entity mainCube = new Entity("MainCube", new Transform() { Scale = new Vector3(0.1f) });
-        model.AddToEntity(mainCube);
-
-        Entity secondCube = new Entity("Cube1", new Transform(new Vector3(1, 0, 0)));
-        secondCube.AddComponent(new MeshRenderer(_mesh));
-        mainCube.AddChild(secondCube);
-        
+        Entity mainCube = new Entity("MainCube");
+        mainCube.AddComponent(new MeshRenderer(_mesh));
+        mainCube.AddComponent(new Rigidbody(new BoxShapeDescription(new Vector3(0.5f)).Create(App.Physics), 1));
+        //model.AddToEntity(mainCube);
         AddEntity(mainCube);
+
+        Entity secondCube = new Entity("Cube1", new Transform(new Vector3(0, -5, 0)));
+        secondCube.AddComponent(new MeshRenderer(_mesh));
+        //mainCube.AddChild(secondCube);
+        AddEntity(secondCube);
+        
+        //AddEntity(mainCube);
         
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());
@@ -96,8 +100,8 @@ public class TestScene : Scene
             AddEntity(entity);
         }
 
-        GetEntity("MainCube").Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitY, dt);
-        GetEntity("MainCube/Cube1").Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitX, dt);
+        /*GetEntity("MainCube").Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitY, dt);
+        GetEntity("MainCube/Cube1").Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitX, dt);*/
     }
 
     public override void Draw()

@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using BepuPhysics;
+using BepuPhysics.Collidables;
 using BepuUtilities;
 using BepuUtilities.Memory;
 using Crimson.Core;
@@ -39,10 +40,24 @@ public class PhysicsSystem : IDisposable
         Simulation.Timestep(deltaTime, _threadDispatcher);
     }
 
-    /*public Body CreateBody(in BodyDescription description)
+    public Body CreateBody(in BodyDescription description)
     {
-        
-    }*/
+        switch (description.Mobility)
+        {
+            case Mobility.Dynamic:
+            {
+                BepuPhysics.BodyDescription bepuDesc = BepuPhysics.BodyDescription.CreateDynamic(
+                    new RigidPose(description.Position, description.Rotation),
+                    description.Shape.CalculateInertia(description.Mass),
+                    new CollidableDescription(description.Shape.Index), new BodyActivityDescription(0.01f));
+
+                BodyHandle handle = Simulation.Bodies.Add(in bepuDesc);
+                return new DynamicBody(Simulation, in handle);
+            }
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
 
     public void Dispose()
     {

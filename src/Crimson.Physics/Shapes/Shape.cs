@@ -13,4 +13,6 @@ public abstract class Shape
         Simulation = simulation;
         Index = index;
     }
+
+    protected internal abstract BodyInertia CalculateInertia(float mass);
 }
