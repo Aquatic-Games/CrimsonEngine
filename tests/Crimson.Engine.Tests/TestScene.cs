@@ -8,6 +8,8 @@ using Crimson.Graphics.Materials;
 using Crimson.Graphics.Primitives;
 using Crimson.Input;
 using Crimson.Math;
+using Crimson.Physics.Shapes;
+using Crimson.Physics.Shapes.Descriptions;
 using Crimson.Platform;
 using Hexa.NET.ImGui;
 using SharpGLTF.Schema2;
@@ -34,26 +36,6 @@ public class TestScene : Scene
 
         _texture = new Texture(App.Renderer, "DEBUG.png");
         //_texture2 = new Texture(App.Renderer, "/home/aqua/Pictures/awesomeface.png");
-
-        /*QuickConfig config = new QuickConfig();
-        config.SetOption("window.size", [1280, 720]);
-        config.SetOption("window.fullscreen", true);
-        config.SetOption("user.name", "Graphics");
-        config.SetOption("test", ["Hello", "There", "This", "Is", "Some", "Text"]);*/
-
-        QuickConfig config = QuickConfig.Deserialize("""
-                                                     window.size=1280,720
-                                                     window.fullscreen=true
-                                                     user.name="Graphics"
-                                                     test="Hello","There","This","Is","Some","Text"
-                                                     input.forward=W
-                                                     input.crouch=LeftControl,C
-                                                     """);
-        
-        Console.WriteLine(config);
-        
-        Console.WriteLine(config.GetEnum<Key>("input.forward"));
-        Console.WriteLine(config.GetEnum<Key>("input.crouch", 1));
         
         MaterialDefinition def = new(_texture)
         {
@@ -65,6 +47,9 @@ public class TestScene : Scene
         
         Model model = Model.FromGltf(App.Renderer, "/home/aqua/Downloads/Fox.glb");
 
+        BoxShapeDescription desc = new BoxShapeDescription(new Vector3(0.5f));
+        BoxShape shape = desc.Create(App.Physics);
+        
         Entity mainCube = new Entity("MainCube", new Transform() { Scale = new Vector3(0.1f) });
         model.AddToEntity(mainCube);
 

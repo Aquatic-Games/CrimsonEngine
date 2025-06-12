@@ -4,6 +4,8 @@ using BepuUtilities;
 using BepuUtilities.Memory;
 using Crimson.Core;
 using Crimson.Physics.Internal;
+using Crimson.Physics.Shapes;
+using Crimson.Physics.Shapes.Descriptions;
 
 namespace Crimson.Physics;
 
@@ -15,7 +17,7 @@ public class PhysicsSystem : IDisposable
     private readonly BufferPool _bufferPool;
     private readonly ThreadDispatcher _threadDispatcher;
     
-    public readonly Simulation Simulation;
+    internal readonly Simulation Simulation;
     
     public Vector3 Gravity { get; set; }
     
@@ -37,14 +39,9 @@ public class PhysicsSystem : IDisposable
         Simulation.Timestep(deltaTime, _threadDispatcher);
     }
 
-    /*public Body CreateDynamicBody(Shape shape, Vector3 position, Quaternion rotation, float mass)
+    /*public Body CreateBody(in BodyDescription description)
     {
-        throw new NotImplementedException();
-    }
-
-    public Body CreateStaticBody(Shape shape, Vector3 position, Quaternion rotation)
-    {
-        throw new NotImplementedException();
+        
     }*/
 
     public void Dispose()
