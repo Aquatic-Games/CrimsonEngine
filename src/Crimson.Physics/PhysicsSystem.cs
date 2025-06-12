@@ -69,6 +69,57 @@ public class PhysicsSystem : IDisposable
         }
     }
 
+    public bool Raycast(Vector3 position, Vector3 direction, float maxDistance, out RaycastHit hit)
+    {
+        RayHandler handler = new RayHandler();
+        Simulation.RayCast(position, direction, maxDistance, ref handler);
+
+        if (!handler.HasHit)
+        {
+            hit = default;
+            return false;
+        }
+
+        Vector3 bodyPos;
+        Quaternion bodyRot;
+
+        switch (handler.Collidable.Mobility)
+        {
+            case CollidableMobility.Dynamic:
+            case CollidableMobility.Kinematic:
+            {
+                BodyReference body = Simulation.Bodies.GetBodyReference(handler.Collidable.BodyHandle);
+                bodyPos = body.Pose.Position;
+                bodyRot = body.Pose.Orientation;
+                
+                break;
+            }
+
+            case CollidableMobility.Static:
+            {
+                StaticReference staticBody = Simulation.Statics.GetStaticReference(handler.Collidable.StaticHandle);
+                bodyPos = staticBody.Pose.Position;
+                bodyRot = staticBody.Pose.Orientation;
+                
+                break;
+            }
+
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
+        hit = new RaycastHit()
+        {
+            BodyID = handler.Collidable.Packed,
+            HitPosition = position + direction * handler.RayDistance,
+            SurfaceNormal = handler.Normal,
+            BodyPosition = bodyPos,
+            BodyRotation = bodyRot
+        };
+        
+        return true;
+    }
+
     public void Dispose()
     {
         Simulation.Dispose();

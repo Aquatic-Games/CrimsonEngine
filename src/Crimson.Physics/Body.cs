@@ -7,6 +7,8 @@ public abstract class Body
 {
     internal readonly Simulation Simulation;
     
+    public abstract uint ID { get; }
+    
     public abstract Vector3 Position { get; set; }
     
     public abstract Quaternion Rotation { get; set; }

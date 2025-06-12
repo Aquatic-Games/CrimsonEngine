@@ -1,11 +1,14 @@
 using System.Numerics;
 using BepuPhysics;
+using BepuPhysics.Collidables;
 
 namespace Crimson.Physics;
 
 internal sealed class StaticBody : Body
 {
     private readonly StaticHandle _handle;
+
+    public override uint ID => new CollidableReference(_handle).Packed;
 
     public override Vector3 Position
     {

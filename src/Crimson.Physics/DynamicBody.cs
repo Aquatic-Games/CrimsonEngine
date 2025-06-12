@@ -1,11 +1,14 @@
 using System.Numerics;
 using BepuPhysics;
+using BepuPhysics.Collidables;
 
 namespace Crimson.Physics;
 
 internal sealed class DynamicBody : Body
 {
     private readonly BodyHandle _handle;
+
+    public override uint ID => new CollidableReference(CollidableMobility.Dynamic, _handle).Packed;
 
     public override Vector3 Position
     {
