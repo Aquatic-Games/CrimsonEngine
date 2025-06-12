@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="JoltPhysicsSharp" Version="2.16.2" />
+      <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
+      <PackageReference Include="BepuPhysics" Version="2.4.0" />
     </ItemGroup>
 
 </Project>
