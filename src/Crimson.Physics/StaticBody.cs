@@ -19,16 +19,29 @@ internal sealed class StaticBody : Body
             Simulation.Statics.UpdateBounds(_handle);
         }
     }
-    
-    public override Quaternion Rotation { get; set; }
+
+    public override Quaternion Rotation
+    {
+        get => Simulation.Statics.GetStaticReference(_handle).Pose.Orientation;
+        set
+        {
+            Simulation.Statics.GetStaticReference(_handle).Pose.Orientation = value;
+            Simulation.Statics.UpdateBounds(_handle);
+        }
+    }
+
+    public StaticBody(Simulation simulation, StaticHandle handle) : base(simulation)
+    {
+        _handle = handle;
+    }
     
     public override void UpdateBounds()
     {
         Simulation.Statics[_handle].UpdateBounds();
     }
 
-    public StaticBody(Simulation simulation, StaticHandle handle) : base(simulation)
+    public override void Dispose()
     {
-        _handle = handle;
+        Simulation.Statics.Remove(_handle);
     }
 }

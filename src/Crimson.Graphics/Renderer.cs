@@ -271,6 +271,11 @@ public sealed class Renderer : IDisposable
             color));
     }
 
+    public void NewFrame()
+    {
+        Camera = default;
+    }
+
     /// <summary>
     /// Render and present to the surface.
     /// </summary>

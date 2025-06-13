@@ -3,7 +3,7 @@ using BepuPhysics.Collidables;
 
 namespace Crimson.Physics.Shapes;
 
-public abstract class Shape
+public abstract class Shape : IDisposable
 {
     internal readonly Simulation Simulation;
     internal readonly TypedIndex Index;
@@ -15,4 +15,9 @@ public abstract class Shape
     }
 
     protected internal abstract BodyInertia CalculateInertia(float mass);
+
+    public void Dispose()
+    {
+        Simulation.Shapes.RecursivelyRemoveAndDispose(Index, Simulation.BufferPool);
+    }
 }

@@ -3,7 +3,7 @@ using BepuPhysics;
 
 namespace Crimson.Physics;
 
-public abstract class Body
+public abstract class Body : IDisposable
 {
     internal readonly Simulation Simulation;
     
@@ -19,4 +19,6 @@ public abstract class Body
     {
         Simulation = simulation;
     }
+
+    public abstract void Dispose();
 }

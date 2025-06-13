@@ -182,6 +182,8 @@ public static class App
             _currentScene.Update(dt);
             _globalApp.PostUpdate(dt);
             
+            _renderer.NewFrame();
+            
             _globalApp.PreDraw();
             _currentScene.Draw();
             _globalApp.PostDraw();

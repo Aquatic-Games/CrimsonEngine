@@ -33,4 +33,9 @@ internal sealed class DynamicBody : Body
         reference.Awake = true;
         reference.UpdateBounds();
     }
+
+    public override void Dispose()
+    {
+        Simulation.Bodies.Remove(_handle);
+    }
 }
