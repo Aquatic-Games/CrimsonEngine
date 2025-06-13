@@ -21,6 +21,11 @@ internal sealed class StaticBody : Body
     }
     
     public override Quaternion Rotation { get; set; }
+    
+    public override void UpdateBounds()
+    {
+        Simulation.Statics[_handle].UpdateBounds();
+    }
 
     public StaticBody(Simulation simulation, StaticHandle handle) : base(simulation)
     {

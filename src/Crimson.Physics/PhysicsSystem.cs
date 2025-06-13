@@ -12,27 +12,25 @@ namespace Crimson.Physics;
 
 public class PhysicsSystem : IDisposable
 {
-    private readonly NarrowPhaseCallbacks _narrowPhaseCallbacks;
-    private readonly PoseIntegratorCallbacks _poseIntegratorCallbacks;
-
     private readonly BufferPool _bufferPool;
     
     internal readonly ThreadDispatcher ThreadDispatcher;
     internal readonly Simulation Simulation;
-    
-    public Vector3 Gravity { get; set; }
+
+    public Vector3 Gravity
+    {
+        get => ((PoseIntegrator<PoseIntegratorCallbacks>) Simulation.PoseIntegrator).Callbacks.Gravity;
+        set => ((PoseIntegrator<PoseIntegratorCallbacks>) Simulation.PoseIntegrator).Callbacks.Gravity = value;
+    }
     
     public PhysicsSystem()
     {
-        _narrowPhaseCallbacks = new NarrowPhaseCallbacks();
-        _poseIntegratorCallbacks = new PoseIntegratorCallbacks(new Vector3(0, -9.81f, 0));
-
         _bufferPool = new BufferPool();
         ThreadDispatcher = new ThreadDispatcher(Environment.ProcessorCount);
 
         Logger.Trace("Creating simulation.");
-        Simulation = Simulation.Create(_bufferPool, _narrowPhaseCallbacks, _poseIntegratorCallbacks,
-            new SolveDescription(8, 1));
+        Simulation = Simulation.Create(_bufferPool, new NarrowPhaseCallbacks(),
+            new PoseIntegratorCallbacks(new Vector3(0, -9.81f, 0)), new SolveDescription(8, 1));
     }
 
     public void Step(float deltaTime)

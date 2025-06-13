@@ -13,6 +13,8 @@ public abstract class Body
     
     public abstract Quaternion Rotation { get; set; }
 
+    public abstract void UpdateBounds();
+
     protected Body(Simulation simulation)
     {
         Simulation = simulation;

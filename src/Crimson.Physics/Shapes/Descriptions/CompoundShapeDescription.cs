@@ -21,10 +21,14 @@ public struct CompoundShapeDescription : IShapeDescription<CompoundShape>
         CompoundBuilder builder =
             new CompoundBuilder(physics.Simulation.BufferPool, physics.Simulation.Shapes, Children.Count);
 
+        List<float> masses = new List<float>(Children.Count);
+        
         foreach (CompoundShape.Child child in Children)
         {
             builder.Add(child.Shape.Index, new RigidPose(child.Position, child.Rotation),
                 child.Shape.CalculateInertia(child.Mass));
+            
+            masses.Add(child.Mass);
         }
         
         builder.BuildDynamicCompound(out Buffer<CompoundChild> children, out BodyInertia inertia);
@@ -32,6 +36,7 @@ public struct CompoundShapeDescription : IShapeDescription<CompoundShape>
 
         BigCompound compound = new BigCompound(children, physics.Simulation.Shapes, physics.Simulation.BufferPool, physics.ThreadDispatcher);
         TypedIndex index = physics.Simulation.Shapes.Add(compound);
-        return new CompoundShape(physics.Simulation, index, compound);
+        
+        return new CompoundShape(physics.Simulation, index, masses);
     }
 }

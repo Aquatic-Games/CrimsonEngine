@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.InteropServices;
 using BepuPhysics;
 using BepuPhysics.Collidables;
 
@@ -6,22 +7,43 @@ namespace Crimson.Physics.Shapes;
 
 public class CompoundShape : Shape
 {
-    private BigCompound _compound;
+    private List<float> _masses;
 
-    internal CompoundShape(Simulation simulation, TypedIndex index, BigCompound compound) : base(simulation, index)
+    internal CompoundShape(Simulation simulation, TypedIndex index, List<float> masses)
+        : base(simulation, index)
     {
-        _compound = compound;
+        _masses = masses;
     }
     
     protected internal override BodyInertia CalculateInertia(float mass)
     {
-        throw new NotImplementedException();
+        ref BigCompound compound = ref Simulation.Shapes.GetShape<BigCompound>(Index.Index);
+        
+        return CompoundBuilder.ComputeInertia(compound.Children, CollectionsMarshal.AsSpan(_masses),
+            Simulation.Shapes);
     }
 
     public void AddChild(in Child child)
     {
-        _compound.Add(new CompoundChild(new RigidPose(child.Position, child.Rotation), child.Shape.Index),
+        ref BigCompound compound = ref Simulation.Shapes.GetShape<BigCompound>(Index.Index);
+        
+        compound.Add(new CompoundChild(new RigidPose(child.Position, child.Rotation), child.Shape.Index),
             Simulation.BufferPool, Simulation.Shapes);
+        
+        _masses.Add(child.Mass);
+    }
+
+    public Child GetChild(int index)
+    {
+        ref BigCompound compound = ref Simulation.Shapes.GetShape<BigCompound>(Index.Index);
+
+        CompoundChild child = compound.GetChild(index);
+
+        return new Child()
+        {
+            Position = child.LocalPosition,
+            Rotation = child.LocalOrientation
+        };
     }
 
     public struct Child

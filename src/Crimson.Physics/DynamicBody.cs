@@ -26,4 +26,11 @@ internal sealed class DynamicBody : Body
     {
         _handle = handle;
     }
+
+    public override void UpdateBounds()
+    {
+        BodyReference reference = Simulation.Bodies[_handle];
+        reference.Awake = true;
+        reference.UpdateBounds();
+    }
 }
