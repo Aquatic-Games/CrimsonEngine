@@ -24,7 +24,6 @@ public static class App
     private static Scene _currentScene;
     private static Scene? _switchScene;
     
-    private static Surface _surface;
     private static Renderer _renderer;
     private static InputManager _input;
     private static PhysicsSystem _physics;
@@ -63,11 +62,6 @@ public static class App
     public static Scene ActiveScene => _currentScene;
 
     /// <summary>
-    /// The app's <see cref="Crimson.Platform.Surface"/>.
-    /// </summary>
-    public static Surface Surface => _surface;
-
-    /// <summary>
     /// The app's <see cref="Renderer"/> instance.
     /// </summary>
     public static Renderer Renderer => _renderer;
@@ -87,7 +81,6 @@ public static class App
         _appName = "";
         _isRunning = false;
         _globalApp = null!;
-        _surface = null!;
         _renderer = null!;
         _currentScene = null!;
         _input = null!;
@@ -119,8 +112,8 @@ public static class App
         Logger.Debug("Initializing events manager.");
         Events.Create();
         
-        Logger.Debug("Creating window.");
-        _surface = new Surface(in options.Window);
+        Logger.Debug("Creating surface.");
+        Surface.Create(in options.Window);
         Events.WindowClose += Close;
         Events.SurfaceSizeChanged += OnSurfaceSizeChanged;
         
@@ -136,7 +129,7 @@ public static class App
         if (_renderer.ImGuiContext is { } context)
         {
             Logger.Debug("Creating imgui controller.");
-            _imGuiController = new ImGuiController(context, _surface);
+            _imGuiController = new ImGuiController(context);
         }
 
         _deltaWatch = Stopwatch.StartNew();
@@ -190,7 +183,7 @@ public static class App
         _globalApp.Dispose();
         _physics.Dispose();
         _renderer.Dispose();
-        _surface.Dispose();
+        Surface.Destroy();
         Events.Destroy();
     }
 

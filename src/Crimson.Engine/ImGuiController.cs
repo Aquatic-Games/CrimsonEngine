@@ -7,12 +7,10 @@ namespace Crimson.Engine;
 internal class ImGuiController
 {
     private readonly ImGuiContextPtr _context;
-    private readonly Surface _surface;
     
-    public ImGuiController(ImGuiContextPtr context, Surface surface)
+    public ImGuiController(ImGuiContextPtr context)
     {
         _context = context;
-        _surface = surface;
         Events.KeyDown += OnKeyDown;
         Events.KeyUp += OnKeyUp;
         Events.MouseButtonDown += OnMouseButtonDown;
@@ -29,7 +27,7 @@ internal class ImGuiController
         ImGuiIOPtr io = ImGui.GetIO();
         io.DeltaTime = dt;
 
-        _surface.AllowTextInput = io.WantTextInput;
+        Surface.AllowTextInput = io.WantTextInput;
     }
 
     private void OnKeyDown(Key key)
