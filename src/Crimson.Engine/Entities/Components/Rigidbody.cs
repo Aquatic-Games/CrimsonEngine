@@ -10,7 +10,7 @@ public class Rigidbody : Component
     
     public Rigidbody(Shape shape, float mass)
     {
-        _body = App.Physics.CreateBody(new BodyDescription()
+        _body = Physics.Physics.CreateBody(new BodyDescription()
         {
             Shape = shape,
             Mobility = mass == 0 ? Mobility.Static : Mobility.Dynamic,

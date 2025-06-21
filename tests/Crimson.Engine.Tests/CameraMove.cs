@@ -10,12 +10,10 @@ public class CameraMove : Component
     
     public override void Update(float dt)
     {
-        Input input = App.Input;
-
         const float lookSpeed = 0.01f;
 
-        _rotation.X -= input.MouseDelta.X * lookSpeed;
-        _rotation.Y -= input.MouseDelta.Y * lookSpeed;
+        _rotation.X -= Input.MouseDelta.X * lookSpeed;
+        _rotation.Y -= Input.MouseDelta.Y * lookSpeed;
 
         _rotation.Y = float.Clamp(_rotation.Y, -float.Pi / 2, float.Pi / 2);
 
@@ -23,17 +21,17 @@ public class CameraMove : Component
         
         float moveSpeed = 5 * dt;
         
-        if (input.IsKeyDown(Key.W))
+        if (Input.IsKeyDown(Key.W))
             Transform.Position += Transform.Forward * moveSpeed;
-        if (input.IsKeyDown(Key.S))
+        if (Input.IsKeyDown(Key.S))
             Transform.Position += Transform.Backward * moveSpeed;
-        if (input.IsKeyDown(Key.A))
+        if (Input.IsKeyDown(Key.A))
             Transform.Position += Transform.Left * moveSpeed;
-        if (input.IsKeyDown(Key.D))
+        if (Input.IsKeyDown(Key.D))
             Transform.Position += Transform.Right * moveSpeed;
-        if (input.IsKeyDown(Key.Space))
+        if (Input.IsKeyDown(Key.Space))
             Transform.Position += Transform.Up * moveSpeed;
-        if (input.IsKeyDown(Key.LeftControl))
+        if (Input.IsKeyDown(Key.LeftControl))
             Transform.Position += Transform.Down * moveSpeed;
         
         

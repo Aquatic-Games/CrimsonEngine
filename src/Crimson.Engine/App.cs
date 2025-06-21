@@ -24,7 +24,6 @@ public static class App
     private static Scene? _switchScene;
     
     private static Renderer _renderer;
-    private static PhysicsSystem _physics;
 
     private static ImGuiController? _imGuiController;
     
@@ -64,11 +63,6 @@ public static class App
     /// </summary>
     public static Renderer Renderer => _renderer;
 
-    /// <summary>
-    /// The physics system.
-    /// </summary>
-    public static PhysicsSystem Physics => _physics;
-
     static App()
     {
         _appName = "";
@@ -77,7 +71,6 @@ public static class App
         _renderer = null!;
         _currentScene = null!;
         _deltaWatch = null!;
-        _physics = null!;
         _imGuiController = null!;
         FpsLimit = 0;
     }
@@ -116,7 +109,7 @@ public static class App
         Input.Create();
         
         Logger.Debug("Initializing physics system.");
-        _physics = new PhysicsSystem();
+        Physics.Physics.Create();
 
         if (_renderer.ImGuiContext is { } context)
         {
@@ -156,7 +149,7 @@ public static class App
             _imGuiController?.Update(dt);
             
             _globalApp.PreUpdate(dt);
-            _physics.Step(1 / 60.0f);
+            Physics.Physics.Step(1 / 60.0f);
             _currentScene.Update(dt);
             _globalApp.PostUpdate(dt);
             
@@ -173,7 +166,7 @@ public static class App
         
         _currentScene.Dispose();
         _globalApp.Dispose();
-        _physics.Dispose();
+        Physics.Physics.Destroy();
         Input.Destroy();
         _renderer.Dispose();
         Surface.Destroy();

@@ -13,9 +13,9 @@ public struct BoxShapeDescription : IShapeDescription<BoxShape>
         HalfExtents = halfExtents;
     }
 
-    public BoxShape Create(PhysicsSystem physics)
+    public BoxShape Create()
     {
-        Simulation simulation = physics.Simulation;
+        Simulation simulation = Physics.Simulation;
         
         TypedIndex index = simulation.Shapes.Add(new Box()
             { HalfWidth = HalfExtents.X, HalfLength = HalfExtents.Y, HalfHeight = HalfExtents.Z });

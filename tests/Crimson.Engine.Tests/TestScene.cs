@@ -48,17 +48,17 @@ public class TestScene : Scene
         Model model = Model.FromGltf(App.Renderer, "/home/aqua/Downloads/Fox.glb");
 
         BoxShapeDescription desc = new BoxShapeDescription(new Vector3(0.5f));
-        BoxShape shape = desc.Create(App.Physics);
+        BoxShape shape = desc.Create();
         
         Entity mainCube = new Entity("MainCube");
         mainCube.AddComponent(new MeshRenderer(_mesh));
-        mainCube.AddComponent(new Rigidbody(new BoxShapeDescription(new Vector3(0.5f)).Create(App.Physics), 1));
+        mainCube.AddComponent(new Rigidbody(new BoxShapeDescription(new Vector3(0.5f)).Create(), 1));
         //model.AddToEntity(mainCube);
         AddEntity(mainCube);
 
         Entity secondCube = new Entity("Cube1", new Transform(new Vector3(0, -5, 0)));
         secondCube.AddComponent(new MeshRenderer(_mesh));
-        secondCube.AddComponent(new Rigidbody(new BoxShapeDescription(new Vector3(0.5f)).Create(App.Physics), 0));
+        secondCube.AddComponent(new Rigidbody(new BoxShapeDescription(new Vector3(0.5f)).Create(), 0));
         //mainCube.AddChild(secondCube);
         AddEntity(secondCube);
 
@@ -89,20 +89,18 @@ public class TestScene : Scene
     public override void Update(float dt)
     {
         base.Update(dt);
-
-        Input input = App.Input;
         
-        if (input.IsKeyPressed(Key.Escape))
+        if (Input.IsKeyPressed(Key.Escape))
             App.Close();
 
-        if (App.Physics.Raycast(Camera.Transform.Position, Camera.Transform.Forward, 100, out RaycastHit hit))
+        if (Physics.Physics.Raycast(Camera.Transform.Position, Camera.Transform.Forward, 100, out RaycastHit hit))
         {
             Entity rayCube = GetEntity("RayCube");
             //rayCube.Transform.Position = hit.BodyPosition + hit.SurfaceNormal;
             rayCube.Transform.Position = hit.WorldPosition;
         }
 
-        if (input.IsMouseButtonPressed(MouseButton.Left) || input.IsMouseButtonDown(MouseButton.Right))
+        if (Input.IsMouseButtonPressed(MouseButton.Left) || Input.IsMouseButtonDown(MouseButton.Right))
         {
             Entity entity = new Entity(Random.Shared.NextInt64().ToString(),
                 new Transform(Camera.Transform.Position + Camera.Transform.Forward * 6));
