@@ -9,17 +9,17 @@ internal class ImGuiController
     private readonly ImGuiContextPtr _context;
     private readonly Surface _surface;
     
-    public ImGuiController(ImGuiContextPtr context, EventsManager events, Surface surface)
+    public ImGuiController(ImGuiContextPtr context, Surface surface)
     {
         _context = context;
         _surface = surface;
-        events.KeyDown += OnKeyDown;
-        events.KeyUp += OnKeyUp;
-        events.MouseButtonDown += OnMouseButtonDown;
-        events.MouseButtonUp += OnMouseButtonUp;
-        events.MouseMove += OnMouseMove;
-        events.MouseScroll += OnMouseScroll;
-        events.TextInput += OnTextInput;
+        Events.KeyDown += OnKeyDown;
+        Events.KeyUp += OnKeyUp;
+        Events.MouseButtonDown += OnMouseButtonDown;
+        Events.MouseButtonUp += OnMouseButtonUp;
+        Events.MouseMove += OnMouseMove;
+        Events.MouseScroll += OnMouseScroll;
+        Events.TextInput += OnTextInput;
     }
 
     public void Update(float dt)

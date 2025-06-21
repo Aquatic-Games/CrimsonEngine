@@ -23,8 +23,7 @@ public static class App
     
     private static Scene _currentScene;
     private static Scene? _switchScene;
-
-    private static EventsManager _events;
+    
     private static Surface _surface;
     private static Renderer _renderer;
     private static InputManager _input;
@@ -64,11 +63,6 @@ public static class App
     public static Scene ActiveScene => _currentScene;
 
     /// <summary>
-    /// The app's <see cref="EventsManager"/>.
-    /// </summary>
-    public static EventsManager Events => _events;
-
-    /// <summary>
     /// The app's <see cref="Crimson.Platform.Surface"/>.
     /// </summary>
     public static Surface Surface => _surface;
@@ -93,7 +87,6 @@ public static class App
         _appName = "";
         _isRunning = false;
         _globalApp = null!;
-        _events = null!;
         _surface = null!;
         _renderer = null!;
         _currentScene = null!;
@@ -124,18 +117,18 @@ public static class App
         _currentScene = scene;
         
         Logger.Debug("Initializing events manager.");
-        _events = new EventsManager();
+        Events.Create();
         
         Logger.Debug("Creating window.");
         _surface = new Surface(in options.Window);
-        _events.WindowClose += Close;
-        _events.SurfaceSizeChanged += OnSurfaceSizeChanged;
+        Events.WindowClose += Close;
+        Events.SurfaceSizeChanged += OnSurfaceSizeChanged;
         
         Logger.Debug("Initializing graphics subsystem.");
         _renderer = new Renderer(_appName, in options.Renderer, Surface.Info);
         
         Logger.Debug("Initializing input manager.");
-        _input = new InputManager(_events);
+        _input = new InputManager();
         
         Logger.Debug("Initializing physics system.");
         _physics = new PhysicsSystem();
@@ -143,7 +136,7 @@ public static class App
         if (_renderer.ImGuiContext is { } context)
         {
             Logger.Debug("Creating imgui controller.");
-            _imGuiController = new ImGuiController(context, _events, _surface);
+            _imGuiController = new ImGuiController(context, _surface);
         }
 
         _deltaWatch = Stopwatch.StartNew();
@@ -161,7 +154,7 @@ public static class App
                 continue;
             
             _input.Update();
-            _events.ProcessEvents();
+            Events.ProcessEvents();
 
             float dt = (float) _deltaWatch.Elapsed.TotalSeconds;
             _deltaWatch.Restart();
@@ -198,7 +191,7 @@ public static class App
         _physics.Dispose();
         _renderer.Dispose();
         _surface.Dispose();
-        _events.Dispose();
+        Events.Destroy();
     }
 
     /// <summary>

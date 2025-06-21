@@ -7,44 +7,52 @@ namespace Crimson.Platform;
 /// <summary>
 /// Contains a series of events that may be called in an application.
 /// </summary>
-public class EventsManager : IDisposable
+public static class Events
 {
     /// <summary>
     /// Invoked when the window is requesting to close.
     /// </summary>
-    public event OnWindowClose WindowClose = delegate { };
+    public static event OnWindowClose WindowClose = delegate { };
 
-    public event OnSurfaceSizeChanged SurfaceSizeChanged = delegate { };
+    public static event OnSurfaceSizeChanged SurfaceSizeChanged = delegate { };
 
-    public event OnKeyDown KeyDown = delegate { };
+    public static event OnKeyDown KeyDown = delegate { };
 
-    public event OnKeyRepeat KeyRepeat = delegate { };
+    public static event OnKeyRepeat KeyRepeat = delegate { };
 
-    public event OnKeyUp KeyUp = delegate { };
+    public static event OnKeyUp KeyUp = delegate { };
 
-    public event OnMouseButtonDown MouseButtonDown = delegate { };
+    public static event OnMouseButtonDown MouseButtonDown = delegate { };
 
-    public event OnMouseButtonUp MouseButtonUp = delegate { };
+    public static event OnMouseButtonUp MouseButtonUp = delegate { };
 
-    public event OnMouseMove MouseMove = delegate { };
+    public static event OnMouseMove MouseMove = delegate { };
 
-    public event OnMouseScroll MouseScroll = delegate { };
+    public static event OnMouseScroll MouseScroll = delegate { };
 
-    public event OnTextInput TextInput = delegate { };
+    public static event OnTextInput TextInput = delegate { };
 
     /// <summary>
-    /// Create a new <see cref="EventsManager"/>.
+    /// Create a new <see cref="Events"/>.
     /// </summary>
-    public EventsManager()
+    public static void Create()
     {
         if (!SDL.Init(SDL.InitFlags.Events))
             throw new Exception($"Failed to initialize SDL: {SDL.GetError()}");
+    }
+    
+    /// <summary>
+    /// Dispose of this <see cref="Events"/>.
+    /// </summary>
+    public static void Destroy()
+    {
+        SDL.Quit();
     }
 
     /// <summary>
     /// Poll and process events.
     /// </summary>
-    public unsafe void ProcessEvents()
+    public static unsafe void ProcessEvents()
     {
         SDL.Event sdlEvent;
         while (SDL.PollEvent(out sdlEvent))
@@ -107,14 +115,6 @@ public class EventsManager : IDisposable
                 }
             }
         }
-    }
-    
-    /// <summary>
-    /// Dispose of this <see cref="EventsManager"/>.
-    /// </summary>
-    public void Dispose()
-    {
-        SDL.Quit();
     }
     
     /// <summary>

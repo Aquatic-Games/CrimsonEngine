@@ -21,19 +21,19 @@ public class InputManager
 
     public Vector2 ScrollDelta => _scrollDelta;
     
-    public InputManager(EventsManager events)
+    public InputManager()
     {
         _keysDown = [];
         _keysPressed = [];
         _buttonsDown = [];
         _buttonsPressed = [];
         
-        events.KeyDown += OnKeyDown;
-        events.KeyUp += OnKeyUp;
-        events.MouseButtonDown += OnMouseButtonDown;
-        events.MouseButtonUp += OnMouseButtonUp;
-        events.MouseMove += OnMouseMove;
-        events.MouseScroll += OnMouseScroll;
+        Events.KeyDown += OnKeyDown;
+        Events.KeyUp += OnKeyUp;
+        Events.MouseButtonDown += OnMouseButtonDown;
+        Events.MouseButtonUp += OnMouseButtonUp;
+        Events.MouseMove += OnMouseMove;
+        Events.MouseScroll += OnMouseScroll;
     }
 
     public bool IsKeyDown(Key key)
