@@ -30,12 +30,6 @@ public static class Renderer
     internal static IntPtr Device;
 
     internal static SDL.GPUTextureFormat MainTargetFormat;
-    
-    public static Texture WhiteTexture;
-
-    public static Texture BlackTexture;
-
-    public static Texture NormalTexture;
 
     /// <summary>
     /// The 3D <see cref="Crimson.Graphics.Camera"/> that will be used when drawing.
@@ -142,9 +136,9 @@ public static class Renderer
         }
 
         Logger.Trace("Creating default textures.");
-        WhiteTexture = new Texture(new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
-        BlackTexture = new Texture(new Size<int>(1), [0, 0, 0, 255], PixelFormat.RGBA8);
-        NormalTexture = new Texture(new Size<int>(1), [128, 128, 255, 255], PixelFormat.RGBA8);
+        Texture.White = new Texture(new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
+        Texture.Black = new Texture(new Size<int>(1), [0, 0, 0, 255], PixelFormat.RGBA8);
+        Texture.EmptyNormal = new Texture(new Size<int>(1), [128, 128, 255, 255], PixelFormat.RGBA8);
 
         Camera = new Camera()
         {
@@ -159,9 +153,12 @@ public static class Renderer
     /// </summary>
     public static void Destroy()
     {
-        NormalTexture.Dispose();
-        BlackTexture.Dispose();
-        WhiteTexture.Dispose();
+        Texture.EmptyNormal.Dispose();
+        Texture.EmptyNormal = null!;
+        Texture.Black.Dispose();
+        Texture.Black = null!;
+        Texture.White.Dispose();
+        Texture.White = null!;
         
         _deferredRenderer?.Dispose();
         _imGuiRenderer?.Dispose();
@@ -267,7 +264,7 @@ public static class Renderer
             bottomRight = Vector2T.Transform(new Vector2T<float>(dist, +halfThickness), rotMatrix) + fA;
         }
 
-        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(WhiteTexture, topLeft, topRight, bottomLeft, bottomRight,
+        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(Texture.White, topLeft, topRight, bottomLeft, bottomRight,
             color));
     }
 

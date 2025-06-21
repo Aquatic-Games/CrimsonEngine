@@ -38,11 +38,11 @@ public class Material : IDisposable
     public unsafe Material(in MaterialDefinition definition)
     {
         Albedo = definition.Albedo;
-        Normal = definition.Normal ?? Renderer.NormalTexture;
-        Metallic = definition.Metallic ?? Renderer.WhiteTexture;
-        Roughness = definition.Roughness ?? Renderer.BlackTexture;
-        Occlusion = definition.Occlusion ?? Renderer.WhiteTexture;
-        Emission = definition.Emission ?? Renderer.BlackTexture;
+        Normal = definition.Normal ?? Texture.EmptyNormal;
+        Metallic = definition.Metallic ?? Texture.White;
+        Roughness = definition.Roughness ?? Texture.Black;
+        Occlusion = definition.Occlusion ?? Texture.White;
+        Emission = definition.Emission ?? Texture.Black;
 
         AlbedoTint = definition.AlbedoTint;
         MetallicMultiplier = definition.MetallicMultiplier;

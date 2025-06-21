@@ -114,4 +114,10 @@ public class Texture : IDisposable
     {
         SDL.ReleaseGPUTexture(_device, TextureHandle);
     }
+    
+    public static Texture White { get; internal set; }
+    
+    public static Texture Black { get; internal set; }
+    
+    public static Texture EmptyNormal { get; internal set; }
 }
