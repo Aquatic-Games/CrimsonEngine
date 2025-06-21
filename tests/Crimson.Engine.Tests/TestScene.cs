@@ -90,7 +90,7 @@ public class TestScene : Scene
     {
         base.Update(dt);
         
-        if (Input.IsKeyPressed(Key.Escape))
+        if (Input.Input.IsKeyPressed(Key.Escape))
             App.Close();
 
         if (Physics.Physics.Raycast(Camera.Transform.Position, Camera.Transform.Forward, 100, out RaycastHit hit))
@@ -100,7 +100,7 @@ public class TestScene : Scene
             rayCube.Transform.Position = hit.WorldPosition;
         }
 
-        if (Input.IsMouseButtonPressed(MouseButton.Left) || Input.IsMouseButtonDown(MouseButton.Right))
+        if (Input.Input.IsMouseButtonPressed(MouseButton.Left) || Input.Input.IsMouseButtonDown(MouseButton.Right))
         {
             Entity entity = new Entity(Random.Shared.NextInt64().ToString(),
                 new Transform(Camera.Transform.Position + Camera.Transform.Forward * 6));

@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grabs.ShaderCompiler", "lib
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Math.Tests", "tests\Crimson.Math.Tests\Crimson.Math.Tests.csproj", "{AA748745-2376-4A10-BF90-A681C5D9B475}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Input", "src\Crimson.Input\Crimson.Input.csproj", "{E7FEB2EE-33C7-48BA-AE9C-EC72D4BEF376}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +97,10 @@ Global
 		{AA748745-2376-4A10-BF90-A681C5D9B475}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA748745-2376-4A10-BF90-A681C5D9B475}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA748745-2376-4A10-BF90-A681C5D9B475}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7FEB2EE-33C7-48BA-AE9C-EC72D4BEF376}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7FEB2EE-33C7-48BA-AE9C-EC72D4BEF376}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7FEB2EE-33C7-48BA-AE9C-EC72D4BEF376}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7FEB2EE-33C7-48BA-AE9C-EC72D4BEF376}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A} = {4DB13778-0F69-4B82-A065-32546F54500F}

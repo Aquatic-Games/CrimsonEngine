@@ -12,8 +12,8 @@ public class CameraMove : Component
     {
         const float lookSpeed = 0.01f;
 
-        _rotation.X -= Input.MouseDelta.X * lookSpeed;
-        _rotation.Y -= Input.MouseDelta.Y * lookSpeed;
+        _rotation.X -= Input.Input.MouseDelta.X * lookSpeed;
+        _rotation.Y -= Input.Input.MouseDelta.Y * lookSpeed;
 
         _rotation.Y = float.Clamp(_rotation.Y, -float.Pi / 2, float.Pi / 2);
 
@@ -21,17 +21,17 @@ public class CameraMove : Component
         
         float moveSpeed = 5 * dt;
         
-        if (Input.IsKeyDown(Key.W))
+        if (Input.Input.IsKeyDown(Key.W))
             Transform.Position += Transform.Forward * moveSpeed;
-        if (Input.IsKeyDown(Key.S))
+        if (Input.Input.IsKeyDown(Key.S))
             Transform.Position += Transform.Backward * moveSpeed;
-        if (Input.IsKeyDown(Key.A))
+        if (Input.Input.IsKeyDown(Key.A))
             Transform.Position += Transform.Left * moveSpeed;
-        if (Input.IsKeyDown(Key.D))
+        if (Input.Input.IsKeyDown(Key.D))
             Transform.Position += Transform.Right * moveSpeed;
-        if (Input.IsKeyDown(Key.Space))
+        if (Input.Input.IsKeyDown(Key.Space))
             Transform.Position += Transform.Up * moveSpeed;
-        if (Input.IsKeyDown(Key.LeftControl))
+        if (Input.Input.IsKeyDown(Key.LeftControl))
             Transform.Position += Transform.Down * moveSpeed;
         
         

@@ -98,7 +98,7 @@ public static class App
         Renderer.Create(_appName, in options.Renderer, Surface.Info);
         
         Logger.Debug("Initializing input manager.");
-        Input.Create();
+        Input.Input.Create();
         
         Logger.Debug("Initializing physics system.");
         Physics.Physics.Create();
@@ -123,7 +123,7 @@ public static class App
             if (_deltaWatch.Elapsed.TotalSeconds < _targetDelta && !Renderer.VSync)
                 continue;
             
-            Input.Update();
+            Input.Input.Update();
             Events.ProcessEvents();
 
             float dt = (float) _deltaWatch.Elapsed.TotalSeconds;
@@ -159,7 +159,7 @@ public static class App
         _currentScene.Dispose();
         _globalApp.Dispose();
         Physics.Physics.Destroy();
-        Input.Destroy();
+        Input.Input.Destroy();
         Renderer.Destroy();
         Surface.Destroy();
         Events.Destroy();

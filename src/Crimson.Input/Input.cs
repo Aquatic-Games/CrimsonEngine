@@ -1,7 +1,7 @@
 using System.Numerics;
 using Crimson.Platform;
 
-namespace Crimson.Engine;
+namespace Crimson.Input;
 
 public static class Input
 {
@@ -29,7 +29,7 @@ public static class Input
         _buttonsPressed = [];
     }
     
-    internal static void Create()
+    public static void Create()
     {
         _keysDown.Clear();
         _keysPressed.Clear();
@@ -44,7 +44,7 @@ public static class Input
         Events.MouseScroll += OnMouseScroll;
     }
 
-    internal static void Destroy()
+    public static void Destroy()
     {
         Events.KeyDown -= OnKeyDown;
         Events.KeyUp -= OnKeyUp;
