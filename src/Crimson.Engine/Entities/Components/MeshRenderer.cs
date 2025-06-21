@@ -12,12 +12,12 @@ public class MeshRenderer : Component
     
     public MeshRenderer(Mesh mesh)
     {
-        _renderable = new Renderable(App.Renderer, mesh);
+        _renderable = new Renderable(mesh);
     }
 
     public override void Draw()
     {
-        App.Renderer.DrawRenderable(_renderable, Entity.WorldMatrix);
+        Renderer.DrawRenderable(_renderable, Entity.WorldMatrix);
     }
 
     public override void Dispose()

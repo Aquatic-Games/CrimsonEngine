@@ -34,7 +34,7 @@ public class TestScene : Scene
         //App.Renderer.VSync = false;
         //App.Surface.CursorVisible = false;
 
-        _texture = new Texture(App.Renderer, "DEBUG.png");
+        _texture = new Texture("DEBUG.png");
         //_texture2 = new Texture(App.Renderer, "/home/aqua/Pictures/awesomeface.png");
         
         MaterialDefinition def = new(_texture)
@@ -42,10 +42,10 @@ public class TestScene : Scene
             RenderFace = RenderFace.Front
         };
         
-        _material = new Material(App.Renderer, in def);
+        _material = new Material(in def);
         _mesh = Mesh.FromPrimitive(new Cube(), _material);
         
-        Model model = Model.FromGltf(App.Renderer, "/home/aqua/Downloads/Fox.glb");
+        Model model = Model.FromGltf("/home/aqua/Downloads/Fox.glb");
 
         BoxShapeDescription desc = new BoxShapeDescription(new Vector3(0.5f));
         BoxShape shape = desc.Create();
@@ -71,7 +71,7 @@ public class TestScene : Scene
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());
         
-        Camera.Skybox = new Skybox(App.Renderer,
+        Camera.Skybox = new Skybox(
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/right.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/left.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/top.png"),
@@ -122,6 +122,6 @@ public class TestScene : Scene
         //App.Renderer.DrawImage(_texture, Vector2.Zero);
         //App.Renderer.DrawImage(_texture, new Vector2(100));
         
-        App.Renderer.DrawLine(new Vector2T<int>(0, 0), new Vector2T<int>(1280, 720), Color.White, 5);
+        Renderer.DrawLine(new Vector2T<int>(0, 0), new Vector2T<int>(1280, 720), Color.White, 5);
     }
 }

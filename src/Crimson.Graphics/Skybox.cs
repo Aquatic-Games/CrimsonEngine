@@ -23,14 +23,13 @@ public sealed class Skybox : IDisposable
     /// <summary>
     /// Create a <see cref="Skybox"/> consisting of 6 textures in a cube.
     /// </summary>
-    /// <param name="renderer">The <see cref="Renderer"/> that this skybox will be associated with.</param>
     /// <param name="right">The right (X+) bitmap image.</param>
     /// <param name="left">The left (X-) bitmap image.</param>
     /// <param name="up">The up (Y+) bitmap image.</param>
     /// <param name="down">The down (Y-) bitmap image.</param>
     /// <param name="front">The back (Z+) bitmap image.</param>
     /// <param name="back">The front (Z-) bitmap image.</param>
-    public unsafe Skybox(Renderer renderer, Bitmap right, Bitmap left, Bitmap up, Bitmap down, Bitmap front, Bitmap back)
+    public unsafe Skybox(Bitmap right, Bitmap left, Bitmap up, Bitmap down, Bitmap front, Bitmap back)
     {
         Debug.Assert(right.Size == left.Size);
         Debug.Assert(right.Size == up.Size);
@@ -38,7 +37,7 @@ public sealed class Skybox : IDisposable
         Debug.Assert(right.Size == front.Size);
         Debug.Assert(right.Size == back.Size);
         
-        _device = renderer.Device;
+        _device = Renderer.Device;
 
         SDL.GPUTextureFormat fmt = right.Format.ToSdl(out uint rowPitch);
 
@@ -146,7 +145,7 @@ public sealed class Skybox : IDisposable
 
         SDL.GPUColorTargetDescription colorTarget = new()
         {
-            Format = renderer.MainTargetFormat
+            Format = Renderer.MainTargetFormat
         };
 
         SDL.GPUVertexBufferDescription vertexBufferDesc = new()

@@ -17,14 +17,12 @@ public class TestApp : GlobalApp
     public override void Initialize()
     {
         base.Initialize();
+        
+        Renderer.Camera.ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(-1, 1, 3), Vector3.Zero, Vector3.UnitY);
 
-        Renderer renderer = App.Renderer;
-        renderer.Camera.ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(-1, 1, 3), Vector3.Zero, Vector3.UnitY);
+        Material material = new Material(new MaterialDefinition(new Texture("/home/aqua/Pictures/BAGELMIP.png")));
 
-        Material material = new Material(renderer,
-            new MaterialDefinition(new Texture(renderer, "/home/aqua/Pictures/BAGELMIP.png")));
-
-        Model model = Model.FromGltf(renderer, "/home/aqua/Documents/test.glb");
+        Model model = Model.FromGltf("/home/aqua/Documents/test.glb");
         
         //Mesh mesh = Mesh.FromPrimitive(new Cube(), material);
         //_renderable = new Renderable(renderer, mesh);

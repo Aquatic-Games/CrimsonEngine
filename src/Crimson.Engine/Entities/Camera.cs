@@ -31,10 +31,9 @@ public class Camera : Entity
 
     public override void Draw()
     {
-        Renderer renderer = App.Renderer;
-        Size<int> size = renderer.RenderSize;
+        Size<int> size = Renderer.RenderSize;
 
-        renderer.Camera = new Graphics.Camera()
+        Renderer.Camera = new Graphics.Camera()
         {
             ProjectionMatrix =
                 Matrix4x4.CreatePerspectiveFieldOfView(_fov, size.Width / (float) size.Height, _near, _far),

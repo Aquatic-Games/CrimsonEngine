@@ -22,8 +22,6 @@ public static class App
     
     private static Scene _currentScene;
     private static Scene? _switchScene;
-    
-    private static Renderer _renderer;
 
     private static ImGuiController? _imGuiController;
     
@@ -58,17 +56,11 @@ public static class App
     /// </summary>
     public static Scene ActiveScene => _currentScene;
 
-    /// <summary>
-    /// The app's <see cref="Renderer"/> instance.
-    /// </summary>
-    public static Renderer Renderer => _renderer;
-
     static App()
     {
         _appName = "";
         _isRunning = false;
         _globalApp = null!;
-        _renderer = null!;
         _currentScene = null!;
         _deltaWatch = null!;
         _imGuiController = null!;
@@ -103,7 +95,7 @@ public static class App
         Events.SurfaceSizeChanged += OnSurfaceSizeChanged;
         
         Logger.Debug("Initializing graphics subsystem.");
-        _renderer = new Renderer(_appName, in options.Renderer, Surface.Info);
+        Renderer.Create(_appName, in options.Renderer, Surface.Info);
         
         Logger.Debug("Initializing input manager.");
         Input.Create();
@@ -111,7 +103,7 @@ public static class App
         Logger.Debug("Initializing physics system.");
         Physics.Physics.Create();
 
-        if (_renderer.ImGuiContext is { } context)
+        if (Renderer.ImGuiContext is { } context)
         {
             Logger.Debug("Creating imgui controller.");
             _imGuiController = new ImGuiController(context);
@@ -153,13 +145,13 @@ public static class App
             _currentScene.Update(dt);
             _globalApp.PostUpdate(dt);
             
-            _renderer.NewFrame();
+            Renderer.NewFrame();
             
             _globalApp.PreDraw();
             _currentScene.Draw();
             _globalApp.PostDraw();
             
-            _renderer.Render();
+            Renderer.Render();
         }
         
         Logger.Info("Cleaning up.");
@@ -168,7 +160,7 @@ public static class App
         _globalApp.Dispose();
         Physics.Physics.Destroy();
         Input.Destroy();
-        _renderer.Dispose();
+        Renderer.Destroy();
         Surface.Destroy();
         Events.Destroy();
     }
@@ -190,6 +182,6 @@ public static class App
     
     private static void OnSurfaceSizeChanged(Size<int> newSize)
     {
-        _renderer.Resize(newSize);
+        Renderer.Resize(newSize);
     }
 }
