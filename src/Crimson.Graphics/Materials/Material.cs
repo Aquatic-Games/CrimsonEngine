@@ -34,22 +34,21 @@ public class Material : IDisposable
     /// <summary>
     /// Create a <see cref="Material"/> from the given definition.
     /// </summary>
-    /// <param name="renderer">A <see cref="Renderer"/> instance.</param>
     /// <param name="definition">The <see cref="MaterialDefinition"/> that describes how the material should be created.</param>
-    public unsafe Material(Renderer renderer, in MaterialDefinition definition)
+    public unsafe Material(in MaterialDefinition definition)
     {
         Albedo = definition.Albedo;
-        Normal = definition.Normal ?? renderer.NormalTexture;
-        Metallic = definition.Metallic ?? renderer.WhiteTexture;
-        Roughness = definition.Roughness ?? renderer.BlackTexture;
-        Occlusion = definition.Occlusion ?? renderer.WhiteTexture;
-        Emission = definition.Emission ?? renderer.BlackTexture;
+        Normal = definition.Normal ?? Texture.EmptyNormal;
+        Metallic = definition.Metallic ?? Texture.White;
+        Roughness = definition.Roughness ?? Texture.Black;
+        Occlusion = definition.Occlusion ?? Texture.White;
+        Emission = definition.Emission ?? Texture.Black;
 
         AlbedoTint = definition.AlbedoTint;
         MetallicMultiplier = definition.MetallicMultiplier;
         RoughnessMultiplier = definition.RoughnessMultiplier;
 
-        _device = renderer.Device;
+        _device = Renderer.Device;
 
         // TODO: Probably best not to load this shader every time a material is created.
         IntPtr vertexShader =

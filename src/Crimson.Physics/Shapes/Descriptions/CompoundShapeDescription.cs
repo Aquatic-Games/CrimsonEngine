@@ -14,12 +14,12 @@ public struct CompoundShapeDescription : IShapeDescription<CompoundShape>
         Children = [];
     }
     
-    public CompoundShape Create(PhysicsSystem physics)
+    public CompoundShape Create()
     {
         Debug.Assert(Children.Count > 0);
         
         CompoundBuilder builder =
-            new CompoundBuilder(physics.Simulation.BufferPool, physics.Simulation.Shapes, Children.Count);
+            new CompoundBuilder(Physics.Simulation.BufferPool, Physics.Simulation.Shapes, Children.Count);
 
         List<float> masses = new List<float>(Children.Count);
         
@@ -34,9 +34,9 @@ public struct CompoundShapeDescription : IShapeDescription<CompoundShape>
         builder.BuildDynamicCompound(out Buffer<CompoundChild> children, out BodyInertia inertia);
         builder.Dispose();
 
-        BigCompound compound = new BigCompound(children, physics.Simulation.Shapes, physics.Simulation.BufferPool, physics.ThreadDispatcher);
-        TypedIndex index = physics.Simulation.Shapes.Add(compound);
+        BigCompound compound = new BigCompound(children, Physics.Simulation.Shapes, Physics.Simulation.BufferPool, Physics.ThreadDispatcher);
+        TypedIndex index = Physics.Simulation.Shapes.Add(compound);
         
-        return new CompoundShape(physics.Simulation, index, masses);
+        return new CompoundShape(Physics.Simulation, index, masses);
     }
 }

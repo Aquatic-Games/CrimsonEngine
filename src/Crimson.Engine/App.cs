@@ -2,7 +2,6 @@
 using Crimson.Core;
 using Crimson.Engine.Entities;
 using Crimson.Graphics;
-using Crimson.Input;
 using Crimson.Math;
 using Crimson.Physics;
 using Crimson.Platform;
@@ -23,12 +22,6 @@ public static class App
     
     private static Scene _currentScene;
     private static Scene? _switchScene;
-
-    private static EventsManager _events;
-    private static Surface _surface;
-    private static Renderer _renderer;
-    private static InputManager _input;
-    private static PhysicsSystem _physics;
 
     private static ImGuiController? _imGuiController;
     
@@ -63,43 +56,13 @@ public static class App
     /// </summary>
     public static Scene ActiveScene => _currentScene;
 
-    /// <summary>
-    /// The app's <see cref="EventsManager"/>.
-    /// </summary>
-    public static EventsManager Events => _events;
-
-    /// <summary>
-    /// The app's <see cref="Crimson.Platform.Surface"/>.
-    /// </summary>
-    public static Surface Surface => _surface;
-
-    /// <summary>
-    /// The app's <see cref="Renderer"/> instance.
-    /// </summary>
-    public static Renderer Renderer => _renderer;
-
-    /// <summary>
-    /// The app's <see cref="InputManager"/>.
-    /// </summary>
-    public static InputManager Input => _input;
-
-    /// <summary>
-    /// The physics system.
-    /// </summary>
-    public static PhysicsSystem Physics => _physics;
-
     static App()
     {
         _appName = "";
         _isRunning = false;
         _globalApp = null!;
-        _events = null!;
-        _surface = null!;
-        _renderer = null!;
         _currentScene = null!;
-        _input = null!;
         _deltaWatch = null!;
-        _physics = null!;
         _imGuiController = null!;
         FpsLimit = 0;
     }
@@ -124,26 +87,26 @@ public static class App
         _currentScene = scene;
         
         Logger.Debug("Initializing events manager.");
-        _events = new EventsManager();
+        Events.Create();
         
-        Logger.Debug("Creating window.");
-        _surface = new Surface(in options.Window);
-        _events.WindowClose += Close;
-        _events.SurfaceSizeChanged += OnSurfaceSizeChanged;
+        Logger.Debug("Creating surface.");
+        Surface.Create(in options.Window);
+        Events.WindowClose += Close;
+        Events.SurfaceSizeChanged += OnSurfaceSizeChanged;
         
         Logger.Debug("Initializing graphics subsystem.");
-        _renderer = new Renderer(_appName, in options.Renderer, Surface.Info);
+        Renderer.Create(_appName, in options.Renderer, Surface.Info);
         
         Logger.Debug("Initializing input manager.");
-        _input = new InputManager(_events);
+        Input.Input.Create();
         
         Logger.Debug("Initializing physics system.");
-        _physics = new PhysicsSystem();
+        Physics.Physics.Create();
 
-        if (_renderer.ImGuiContext is { } context)
+        if (Renderer.ImGuiContext is { } context)
         {
             Logger.Debug("Creating imgui controller.");
-            _imGuiController = new ImGuiController(context, _events, _surface);
+            _imGuiController = new ImGuiController(context);
         }
 
         _deltaWatch = Stopwatch.StartNew();
@@ -160,8 +123,8 @@ public static class App
             if (_deltaWatch.Elapsed.TotalSeconds < _targetDelta && !Renderer.VSync)
                 continue;
             
-            _input.Update();
-            _events.ProcessEvents();
+            Input.Input.Update();
+            Events.ProcessEvents();
 
             float dt = (float) _deltaWatch.Elapsed.TotalSeconds;
             _deltaWatch.Restart();
@@ -178,27 +141,28 @@ public static class App
             _imGuiController?.Update(dt);
             
             _globalApp.PreUpdate(dt);
-            _physics.Step(1 / 60.0f);
+            Physics.Physics.Step(1 / 60.0f);
             _currentScene.Update(dt);
             _globalApp.PostUpdate(dt);
             
-            _renderer.NewFrame();
+            Renderer.NewFrame();
             
             _globalApp.PreDraw();
             _currentScene.Draw();
             _globalApp.PostDraw();
             
-            _renderer.Render();
+            Renderer.Render();
         }
         
         Logger.Info("Cleaning up.");
         
         _currentScene.Dispose();
         _globalApp.Dispose();
-        _physics.Dispose();
-        _renderer.Dispose();
-        _surface.Dispose();
-        _events.Dispose();
+        Physics.Physics.Destroy();
+        Input.Input.Destroy();
+        Renderer.Destroy();
+        Surface.Destroy();
+        Events.Destroy();
     }
 
     /// <summary>
@@ -218,6 +182,6 @@ public static class App
     
     private static void OnSurfaceSizeChanged(Size<int> newSize)
     {
-        _renderer.Resize(newSize);
+        Renderer.Resize(newSize);
     }
 }

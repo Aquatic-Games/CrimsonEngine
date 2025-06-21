@@ -10,20 +10,20 @@ using Crimson.Physics.Shapes.Descriptions;
 
 namespace Crimson.Physics;
 
-public class PhysicsSystem : IDisposable
+public static class Physics
 {
-    private readonly BufferPool _bufferPool;
+    private static BufferPool _bufferPool;
     
-    internal readonly ThreadDispatcher ThreadDispatcher;
-    internal readonly Simulation Simulation;
+    internal static ThreadDispatcher ThreadDispatcher;
+    internal static Simulation Simulation;
 
-    public Vector3 Gravity
+    public static Vector3 Gravity
     {
         get => ((PoseIntegrator<PoseIntegratorCallbacks>) Simulation.PoseIntegrator).Callbacks.Gravity;
         set => ((PoseIntegrator<PoseIntegratorCallbacks>) Simulation.PoseIntegrator).Callbacks.Gravity = value;
     }
     
-    public PhysicsSystem()
+    public static void Create()
     {
         _bufferPool = new BufferPool();
         ThreadDispatcher = new ThreadDispatcher(Environment.ProcessorCount);
@@ -32,13 +32,20 @@ public class PhysicsSystem : IDisposable
         Simulation = Simulation.Create(_bufferPool, new NarrowPhaseCallbacks(),
             new PoseIntegratorCallbacks(new Vector3(0, -9.81f, 0)), new SolveDescription(8, 1));
     }
+    
+    public static void Destroy()
+    {
+        Simulation.Dispose();
+        ThreadDispatcher.Dispose();
+        _bufferPool.Clear();
+    }
 
-    public void Step(float deltaTime)
+    public static void Step(float deltaTime)
     {
         Simulation.Timestep(deltaTime, ThreadDispatcher);
     }
 
-    public Body CreateBody(in BodyDescription description)
+    public static Body CreateBody(in BodyDescription description)
     {
         RigidPose pose = new RigidPose(description.Position, description.Rotation);
         TypedIndex index = description.Shape.Index;
@@ -67,7 +74,7 @@ public class PhysicsSystem : IDisposable
         }
     }
 
-    public bool Raycast(Vector3 position, Vector3 direction, float maxDistance, out RaycastHit hit)
+    public static bool Raycast(Vector3 position, Vector3 direction, float maxDistance, out RaycastHit hit)
     {
         RayHandler handler = new RayHandler();
         Simulation.RayCast(position, direction, maxDistance, ref handler);
@@ -117,10 +124,5 @@ public class PhysicsSystem : IDisposable
         };
         
         return true;
-    }
-
-    public void Dispose()
-    {
-        Simulation.Dispose();
     }
 }

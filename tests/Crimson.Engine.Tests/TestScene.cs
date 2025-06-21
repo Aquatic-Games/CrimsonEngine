@@ -6,7 +6,6 @@ using Crimson.Graphics;
 using Crimson.Graphics.Materials;
 //using Crimson.Graphics.Materials;
 using Crimson.Graphics.Primitives;
-using Crimson.Input;
 using Crimson.Math;
 using Crimson.Physics;
 using Crimson.Physics.Shapes;
@@ -35,7 +34,7 @@ public class TestScene : Scene
         //App.Renderer.VSync = false;
         //App.Surface.CursorVisible = false;
 
-        _texture = new Texture(App.Renderer, "DEBUG.png");
+        _texture = new Texture("DEBUG.png");
         //_texture2 = new Texture(App.Renderer, "/home/aqua/Pictures/awesomeface.png");
         
         MaterialDefinition def = new(_texture)
@@ -43,23 +42,23 @@ public class TestScene : Scene
             RenderFace = RenderFace.Front
         };
         
-        _material = new Material(App.Renderer, in def);
+        _material = new Material(in def);
         _mesh = Mesh.FromPrimitive(new Cube(), _material);
         
-        Model model = Model.FromGltf(App.Renderer, "/home/aqua/Downloads/Fox.glb");
+        Model model = Model.FromGltf("/home/aqua/Downloads/Fox.glb");
 
         BoxShapeDescription desc = new BoxShapeDescription(new Vector3(0.5f));
-        BoxShape shape = desc.Create(App.Physics);
+        BoxShape shape = desc.Create();
         
         Entity mainCube = new Entity("MainCube");
         mainCube.AddComponent(new MeshRenderer(_mesh));
-        mainCube.AddComponent(new Rigidbody(new BoxShapeDescription(new Vector3(0.5f)).Create(App.Physics), 1));
+        mainCube.AddComponent(new Rigidbody(new BoxShapeDescription(new Vector3(0.5f)).Create(), 1));
         //model.AddToEntity(mainCube);
         AddEntity(mainCube);
 
         Entity secondCube = new Entity("Cube1", new Transform(new Vector3(0, -5, 0)));
         secondCube.AddComponent(new MeshRenderer(_mesh));
-        secondCube.AddComponent(new Rigidbody(new BoxShapeDescription(new Vector3(0.5f)).Create(App.Physics), 0));
+        secondCube.AddComponent(new Rigidbody(new BoxShapeDescription(new Vector3(0.5f)).Create(), 0));
         //mainCube.AddChild(secondCube);
         AddEntity(secondCube);
 
@@ -72,7 +71,7 @@ public class TestScene : Scene
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());
         
-        Camera.Skybox = new Skybox(App.Renderer,
+        Camera.Skybox = new Skybox(
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/right.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/left.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/top.png"),
@@ -90,20 +89,18 @@ public class TestScene : Scene
     public override void Update(float dt)
     {
         base.Update(dt);
-
-        InputManager input = App.Input;
         
-        if (input.IsKeyPressed(Key.Escape))
+        if (Input.Input.IsKeyPressed(Key.Escape))
             App.Close();
 
-        if (App.Physics.Raycast(Camera.Transform.Position, Camera.Transform.Forward, 100, out RaycastHit hit))
+        if (Physics.Physics.Raycast(Camera.Transform.Position, Camera.Transform.Forward, 100, out RaycastHit hit))
         {
             Entity rayCube = GetEntity("RayCube");
             //rayCube.Transform.Position = hit.BodyPosition + hit.SurfaceNormal;
             rayCube.Transform.Position = hit.WorldPosition;
         }
 
-        if (input.IsMouseButtonPressed(MouseButton.Left) || input.IsMouseButtonDown(MouseButton.Right))
+        if (Input.Input.IsMouseButtonPressed(MouseButton.Left) || Input.Input.IsMouseButtonDown(MouseButton.Right))
         {
             Entity entity = new Entity(Random.Shared.NextInt64().ToString(),
                 new Transform(Camera.Transform.Position + Camera.Transform.Forward * 6));
@@ -125,6 +122,6 @@ public class TestScene : Scene
         //App.Renderer.DrawImage(_texture, Vector2.Zero);
         //App.Renderer.DrawImage(_texture, new Vector2(100));
         
-        App.Renderer.DrawLine(new Vector2T<int>(0, 0), new Vector2T<int>(1280, 720), Color.White, 5);
+        Renderer.DrawLine(new Vector2T<int>(0, 0), new Vector2T<int>(1280, 720), Color.White, 5);
     }
 }

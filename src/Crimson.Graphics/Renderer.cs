@@ -14,43 +14,37 @@ namespace Crimson.Graphics;
 /// <summary>
 /// The graphics subsystem, containing everything used to render.
 /// </summary>
-public sealed class Renderer : IDisposable
+public static class Renderer
 {
-    private readonly IntPtr _window;
+    private static IntPtr _window;
     
-    private IntPtr _depthTexture;
+    private static IntPtr _depthTexture;
 
-    private bool _vsyncEnabled;
-    private Size<int> _swapchainSize;
+    private static bool _vsyncEnabled;
+    private static Size<int> _swapchainSize;
     
-    private readonly TextureBatcher _uiBatcher;
-    private readonly ImGuiRenderer? _imGuiRenderer;
-    private readonly DeferredRenderer? _deferredRenderer;
+    private static TextureBatcher _uiBatcher;
+    private static ImGuiRenderer? _imGuiRenderer;
+    private static DeferredRenderer? _deferredRenderer;
 
-    internal readonly IntPtr Device;
+    internal static IntPtr Device;
 
-    internal readonly SDL.GPUTextureFormat MainTargetFormat;
-    
-    public readonly Texture WhiteTexture;
-
-    public readonly Texture BlackTexture;
-
-    public readonly Texture NormalTexture;
+    internal static SDL.GPUTextureFormat MainTargetFormat;
 
     /// <summary>
     /// The 3D <see cref="Crimson.Graphics.Camera"/> that will be used when drawing.
     /// </summary>
-    public Camera Camera;
+    public static Camera Camera;
 
     /// <summary>
     /// Get the render area size in pixels.
     /// </summary>
-    public Size<int> RenderSize => _swapchainSize;
+    public static Size<int> RenderSize => _swapchainSize;
 
     /// <summary>
     /// Enable/disable vertical sync.
     /// </summary>
-    public bool VSync
+    public static bool VSync
     {
         get => _vsyncEnabled;
         set
@@ -65,7 +59,7 @@ public sealed class Renderer : IDisposable
     /// <summary>
     /// Gets the ImGUI context pointer.
     /// </summary>
-    public ImGuiContextPtr? ImGuiContext
+    public static ImGuiContextPtr? ImGuiContext
     {
         get
         {
@@ -79,7 +73,7 @@ public sealed class Renderer : IDisposable
     /// </summary>
     /// <param name="appName">The application name.</param>
     /// <param name="surface">The <see cref="SurfaceInfo"/> to use when creating the subsystem.</param>
-    public Renderer(string appName, in RendererOptions options, in SurfaceInfo surface)
+    public static void Create(string appName, in RendererOptions options, in SurfaceInfo surface)
     {
         _swapchainSize = surface.Size;
 
@@ -142,9 +136,9 @@ public sealed class Renderer : IDisposable
         }
 
         Logger.Trace("Creating default textures.");
-        WhiteTexture = new Texture(this, new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
-        BlackTexture = new Texture(this, new Size<int>(1), [0, 0, 0, 255], PixelFormat.RGBA8);
-        NormalTexture = new Texture(this, new Size<int>(1), [128, 128, 255, 255], PixelFormat.RGBA8);
+        Texture.White = new Texture(new Size<int>(1), [255, 255, 255, 255], PixelFormat.RGBA8);
+        Texture.Black = new Texture(new Size<int>(1), [0, 0, 0, 255], PixelFormat.RGBA8);
+        Texture.EmptyNormal = new Texture(new Size<int>(1), [128, 128, 255, 255], PixelFormat.RGBA8);
 
         Camera = new Camera()
         {
@@ -157,11 +151,14 @@ public sealed class Renderer : IDisposable
     /// <summary>
     /// Destroy the graphics subsystem.
     /// </summary>
-    public void Dispose()
+    public static void Destroy()
     {
-        NormalTexture.Dispose();
-        BlackTexture.Dispose();
-        WhiteTexture.Dispose();
+        Texture.EmptyNormal.Dispose();
+        Texture.EmptyNormal = null!;
+        Texture.Black.Dispose();
+        Texture.Black = null!;
+        Texture.White.Dispose();
+        Texture.White = null!;
         
         _deferredRenderer?.Dispose();
         _imGuiRenderer?.Dispose();
@@ -177,7 +174,7 @@ public sealed class Renderer : IDisposable
     /// </summary>
     /// <param name="renderable">The <see cref="Renderable"/> to draw.</param>
     /// <param name="worldMatrix">The world matrix.</param>
-    public void DrawRenderable(Renderable renderable, Matrix4x4 worldMatrix)
+    public static void DrawRenderable(Renderable renderable, Matrix4x4 worldMatrix)
     {
         Debug.Assert(_deferredRenderer != null, "Renderer has not been created with 3D rendering enabled.");
         _deferredRenderer.AddToQueue(renderable, worldMatrix);
@@ -189,7 +186,7 @@ public sealed class Renderer : IDisposable
     /// <param name="texture">The texture to use as the image.</param>
     /// <param name="position">The position, in pixels.</param>
     /// <param name="tint">The tint to use, if any.</param>
-    public void DrawImage(Texture texture, in Vector2T<int> position, in Color? tint = null)
+    public static void DrawImage(Texture texture, in Vector2T<int> position, in Color? tint = null)
     {
         Size<int> size = texture.Size;
         
@@ -209,7 +206,7 @@ public sealed class Renderer : IDisposable
     /// <param name="position">The position, in pixels.</param>
     /// <param name="size">The size, in pixels.</param>
     /// <param name="tint">The tint to use, if any.</param>
-    public void DrawImage(Texture texture, in Vector2T<int> position, in Size<int> size, Color? tint = null)
+    public static void DrawImage(Texture texture, in Vector2T<int> position, in Size<int> size, Color? tint = null)
     {
         Vector2T<int> topLeft = position;
         Vector2T<int> topRight = position + new Vector2T<int>(size.Width, 0);
@@ -227,7 +224,7 @@ public sealed class Renderer : IDisposable
     /// <param name="b">The second point.</param>
     /// <param name="color">The line color.</param>
     /// <param name="thickness">The line thickness in pixels.</param>
-    public void DrawLine(in Vector2T<int> a, in Vector2T<int> b, in Color color, int thickness)
+    public static void DrawLine(in Vector2T<int> a, in Vector2T<int> b, in Color color, int thickness)
     {
         float halfThickness = thickness / 2.0f;
 
@@ -267,11 +264,11 @@ public sealed class Renderer : IDisposable
             bottomRight = Vector2T.Transform(new Vector2T<float>(dist, +halfThickness), rotMatrix) + fA;
         }
 
-        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(WhiteTexture, topLeft, topRight, bottomLeft, bottomRight,
+        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(Texture.White, topLeft, topRight, bottomLeft, bottomRight,
             color));
     }
 
-    public void NewFrame()
+    public static void NewFrame()
     {
         Camera = default;
     }
@@ -279,7 +276,7 @@ public sealed class Renderer : IDisposable
     /// <summary>
     /// Render and present to the surface.
     /// </summary>
-    public void Render()
+    public static void Render()
     {
         IntPtr cb = SDL.AcquireGPUCommandBuffer(Device).Check("Acquire command buffer");
 
@@ -317,7 +314,7 @@ public sealed class Renderer : IDisposable
     /// Resize the renderer.
     /// </summary>
     /// <param name="newSize">The new size to set.</param>
-    public void Resize(Size<int> newSize)
+    public static void Resize(Size<int> newSize)
     {
         _swapchainSize = newSize;
         

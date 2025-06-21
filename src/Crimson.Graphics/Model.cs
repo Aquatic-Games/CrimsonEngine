@@ -19,7 +19,7 @@ public class Model
         Materials = materials;
     }
 
-    public static Model FromGltf(Renderer renderer, string path)
+    public static Model FromGltf(string path)
     {
         ModelRoot root = ModelRoot.Load(path);
 
@@ -35,12 +35,12 @@ public class Model
 
                 if (primaryImage != null)
                 {
-                    Texture albedo = new Texture(renderer, new Bitmap(primaryImage.Content.Content.ToArray()));
+                    Texture albedo = new Texture(new Bitmap(primaryImage.Content.Content.ToArray()));
                     definition.Albedo = albedo;
                 }
             }
             
-            materialMap.Add(material, new Material(renderer, in definition));
+            materialMap.Add(material, new Material(in definition));
         }
 
         List<ModelMesh> meshes = [];

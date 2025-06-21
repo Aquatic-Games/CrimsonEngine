@@ -26,11 +26,10 @@ public class Renderable : IDisposable
     /// <summary>
     /// Create a <see cref="Renderable"/> that can be drawn.
     /// </summary>
-    /// <param name="renderer">A <see cref="Renderer"/> instance.</param>
     /// <param name="mesh">The mesh to use.</param>
-    public Renderable(Renderer renderer, Mesh mesh)
+    public Renderable(Mesh mesh)
     {
-        _device = renderer.Device;
+        _device = Renderer.Device;
 
         VertexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Vertex, mesh.Vertices);
         IndexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Index, mesh.Indices);

@@ -8,15 +8,15 @@ namespace Crimson.Platform;
 /// <summary>
 /// The primary application surface that is being rendered to.
 /// </summary>
-public sealed class Surface : IDisposable
+public static class Surface
 {
-    private IntPtr _window;
+    private static IntPtr _window;
 
     /// <summary>
     /// The surface's size, in pixels.
     /// </summary>
     /// <remarks><see cref="set_Size"/> may not be available on all platforms.</remarks>
-    public Size<int> Size
+    public static Size<int> Size
     {
         get
         {
@@ -31,7 +31,7 @@ public sealed class Surface : IDisposable
     /// Gets/sets if the cursor is visible. If false, the cursor will be invisible and locked to the surface.
     /// </summary>
     /// <remarks>Only works on platforms that support mouse input.</remarks>
-    public bool CursorVisible
+    public static bool CursorVisible
     {
         get => SDL.GetWindowRelativeMouseMode(_window);
         set => SDL.SetWindowRelativeMouseMode(_window, !value);
@@ -40,7 +40,7 @@ public sealed class Surface : IDisposable
     /// <summary>
     /// Allow/disallow text input. This may cause on-screen keyboards to appear, etc.
     /// </summary>
-    public bool AllowTextInput
+    public static bool AllowTextInput
     {
         get => SDL.TextInputActive(_window);
         set
@@ -56,7 +56,7 @@ public sealed class Surface : IDisposable
     /// The underlying handle(s) to the surface, typically provided by the window manager.
     /// </summary>
     /// <exception cref="PlatformNotSupportedException">Thrown if the current platform does not support the surface.</exception>
-    public SurfaceInfo Info
+    public static SurfaceInfo Info
     {
         get
         {
@@ -106,7 +106,7 @@ public sealed class Surface : IDisposable
     /// </summary>
     /// <param name="options">The <see cref="WindowOptions"/> to use when creating this surface.</param>
     /// <exception cref="Exception">Thrown if the surface failed to create.</exception>
-    public Surface(in WindowOptions options)
+    public static void Create(in WindowOptions options)
     {
         Logger.Trace("Initializing SDL.");
         if (!SDL.Init(SDL.InitFlags.Video))
@@ -130,7 +130,7 @@ public sealed class Surface : IDisposable
     /// <summary>
     /// Destroy the surface.
     /// </summary>
-    public void Dispose()
+    public static void Destroy()
     {
         SDL.DestroyWindow(_window);
     }
