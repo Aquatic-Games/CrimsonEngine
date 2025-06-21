@@ -22,6 +22,16 @@ public static class Content
         DirectoryName = "Content";
     }
 
+    public static string GetFullyQualifiedName(string name, string extension)
+    {
+        return Path.Combine(_contentPathBase, Path.ChangeExtension(name, extension));
+    }
+    
+    public static string GetFullyQualifiedName(string name)
+    {
+        return Path.Combine(_contentPathBase, name);
+    }
+
     public static T Load<T>(string resName) where T : IContentResource<T>
     {
         Logger.Debug($"Loading content resource \"{resName}\".");
@@ -42,6 +52,11 @@ public static class Content
             _disposableResources.Add(fullPath, disposable);
 
         return resource;
+    }
+
+    public static string[] GetContentFiles(string directory, string? searchPattern = null)
+    {
+        return Directory.GetFiles(GetFullyQualifiedName(directory), searchPattern ?? "*");
     }
 
     public static void UnloadAllResources()
