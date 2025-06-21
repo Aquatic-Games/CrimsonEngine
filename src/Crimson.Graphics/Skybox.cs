@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Crimson.Content;
 using Crimson.Core;
 using Crimson.Graphics.Primitives;
 using Crimson.Graphics.Renderers.Structs;
@@ -8,7 +9,7 @@ using SDL3;
 
 namespace Crimson.Graphics;
 
-public sealed class Skybox : IDisposable
+public sealed class Skybox : IContentResource<Skybox>, IDisposable
 {
     private readonly IntPtr _device;
     
@@ -270,5 +271,32 @@ public sealed class Skybox : IDisposable
         SDL.ReleaseGPUBuffer(_device, _vertexBuffer);
         SDL.ReleaseGPUSampler(_device, _sampler);
         SDL.ReleaseGPUTexture(_device, _textureHandle);
+    }
+
+    public static Skybox LoadResource(string fullPath, bool hasExtension)
+    {
+        if (hasExtension)
+            throw new NotImplementedException();
+
+        if (Directory.Exists(fullPath))
+        {
+            string right = Path.Combine(fullPath, Path.ChangeExtension("right", ".png"));
+            string left = Path.Combine(fullPath, Path.ChangeExtension("left", ".png"));
+            string up = Path.Combine(fullPath, Path.ChangeExtension("top", ".png"));
+            string down = Path.Combine(fullPath, Path.ChangeExtension("bottom", ".png"));
+            string front = Path.Combine(fullPath, Path.ChangeExtension("front", ".png"));
+            string back = Path.Combine(fullPath, Path.ChangeExtension("back", ".png"));
+            
+            return new Skybox(
+                new Bitmap(right),
+                new Bitmap(left),
+                new Bitmap(up),
+                new Bitmap(down),
+                new Bitmap(front),
+                new Bitmap(back)
+            );
+        }
+        else
+            throw new NotImplementedException();
     }
 }

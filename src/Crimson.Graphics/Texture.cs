@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Crimson.Content;
 using Crimson.Core;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
@@ -9,7 +10,7 @@ namespace Crimson.Graphics;
 /// <summary>
 /// A texture image that is used during rendering.
 /// </summary>
-public class Texture : IDisposable
+public class Texture : IContentResource<Texture>, IDisposable
 {
     private readonly IntPtr _device;
     
@@ -120,4 +121,16 @@ public class Texture : IDisposable
     public static Texture Black { get; internal set; }
     
     public static Texture EmptyNormal { get; internal set; }
+    
+    public static Texture LoadResource(string fullPath, bool hasExtension)
+    {
+        if (hasExtension)
+            return new Texture(fullPath);
+        
+        fullPath = Path.ChangeExtension(fullPath, ".png");
+        if (File.Exists(fullPath))
+            return new Texture(fullPath);
+        
+        throw new FileNotFoundException(fullPath);
+    }
 }

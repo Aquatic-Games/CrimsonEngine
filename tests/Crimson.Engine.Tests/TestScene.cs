@@ -24,7 +24,6 @@ namespace Crimson.Engine.Tests;
 public class TestScene : Scene
 {
     private Texture _texture;
-    private Texture _texture2;
     private Material _material;
     private Mesh _mesh;
     
@@ -34,8 +33,7 @@ public class TestScene : Scene
         //App.Renderer.VSync = false;
         //App.Surface.CursorVisible = false;
 
-        _texture = new Texture("DEBUG.png");
-        //_texture2 = new Texture(App.Renderer, "/home/aqua/Pictures/awesomeface.png");
+        _texture = Content.Content.Load<Texture>("awesomeface");
         
         MaterialDefinition def = new(_texture)
         {
@@ -71,13 +69,14 @@ public class TestScene : Scene
         Camera.Transform.Position = new Vector3(0, 0, 3);
         Camera.AddComponent(new CameraMove());
         
-        Camera.Skybox = new Skybox(
+        /*Camera.Skybox = new Skybox(
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/right.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/left.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/top.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/bottom.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/front.png"),
-            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/back.png"));
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/back.png"));*/
+        Camera.Skybox = Content.Content.Load<Skybox>("/home/aqua/Pictures/skybox/spacebox/nizzine/");
         
         Console.WriteLine(Matrix<float>.Identity);
         

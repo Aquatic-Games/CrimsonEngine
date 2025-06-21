@@ -11,11 +11,9 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\Crimson.Engine\Crimson.Engine.csproj" />
     </ItemGroup>
-
+    
     <ItemGroup>
-      <None Update="DEBUG.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <Content Include="Content/**/*" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
 </Project>
