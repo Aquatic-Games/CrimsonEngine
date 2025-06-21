@@ -6,7 +6,6 @@ using Crimson.Graphics;
 using Crimson.Graphics.Materials;
 //using Crimson.Graphics.Materials;
 using Crimson.Graphics.Primitives;
-using Crimson.Input;
 using Crimson.Math;
 using Crimson.Physics;
 using Crimson.Physics.Shapes;
@@ -91,7 +90,7 @@ public class TestScene : Scene
     {
         base.Update(dt);
 
-        InputManager input = App.Input;
+        Input input = App.Input;
         
         if (input.IsKeyPressed(Key.Escape))
             App.Close();

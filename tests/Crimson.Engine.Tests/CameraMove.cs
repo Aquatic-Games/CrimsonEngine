@@ -1,6 +1,5 @@
 using System.Numerics;
 using Crimson.Engine.Entities;
-using Crimson.Input;
 using Crimson.Platform;
 
 namespace Crimson.Engine.Tests;
@@ -11,7 +10,7 @@ public class CameraMove : Component
     
     public override void Update(float dt)
     {
-        InputManager input = App.Input;
+        Input input = App.Input;
 
         const float lookSpeed = 0.01f;
 

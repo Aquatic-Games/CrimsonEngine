@@ -2,7 +2,6 @@
 using Crimson.Core;
 using Crimson.Engine.Entities;
 using Crimson.Graphics;
-using Crimson.Input;
 using Crimson.Math;
 using Crimson.Physics;
 using Crimson.Platform;
@@ -25,7 +24,6 @@ public static class App
     private static Scene? _switchScene;
     
     private static Renderer _renderer;
-    private static InputManager _input;
     private static PhysicsSystem _physics;
 
     private static ImGuiController? _imGuiController;
@@ -67,11 +65,6 @@ public static class App
     public static Renderer Renderer => _renderer;
 
     /// <summary>
-    /// The app's <see cref="InputManager"/>.
-    /// </summary>
-    public static InputManager Input => _input;
-
-    /// <summary>
     /// The physics system.
     /// </summary>
     public static PhysicsSystem Physics => _physics;
@@ -83,7 +76,6 @@ public static class App
         _globalApp = null!;
         _renderer = null!;
         _currentScene = null!;
-        _input = null!;
         _deltaWatch = null!;
         _physics = null!;
         _imGuiController = null!;
@@ -121,7 +113,7 @@ public static class App
         _renderer = new Renderer(_appName, in options.Renderer, Surface.Info);
         
         Logger.Debug("Initializing input manager.");
-        _input = new InputManager();
+        Input.Create();
         
         Logger.Debug("Initializing physics system.");
         _physics = new PhysicsSystem();
@@ -146,7 +138,7 @@ public static class App
             if (_deltaWatch.Elapsed.TotalSeconds < _targetDelta && !Renderer.VSync)
                 continue;
             
-            _input.Update();
+            Input.Update();
             Events.ProcessEvents();
 
             float dt = (float) _deltaWatch.Elapsed.TotalSeconds;
@@ -182,6 +174,7 @@ public static class App
         _currentScene.Dispose();
         _globalApp.Dispose();
         _physics.Dispose();
+        Input.Destroy();
         _renderer.Dispose();
         Surface.Destroy();
         Events.Destroy();
