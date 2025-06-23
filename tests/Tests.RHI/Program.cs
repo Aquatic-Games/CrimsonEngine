@@ -13,7 +13,7 @@ WindowOptions options = new()
 };
 
 Surface.Create(in options);
-GraphicsDevice device = new VulkanDevice("Tests.RHI");
+Device device = new VulkanDevice("Tests.RHI", Surface.Info.Handle);
 
 device.Dispose();
 Surface.Destroy();
