@@ -5,6 +5,7 @@ using SDL3;
 using Silk.NET.Core;
 using Silk.NET.Core.Native;
 using Silk.NET.Vulkan;
+using Silk.NET.Vulkan.Extensions.EXT;
 using Silk.NET.Vulkan.Extensions.KHR;
 
 namespace Crimson.Graphics.RHI.Vulkan;
@@ -13,6 +14,9 @@ public sealed unsafe class VulkanDevice : Device
 {
     private readonly Vk _vk;
     private readonly Instance _instance;
+
+    private readonly ExtDebugUtils? _debugUtilsExt;
+    private readonly DebugUtilsMessengerEXT _debugMessenger;
 
     private readonly KhrSurface _surfaceExt;
     private readonly SurfaceKHR _surface;
@@ -24,7 +28,7 @@ public sealed unsafe class VulkanDevice : Device
     
     public override Backend Backend => Backend.Vulkan;
     
-    public VulkanDevice(string appName, IntPtr sdlWindow)
+    public VulkanDevice(string appName, IntPtr sdlWindow, bool debug)
     {
         _vk = Vk.GetApi();
         
@@ -41,7 +45,22 @@ public sealed unsafe class VulkanDevice : Device
             ApiVersion = Vk.Version13
         };
 
-        string[] instanceExtensions = SDL.VulkanGetInstanceExtensions(out uint extCount)!;
+        string[] instanceExtensions = SDL.VulkanGetInstanceExtensions(out uint numExts)!;
+        
+        uint numLayers = 0;
+        nint pLayers = 0;
+
+        if (debug)
+        {
+            Logger.Debug("Debugging enabled. Inserting debug layers and exts.");
+            Array.Resize(ref instanceExtensions, instanceExtensions.Length + 1);
+            numExts++;
+            instanceExtensions[^1] = ExtDebugUtils.ExtensionName;
+
+            numLayers = 1;
+            pLayers = SilkMarshal.StringArrayToPtr(["VK_LAYER_KHRONOS_validation"]);
+        }
+        
         nint pInstanceExtensions = SilkMarshal.StringArrayToPtr(instanceExtensions);
 
         InstanceCreateInfo instanceInfo = new()
@@ -49,16 +68,44 @@ public sealed unsafe class VulkanDevice : Device
             SType = StructureType.InstanceCreateInfo,
             PApplicationInfo = &appInfo,
             
-            EnabledExtensionCount = extCount,
-            PpEnabledExtensionNames = (byte**) pInstanceExtensions
+            EnabledExtensionCount = numExts,
+            PpEnabledExtensionNames = (byte**) pInstanceExtensions,
+            
+            EnabledLayerCount = numLayers,
+            PpEnabledLayerNames = (byte**) pLayers
         };
         
         Logger.Trace("Creating instance.");
         _vk.CreateInstance(&instanceInfo, null, out _instance).Check("Create instance");
-
+        
+        if (pLayers != 0)
+            SilkMarshal.Free(pLayers);
         SilkMarshal.Free(pInstanceExtensions);
         SilkMarshal.Free(pEngineName);
         SilkMarshal.Free(pAppName);
+
+        if (debug)
+        {
+            if (!_vk.TryGetInstanceExtension(_instance, out _debugUtilsExt))
+                throw new Exception("Failed to get debug utils extension.");
+
+            DebugUtilsMessengerCreateInfoEXT messengerInfo = new()
+            {
+                SType = StructureType.DebugUtilsMessengerCreateInfoExt,
+                MessageType = DebugUtilsMessageTypeFlagsEXT.GeneralBitExt |
+                              DebugUtilsMessageTypeFlagsEXT.PerformanceBitExt |
+                              DebugUtilsMessageTypeFlagsEXT.ValidationBitExt,
+                MessageSeverity = DebugUtilsMessageSeverityFlagsEXT.VerboseBitExt |
+                                  DebugUtilsMessageSeverityFlagsEXT.InfoBitExt |
+                                  DebugUtilsMessageSeverityFlagsEXT.WarningBitExt |
+                                  DebugUtilsMessageSeverityFlagsEXT.ErrorBitExt,
+                PfnUserCallback = new PfnDebugUtilsMessengerCallbackEXT(DebugCallback)
+            };
+
+            Logger.Trace("Creating debug messenger.");
+            _debugUtilsExt!.CreateDebugUtilsMessenger(_instance, &messengerInfo, null, out _debugMessenger)
+                .Check("Create debug messenger");
+        }
         
         Logger.Trace("Creating window surface.");
         if (!_vk.TryGetInstanceExtension(_instance, out _surfaceExt))
@@ -143,6 +190,14 @@ public sealed unsafe class VulkanDevice : Device
             QueueCreateInfoCount = (uint) uniqueQueueFamilies.Count,
             PQueueCreateInfos = queueInfos
         };
+
+        // Enable dynamic rendering
+        PhysicalDeviceDynamicRenderingFeatures dynamicRendering = new()
+        {
+            SType = StructureType.PhysicalDeviceDynamicRenderingFeatures,
+            DynamicRendering = true
+        };
+        deviceInfo.PNext = &dynamicRendering;
         
         Logger.Trace("Creating logical device.");
         _vk.CreateDevice(_physicalDevice, &deviceInfo, null, out _device).Check("Create device");
@@ -154,10 +209,42 @@ public sealed unsafe class VulkanDevice : Device
 
     public override void Dispose()
     {
+        _vk.DeviceWaitIdle(_device).Check("Wait for idle");
+        
         _vk.DestroyDevice(_device, null);
+        
         _surfaceExt.DestroySurface(_instance, _surface, null);
         _surfaceExt.Dispose();
+
+        if (_debugUtilsExt != null)
+        {
+            _debugUtilsExt.DestroyDebugUtilsMessenger(_instance, _debugMessenger, null);
+            _debugUtilsExt.Dispose();
+        }
+        
         _vk.DestroyInstance(_instance, null);
         _vk.Dispose();
+    }
+    
+    private static uint DebugCallback(DebugUtilsMessageSeverityFlagsEXT messageSeverity, DebugUtilsMessageTypeFlagsEXT messageTypes, DebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
+    {
+        string message = new string((sbyte*) pCallbackData->PMessage);
+
+        if (messageSeverity == DebugUtilsMessageSeverityFlagsEXT.ErrorBitExt)
+            throw new Exception(message);
+
+        string type = messageTypes.ToString().Replace("BitExt", "");
+
+        Logger.Severity severity = messageSeverity switch
+        {
+            DebugUtilsMessageSeverityFlagsEXT.VerboseBitExt => Logger.Severity.Trace,
+            DebugUtilsMessageSeverityFlagsEXT.InfoBitExt => Logger.Severity.Trace,
+            DebugUtilsMessageSeverityFlagsEXT.WarningBitExt => Logger.Severity.Warning,
+            _ => throw new ArgumentOutOfRangeException(nameof(messageSeverity), messageSeverity, null)
+        };
+        
+        Logger.Log(severity, $"{type}: {message}");
+        
+        return Vk.True;
     }
 }
