@@ -227,7 +227,8 @@ public sealed unsafe class VulkanDevice : Device
         CommandPoolCreateInfo poolInfo = new()
         {
             SType = StructureType.CommandPoolCreateInfo,
-            QueueFamilyIndex = _queues.GraphicsIndex
+            QueueFamilyIndex = _queues.GraphicsIndex,
+            Flags = CommandPoolCreateFlags.ResetCommandBufferBit
         };
         
         Logger.Trace("Creating command pool.");
@@ -254,6 +255,8 @@ public sealed unsafe class VulkanDevice : Device
         DestroySwapchain();
         _swapchainExt.Dispose();
         
+        _vk.DestroyFence(_device, _swapchainFence, null);
+        
         _vk.DestroyCommandPool(_device, _commandPool, null);
         
         _vk.DestroyDevice(_device, null);
@@ -274,6 +277,24 @@ public sealed unsafe class VulkanDevice : Device
     public override CommandList CreateCommandList()
     {
         return new VulkanCommandList(_vk, _device, _commandPool);
+    }
+
+    public override void ExecuteCommandList(CommandList cl)
+    {
+        VulkanCommandList vulkanCl = (VulkanCommandList) cl;
+        CommandBuffer buffer = vulkanCl.Buffer;
+
+        SubmitInfo submitInfo = new()
+        {
+            SType = StructureType.SubmitInfo,
+            CommandBufferCount = 1,
+            PCommandBuffers = &buffer
+        };
+
+        // TODO: Must use semaphores etc for this. This is only temporary during development!
+        // (2 years later....)
+        _vk.QueueSubmit(_queues.Graphics, 1, &submitInfo, new Fence()).Check("Submit queue");
+        _vk.QueueWaitIdle(_queues.Graphics).Check("Wait for queue idle");
     }
 
     public override Texture GetNextSwapchainTexture()

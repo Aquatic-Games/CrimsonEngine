@@ -11,11 +11,15 @@ internal sealed unsafe class VulkanTexture : Texture
     private readonly Image _image;
     
     public readonly ImageView ImageView;
+    public readonly bool IsSwapchainTexture;
+    
 
     public VulkanTexture(Vk vk, VkDevice device, Image swapchainImage, Format format)
     {
         _vk = vk;
         _device = device;
+        _image = swapchainImage;
+        IsSwapchainTexture = true;
 
         ImageViewCreateInfo viewInfo = new()
         {
@@ -48,7 +52,30 @@ internal sealed unsafe class VulkanTexture : Texture
     {
         _vk.DestroyImageView(_device, ImageView, null);
         
-        if (_image.Handle != 0)
+        if (!IsSwapchainTexture)
             _vk.DestroyImage(_device, _image, null);
+    }
+
+    public void Transition(CommandBuffer cb, ImageLayout oldLayout, ImageLayout newLayout)
+    {
+        ImageMemoryBarrier barrier = new()
+        {
+            SType = StructureType.ImageMemoryBarrier,
+            Image = _image,
+            OldLayout = oldLayout,
+            NewLayout = newLayout,
+            DstAccessMask = AccessFlags.ColorAttachmentWriteBit,
+            SubresourceRange = new ImageSubresourceRange()
+            {
+                AspectMask = ImageAspectFlags.ColorBit,
+                LayerCount = 1,
+                BaseArrayLayer = 0,
+                LevelCount = 1,
+                BaseMipLevel = 0
+            }
+        };
+
+        _vk.CmdPipelineBarrier(cb, PipelineStageFlags.ColorAttachmentOutputBit,
+            PipelineStageFlags.ColorAttachmentOutputBit, 0, 0, null, 0, null, 1, &barrier);
     }
 }

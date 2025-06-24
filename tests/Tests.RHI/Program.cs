@@ -28,8 +28,14 @@ while (alive)
 
     Texture texture = device.GetNextSwapchainTexture();
     
+    cl.Begin();
     
+    cl.BeginRenderPass([new ColorAttachmentInfo(texture, Color.CornflowerBlue)]);
+    cl.EndRenderPass();
     
+    cl.End();
+    
+    device.ExecuteCommandList(cl);
     device.Present();
 }
 
