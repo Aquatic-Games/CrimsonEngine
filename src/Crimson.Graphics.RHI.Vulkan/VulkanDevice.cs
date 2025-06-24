@@ -7,6 +7,7 @@ using Silk.NET.Core.Native;
 using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.EXT;
 using Silk.NET.Vulkan.Extensions.KHR;
+using Image = Silk.NET.Vulkan.Image;
 
 namespace Crimson.Graphics.RHI.Vulkan;
 
@@ -25,6 +26,11 @@ public sealed unsafe class VulkanDevice : Device
     
     private readonly PhysicalDevice _physicalDevice;
     private readonly VkDevice _device;
+
+    private readonly KhrSwapchain _swapchainExt;
+    private SwapchainKHR _swapchain;
+    private VulkanTexture[] _swapchainTextures;
+    private uint _currentTexture;
     
     public override Backend Backend => Backend.Vulkan;
     
@@ -179,6 +185,9 @@ public sealed unsafe class VulkanDevice : Device
         
         // Failure condition, means that it's written into memory it shouldn't have.
         Debug.Assert(currentQueue == uniqueQueueFamilies.Count);
+
+        numExts = 1;
+        nint deviceExts = SilkMarshal.StringArrayToPtr([KhrSwapchain.ExtensionName]);
         
         PhysicalDeviceFeatures deviceFeatures = new();
 
@@ -188,7 +197,10 @@ public sealed unsafe class VulkanDevice : Device
             PEnabledFeatures = &deviceFeatures,
             
             QueueCreateInfoCount = (uint) uniqueQueueFamilies.Count,
-            PQueueCreateInfos = queueInfos
+            PQueueCreateInfos = queueInfos,
+            
+            EnabledExtensionCount = numExts,
+            PpEnabledExtensionNames = (byte**) deviceExts
         };
 
         // Enable dynamic rendering
@@ -201,15 +213,25 @@ public sealed unsafe class VulkanDevice : Device
         
         Logger.Trace("Creating logical device.");
         _vk.CreateDevice(_physicalDevice, &deviceInfo, null, out _device).Check("Create device");
+
+        SilkMarshal.Free(deviceExts);
         
         Logger.Trace("Getting device queues.");
         _vk.GetDeviceQueue(_device, _queues.GraphicsIndex, 0, out _queues.Graphics);
         _vk.GetDeviceQueue(_device, _queues.PresentIndex, 0, out _queues.Present);
+
+        if (!_vk.TryGetDeviceExtension(_instance, _device, out _swapchainExt))
+            throw new Exception("Failed to get swapchain extension.");
+
+        CreateSwapchain();
     }
 
     public override void Dispose()
     {
         _vk.DeviceWaitIdle(_device).Check("Wait for idle");
+     
+        DestroySwapchain();
+        _swapchainExt.Dispose();
         
         _vk.DestroyDevice(_device, null);
         
@@ -225,8 +247,66 @@ public sealed unsafe class VulkanDevice : Device
         _vk.DestroyInstance(_instance, null);
         _vk.Dispose();
     }
+
+    private void CreateSwapchain()
+    {
+        SurfaceCapabilitiesKHR capabilities;
+        _surfaceExt.GetPhysicalDeviceSurfaceCapabilities(_physicalDevice, _surface, &capabilities)
+            .Check("Get surface capabilities");
+
+        Extent2D extent = capabilities.CurrentExtent;
+        uint numImages = capabilities.MinImageCount;
+
+        SwapchainCreateInfoKHR swapchainInfo = new()
+        {
+            SType = StructureType.SwapchainCreateInfoKhr,
+            Surface = _surface,
+            OldSwapchain = _swapchain,
+
+            MinImageCount = numImages,
+            ImageExtent = extent,
+            ImageUsage = ImageUsageFlags.ColorAttachmentBit,
+            ImageArrayLayers = 1,
+            
+            // TODO: Should check support for these
+            ImageColorSpace = ColorSpaceKHR.SpaceSrgbNonlinearKhr,
+            ImageFormat = Format.B8G8R8A8Unorm,
+            PresentMode = PresentModeKHR.FifoKhr,
+            
+            CompositeAlpha = CompositeAlphaFlagsKHR.OpaqueBitKhr,
+            PreTransform = SurfaceTransformFlagsKHR.IdentityBitKhr,
+            Clipped = false
+        };
+
+        if (_queues.GraphicsIndex == _queues.PresentIndex)
+            swapchainInfo.ImageSharingMode = SharingMode.Exclusive;
+        else
+            throw new NotImplementedException("Cannot support different graphics and present queues at this time.");
+        
+        Logger.Trace("Creating swapchain");
+        _swapchainExt.CreateSwapchain(_device, &swapchainInfo, null, out _swapchain).Check("Create swapchain");
+
+        uint numSwapchainImages;
+        _swapchainExt.GetSwapchainImages(_device, _swapchain, &numSwapchainImages, null).Check("Get swapchain images");
+        Image* images = stackalloc Image[(int) numSwapchainImages];
+        _swapchainExt.GetSwapchainImages(_device, _swapchain, &numSwapchainImages, images).Check("Get swapchain images");
+
+        _swapchainTextures = new VulkanTexture[numSwapchainImages];
+
+        for (int i = 0; i < numSwapchainImages; i++)
+            _swapchainTextures[i] = new VulkanTexture(_vk, _device, images[i], swapchainInfo.ImageFormat);
+    }
+
+    private void DestroySwapchain()
+    {
+        foreach (VulkanTexture texture in _swapchainTextures)
+            texture.Dispose();
+        
+        _swapchainExt.DestroySwapchain(_device, _swapchain, null);
+    }
     
-    private static uint DebugCallback(DebugUtilsMessageSeverityFlagsEXT messageSeverity, DebugUtilsMessageTypeFlagsEXT messageTypes, DebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
+    private static uint DebugCallback(DebugUtilsMessageSeverityFlagsEXT messageSeverity,
+        DebugUtilsMessageTypeFlagsEXT messageTypes, DebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
     {
         string message = new string((sbyte*) pCallbackData->PMessage);
 
