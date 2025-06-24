@@ -9,7 +9,8 @@ Logger.EnableConsole();
 WindowOptions options = new()
 {
     Title = "Tests.RHI (Vulkan)",
-    Size = new Size<int>(1280, 720)
+    Size = new Size<int>(1280, 720),
+    Resizable = true
 };
 
 bool alive = true;

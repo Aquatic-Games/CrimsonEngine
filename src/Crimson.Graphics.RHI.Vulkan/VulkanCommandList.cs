@@ -81,14 +81,15 @@ internal sealed unsafe class VulkanCommandList : CommandList
             };
         }
 
+        Texture firstTexture = colorAttachments[0].Texture;
+
         RenderingInfo renderingInfo = new()
         {
             SType = StructureType.RenderingInfo,
             ColorAttachmentCount = (uint) colorAttachments.Length,
             PColorAttachments = colorRenderAttachments,
             LayerCount = 1,
-            // TODO: Temporary render area, of course. I just know you'll forget about it and then wonder why it's broken.
-            RenderArea = new Rect2D(new Offset2D(0, 0), new Extent2D(1280, 720))
+            RenderArea = new Rect2D(new Offset2D(0, 0), new Extent2D(firstTexture.Size.Width, firstTexture.Size.Height))
         };
         
         _vk.CmdBeginRendering(Buffer, &renderingInfo);

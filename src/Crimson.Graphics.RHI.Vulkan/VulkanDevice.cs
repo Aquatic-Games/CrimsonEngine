@@ -1,6 +1,7 @@
 ﻿global using VkDevice = Silk.NET.Vulkan.Device;
 using System.Diagnostics;
 using Crimson.Core;
+using Crimson.Math;
 using SDL3;
 using Silk.NET.Core;
 using Silk.NET.Core.Native;
@@ -252,7 +253,10 @@ public sealed unsafe class VulkanDevice : Device
     {
         _vk.DeviceWaitIdle(_device).Check("Wait for idle");
      
-        DestroySwapchain();
+        foreach (VulkanTexture texture in _swapchainTextures)
+            texture.Dispose();
+        
+        _swapchainExt.DestroySwapchain(_device, _swapchain, null);
         _swapchainExt.Dispose();
         
         _vk.DestroyFence(_device, _swapchainFence, null);
@@ -300,9 +304,14 @@ public sealed unsafe class VulkanDevice : Device
     public override Texture GetNextSwapchainTexture()
     {
         // TODO: Check for invalid swapchains and recreate.
-        _swapchainExt
-            .AcquireNextImage(_device, _swapchain, ulong.MaxValue, new Semaphore(), _swapchainFence,
-                ref _currentTexture).Check("Acquire next swapchain image");
+        Result result = _swapchainExt.AcquireNextImage(_device, _swapchain, ulong.MaxValue, new Semaphore(),
+            _swapchainFence, ref _currentTexture);
+        
+        // Recreate swapchain even when suboptimal, despite not being an error.
+        if (result is Result.SuboptimalKhr or Result.ErrorOutOfDateKhr or Result.ErrorSurfaceLostKhr)
+            RecreateSwapchain();
+        else
+            result.Check("Acquire next swapchain image");
 
         _vk.WaitForFences(_device, 1, in _swapchainFence, true, ulong.MaxValue).Check("Wait for swapchain fence");
         _vk.ResetFences(_device, 1, in _swapchainFence).Check("Reset swapchain fence");
@@ -324,7 +333,13 @@ public sealed unsafe class VulkanDevice : Device
         };
         
         // TODO: Again, check for invalid swapchain and recreate.
-        _swapchainExt.QueuePresent(_queues.Present, &presentInfo).Check("Present");
+        Result result = _swapchainExt.QueuePresent(_queues.Present, &presentInfo);
+        
+        // Recreate swapchain even when suboptimal, despite not being an error.
+        if (result is Result.SuboptimalKhr or Result.ErrorOutOfDateKhr or Result.ErrorSurfaceLostKhr)
+            RecreateSwapchain();
+        else
+            result.Check("Present");
     }
 
     private void CreateSwapchain()
@@ -373,15 +388,27 @@ public sealed unsafe class VulkanDevice : Device
         _swapchainTextures = new VulkanTexture[numSwapchainImages];
 
         for (int i = 0; i < numSwapchainImages; i++)
-            _swapchainTextures[i] = new VulkanTexture(_vk, _device, images[i], swapchainInfo.ImageFormat);
+        {
+            _swapchainTextures[i] = new VulkanTexture(_vk, _device, images[i], swapchainInfo.ImageFormat,
+                new Size<uint>(extent.Width, extent.Height));
+        }
     }
 
-    private void DestroySwapchain()
+    private void RecreateSwapchain()
     {
+        Logger.Debug("Recreating swapchain");
+
+        // CreateSwapchain uses the old swapchain during its creation, but replaces the value of _swapchain with the new
+        // swapchain. Therefore, we must destroy the old swapchain only after the new one has been successfully created.
+        
+        SwapchainKHR currentSwapchain = _swapchain;
+        
         foreach (VulkanTexture texture in _swapchainTextures)
             texture.Dispose();
         
-        _swapchainExt.DestroySwapchain(_device, _swapchain, null);
+        CreateSwapchain();
+        
+        _swapchainExt.DestroySwapchain(_device, currentSwapchain, null);
     }
     
     private static uint DebugCallback(DebugUtilsMessageSeverityFlagsEXT messageSeverity,
