@@ -8,6 +8,7 @@ using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.EXT;
 using Silk.NET.Vulkan.Extensions.KHR;
 using Image = Silk.NET.Vulkan.Image;
+using Semaphore = Silk.NET.Vulkan.Semaphore;
 
 namespace Crimson.Graphics.RHI.Vulkan;
 
@@ -28,12 +29,13 @@ public sealed unsafe class VulkanDevice : Device
     private readonly VkDevice _device;
 
     private readonly KhrSwapchain _swapchainExt;
+    private readonly Fence _swapchainFence;
     private SwapchainKHR _swapchain;
     private VulkanTexture[] _swapchainTextures;
     private uint _currentTexture;
     
     public override Backend Backend => Backend.Vulkan;
-    
+
     public VulkanDevice(string appName, IntPtr sdlWindow, bool debug)
     {
         _vk = Vk.GetApi();
@@ -223,6 +225,14 @@ public sealed unsafe class VulkanDevice : Device
         if (!_vk.TryGetDeviceExtension(_instance, _device, out _swapchainExt))
             throw new Exception("Failed to get swapchain extension.");
 
+        FenceCreateInfo swapchainFenceInfo = new()
+        {
+            SType = StructureType.FenceCreateInfo
+        };
+        
+        Logger.Trace("Creating swapchain fence.");
+        _vk.CreateFence(_device, &swapchainFenceInfo, null, out _swapchainFence).Check("Create swapchain fence");
+        
         CreateSwapchain();
     }
 
@@ -246,6 +256,36 @@ public sealed unsafe class VulkanDevice : Device
         
         _vk.DestroyInstance(_instance, null);
         _vk.Dispose();
+    }
+    
+    public override Texture GetNextSwapchainTexture()
+    {
+        // TODO: Check for invalid swapchains and recreate.
+        _swapchainExt
+            .AcquireNextImage(_device, _swapchain, ulong.MaxValue, new Semaphore(), _swapchainFence,
+                ref _currentTexture).Check("Acquire next swapchain image");
+
+        _vk.WaitForFences(_device, 1, in _swapchainFence, true, ulong.MaxValue).Check("Wait for swapchain fence");
+        _vk.ResetFences(_device, 1, in _swapchainFence).Check("Reset swapchain fence");
+
+        return _swapchainTextures[_currentTexture];
+    }
+    
+    public override void Present()
+    {
+        SwapchainKHR swapchain = _swapchain;
+        uint currentImage = _currentTexture;
+
+        PresentInfoKHR presentInfo = new()
+        {
+            SType = StructureType.PresentInfoKhr,
+            SwapchainCount = 1,
+            PSwapchains = &swapchain,
+            PImageIndices = &currentImage
+        };
+        
+        // TODO: Again, check for invalid swapchain and recreate.
+        _swapchainExt.QueuePresent(_queues.Present, &presentInfo).Check("Present");
     }
 
     private void CreateSwapchain()
