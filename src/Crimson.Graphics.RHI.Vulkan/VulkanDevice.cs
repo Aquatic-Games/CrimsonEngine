@@ -28,6 +28,8 @@ public sealed unsafe class VulkanDevice : Device
     private readonly PhysicalDevice _physicalDevice;
     private readonly VkDevice _device;
 
+    private readonly CommandPool _commandPool;
+
     private readonly KhrSwapchain _swapchainExt;
     private readonly Fence _swapchainFence;
     private SwapchainKHR _swapchain;
@@ -222,6 +224,15 @@ public sealed unsafe class VulkanDevice : Device
         _vk.GetDeviceQueue(_device, _queues.GraphicsIndex, 0, out _queues.Graphics);
         _vk.GetDeviceQueue(_device, _queues.PresentIndex, 0, out _queues.Present);
 
+        CommandPoolCreateInfo poolInfo = new()
+        {
+            SType = StructureType.CommandPoolCreateInfo,
+            QueueFamilyIndex = _queues.GraphicsIndex
+        };
+        
+        Logger.Trace("Creating command pool.");
+        _vk.CreateCommandPool(_device, &poolInfo, null, out _commandPool).Check("Create command pool");
+
         if (!_vk.TryGetDeviceExtension(_instance, _device, out _swapchainExt))
             throw new Exception("Failed to get swapchain extension.");
 
@@ -243,6 +254,8 @@ public sealed unsafe class VulkanDevice : Device
         DestroySwapchain();
         _swapchainExt.Dispose();
         
+        _vk.DestroyCommandPool(_device, _commandPool, null);
+        
         _vk.DestroyDevice(_device, null);
         
         _surfaceExt.DestroySurface(_instance, _surface, null);
@@ -257,7 +270,12 @@ public sealed unsafe class VulkanDevice : Device
         _vk.DestroyInstance(_instance, null);
         _vk.Dispose();
     }
-    
+
+    public override CommandList CreateCommandList()
+    {
+        return new VulkanCommandList(_vk, _device, _commandPool);
+    }
+
     public override Texture GetNextSwapchainTexture()
     {
         // TODO: Check for invalid swapchains and recreate.

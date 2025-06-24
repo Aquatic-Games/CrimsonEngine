@@ -20,6 +20,7 @@ Events.WindowClose += () => alive = false;
 Surface.Create(in options);
 
 Device device = new VulkanDevice("Tests.RHI", Surface.Info.Handle, true);
+CommandList cl = device.CreateCommandList();
 
 while (alive)
 {
@@ -32,6 +33,7 @@ while (alive)
     device.Present();
 }
 
+cl.Dispose();
 device.Dispose();
 Surface.Destroy();
 Events.Destroy();
