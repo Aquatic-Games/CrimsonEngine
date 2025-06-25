@@ -283,6 +283,11 @@ public sealed unsafe class VulkanDevice : Device
         return new VulkanCommandList(_vk, _device, _commandPool);
     }
 
+    public override ShaderModule CreateShaderModule(ShaderStage stage, byte[] compiled, string entryPoint)
+    {
+        return new VulkanShaderModule(_vk, _device, stage, compiled, entryPoint);
+    }
+
     public override void ExecuteCommandList(CommandList cl)
     {
         VulkanCommandList vulkanCl = (VulkanCommandList) cl;
@@ -308,9 +313,9 @@ public sealed unsafe class VulkanDevice : Device
             _swapchainFence, ref _currentTexture);
         
         // Recreate swapchain even when suboptimal, despite not being an error.
-        if (result is Result.SuboptimalKhr or Result.ErrorOutOfDateKhr or Result.ErrorSurfaceLostKhr)
+        if (result is Result.ErrorOutOfDateKhr or Result.ErrorSurfaceLostKhr)
             RecreateSwapchain();
-        else
+        else if (result is not Result.SuboptimalKhr)
             result.Check("Acquire next swapchain image");
 
         _vk.WaitForFences(_device, 1, in _swapchainFence, true, ulong.MaxValue).Check("Wait for swapchain fence");
@@ -336,9 +341,9 @@ public sealed unsafe class VulkanDevice : Device
         Result result = _swapchainExt.QueuePresent(_queues.Present, &presentInfo);
         
         // Recreate swapchain even when suboptimal, despite not being an error.
-        if (result is Result.SuboptimalKhr or Result.ErrorOutOfDateKhr or Result.ErrorSurfaceLostKhr)
+        if (result is Result.ErrorOutOfDateKhr or Result.ErrorSurfaceLostKhr)
             RecreateSwapchain();
-        else
+        else if (result is not Result.SuboptimalKhr)
             result.Check("Present");
     }
 

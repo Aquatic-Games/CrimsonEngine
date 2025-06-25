@@ -6,6 +6,8 @@ public abstract class Device : IDisposable
 
     public abstract CommandList CreateCommandList();
 
+    public abstract ShaderModule CreateShaderModule(ShaderStage stage, byte[] compiled, string entryPoint);
+
     public abstract void ExecuteCommandList(CommandList cl);
 
     public abstract Texture GetNextSwapchainTexture();
