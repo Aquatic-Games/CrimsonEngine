@@ -93,11 +93,29 @@ internal sealed unsafe class VulkanCommandList : CommandList
         };
         
         _vk.CmdBeginRendering(Buffer, &renderingInfo);
+
+        Viewport viewport = new Viewport(0, 0, firstTexture.Size.Width, firstTexture.Size.Height, 0, 1);
+        _vk.CmdSetViewport(Buffer, 0, 1, &viewport);
+
+        Rect2D scissor = new Rect2D(new Offset2D(0, 0),
+            new Extent2D(firstTexture.Size.Width, firstTexture.Size.Height));
+        _vk.CmdSetScissor(Buffer, 0, 1, &scissor);
     }
     
     public override void EndRenderPass()
     {
         _vk.CmdEndRendering(Buffer);
+    }
+
+    public override void SetGraphicsPipeline(Pipeline pipeline)
+    {
+        VulkanPipeline vkPipeline = (VulkanPipeline) pipeline;
+        _vk.CmdBindPipeline(Buffer, PipelineBindPoint.Graphics, vkPipeline.Pipeline);
+    }
+    
+    public override void Draw(uint numVertices)
+    {
+        _vk.CmdDraw(Buffer, numVertices, 1, 0, 0);
     }
 
     public override void Dispose()

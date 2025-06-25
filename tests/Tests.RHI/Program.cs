@@ -34,10 +34,16 @@ const string Shader = """
                               float2(+0.5, +0.5),
                               float2(-0.5, +0.5)
                           };
+                          
+                          uint indices[] =
+                          {
+                              0, 1, 3,
+                              1, 2, 3
+                          };
 
                           VSOutput output;
                           
-                          output.Position = float4(vertices[vertex], 0.0, 1.0);
+                          output.Position = float4(vertices[indices[vertex]], 0.0, 1.0);
                           
                           return output;
                       }
@@ -91,6 +97,8 @@ while (alive)
     cl.Begin();
     
     cl.BeginRenderPass([new ColorAttachmentInfo(texture, Color.CornflowerBlue)]);
+    cl.SetGraphicsPipeline(pipeline);
+    cl.Draw(6);
     cl.EndRenderPass();
     
     cl.End();

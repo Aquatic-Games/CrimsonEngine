@@ -89,14 +89,13 @@ internal sealed unsafe class VulkanPipeline : Pipeline
         DynamicState* pStates = stackalloc DynamicState[]
         {
             DynamicState.Viewport,
-            DynamicState.Scissor,
-            DynamicState.VertexInputBindingStride
+            DynamicState.Scissor
         };
 
         PipelineDynamicStateCreateInfo dynamicState = new()
         {
             SType = StructureType.PipelineDynamicStateCreateInfo,
-            DynamicStateCount = 3,
+            DynamicStateCount = 2,
             PDynamicStates = pStates
         };
 
@@ -108,7 +107,8 @@ internal sealed unsafe class VulkanPipeline : Pipeline
         {
             blendAttachments[i] = new PipelineColorBlendAttachmentState()
             {
-                BlendEnable = false
+                BlendEnable = false,
+                ColorWriteMask = ColorComponentFlags.RBit | ColorComponentFlags.GBit | ColorComponentFlags.BBit | ColorComponentFlags.ABit
             };
             
             colorAttachmentFormats[i] = info.ColorTargets[i].ToVk();
