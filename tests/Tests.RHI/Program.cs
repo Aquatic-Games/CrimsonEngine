@@ -7,6 +7,8 @@ using grabs.ShaderCompiler;
 using ColorAttachmentInfo = Crimson.Graphics.RHI.ColorAttachmentInfo;
 using CommandList = Crimson.Graphics.RHI.CommandList;
 using Device = Crimson.Graphics.RHI.Device;
+using GraphicsPipelineInfo = Crimson.Graphics.RHI.GraphicsPipelineInfo;
+using Pipeline = Crimson.Graphics.RHI.Pipeline;
 using ShaderModule = Crimson.Graphics.RHI.ShaderModule;
 using ShaderStage = Crimson.Graphics.RHI.ShaderStage;
 using Surface = Crimson.Platform.Surface;
@@ -74,6 +76,9 @@ ShaderModule vertexShader = device.CreateShaderModule(ShaderStage.Vertex,
 ShaderModule pixelShader = device.CreateShaderModule(ShaderStage.Pixel,
     Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Pixel, ShaderFormat.Spirv, Shader, "PSMain"), "PSMain");
 
+Pipeline pipeline =
+    device.CreateGraphicsPipeline(new GraphicsPipelineInfo(vertexShader, pixelShader, [device.SwapchainFormat]));
+
 pixelShader.Dispose();
 vertexShader.Dispose();
 
@@ -94,6 +99,7 @@ while (alive)
     device.Present();
 }
 
+pipeline.Dispose();
 cl.Dispose();
 device.Dispose();
 Surface.Destroy();

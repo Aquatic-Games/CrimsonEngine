@@ -15,7 +15,7 @@ internal sealed unsafe class VulkanTexture : Texture
     public readonly bool IsSwapchainTexture;
     
 
-    public VulkanTexture(Vk vk, VkDevice device, Image swapchainImage, Format format, Size<uint> size) : base(size)
+    public VulkanTexture(Vk vk, VkDevice device, Image swapchainImage, VkFormat format, Size<uint> size) : base(size)
     {
         _vk = vk;
         _device = device;

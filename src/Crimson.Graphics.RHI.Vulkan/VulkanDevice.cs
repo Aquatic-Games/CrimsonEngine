@@ -33,11 +33,14 @@ public sealed unsafe class VulkanDevice : Device
 
     private readonly KhrSwapchain _swapchainExt;
     private readonly Fence _swapchainFence;
+    private Format _swapchainFormat;
     private SwapchainKHR _swapchain;
     private VulkanTexture[] _swapchainTextures;
     private uint _currentTexture;
     
     public override Backend Backend => Backend.Vulkan;
+
+    public override Format SwapchainFormat => _swapchainFormat;
 
     public VulkanDevice(string appName, IntPtr sdlWindow, bool debug)
     {
@@ -288,6 +291,11 @@ public sealed unsafe class VulkanDevice : Device
         return new VulkanShaderModule(_vk, _device, stage, compiled, entryPoint);
     }
 
+    public override Pipeline CreateGraphicsPipeline(in GraphicsPipelineInfo info)
+    {
+        return new VulkanPipeline(_vk, _device, in info);
+    }
+
     public override void ExecuteCommandList(CommandList cl)
     {
         VulkanCommandList vulkanCl = (VulkanCommandList) cl;
@@ -355,6 +363,7 @@ public sealed unsafe class VulkanDevice : Device
 
         Extent2D extent = capabilities.CurrentExtent;
         uint numImages = capabilities.MinImageCount;
+        _swapchainFormat = Format.B8G8R8A8_UNorm;
 
         SwapchainCreateInfoKHR swapchainInfo = new()
         {
@@ -369,7 +378,7 @@ public sealed unsafe class VulkanDevice : Device
             
             // TODO: Should check support for these
             ImageColorSpace = ColorSpaceKHR.SpaceSrgbNonlinearKhr,
-            ImageFormat = Format.B8G8R8A8Unorm,
+            ImageFormat = _swapchainFormat.ToVk(),
             PresentMode = PresentModeKHR.FifoKhr,
             
             CompositeAlpha = CompositeAlphaFlagsKHR.OpaqueBitKhr,
