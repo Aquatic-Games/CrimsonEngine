@@ -12,6 +12,8 @@ public abstract class Device : IDisposable
 
     public abstract Pipeline CreateGraphicsPipeline(in GraphicsPipelineInfo info);
 
+    public abstract Buffer CreateBuffer<T>(BufferUsage usage, in ReadOnlySpan<T> data) where T : unmanaged;
+
     public abstract void ExecuteCommandList(CommandList cl);
 
     public abstract Texture GetNextSwapchainTexture();

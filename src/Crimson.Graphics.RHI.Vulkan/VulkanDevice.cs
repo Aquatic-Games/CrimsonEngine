@@ -296,6 +296,11 @@ public sealed unsafe class VulkanDevice : Device
         return new VulkanPipeline(_vk, _device, in info);
     }
 
+    public override Buffer CreateBuffer<T>(BufferUsage usage, in ReadOnlySpan<T> data)
+    {
+        throw new NotImplementedException();
+    }
+
     public override void ExecuteCommandList(CommandList cl)
     {
         VulkanCommandList vulkanCl = (VulkanCommandList) cl;
