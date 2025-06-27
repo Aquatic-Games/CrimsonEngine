@@ -55,7 +55,7 @@ public class D3D11Device : Device
     
     public override ShaderModule CreateShaderModule(ShaderStage stage, byte[] compiled, string entryPoint)
     {
-        throw new NotImplementedException();
+        return new D3D11ShaderModule(compiled, entryPoint);
     }
     
     public override Pipeline CreateGraphicsPipeline(in GraphicsPipelineInfo info)
@@ -65,7 +65,7 @@ public class D3D11Device : Device
     
     public override Buffer CreateBuffer(BufferUsage usage, uint sizeInBytes)
     {
-        throw new NotImplementedException();
+        return new D3D11Buffer(_device, usage, sizeInBytes);
     }
     
     public override void ExecuteCommandList(CommandList cl)

@@ -80,7 +80,7 @@ Device device = new D3D11Device(Surface.Info.Handle, options.Size.As<uint>(), tr
 Events.SurfaceSizeChanged += size => device.Resize(size.As<uint>());
 CommandList cl = device.CreateCommandList();
 
-/*ReadOnlySpan<float> vertices =
+ReadOnlySpan<float> vertices =
 [
     -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
     +0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
@@ -101,7 +101,7 @@ Buffer vertexBuffer = device.CreateBuffer(BufferUsage.VertexBuffer | BufferUsage
 Buffer indexBuffer = device.CreateBuffer(BufferUsage.IndexBuffer | BufferUsage.TransferDst, indicesSize);
 
 Buffer transferBuffer = device.CreateBuffer(BufferUsage.TransferSrc, verticesSize + indicesSize);
-nint mapBuffer = device.MapBuffer(transferBuffer);
+/*nint mapBuffer = device.MapBuffer(transferBuffer);
 unsafe
 {
     fixed (float* pVertices = vertices)
@@ -115,16 +115,16 @@ cl.Begin();
 cl.CopyBufferToBuffer(transferBuffer, 0, vertexBuffer, 0, verticesSize);
 cl.CopyBufferToBuffer(transferBuffer, verticesSize, indexBuffer, 0, indicesSize);
 cl.End();
-device.ExecuteCommandList(cl);
+device.ExecuteCommandList(cl);*/
 
 transferBuffer.Dispose();
 
 ShaderModule vertexShader = device.CreateShaderModule(ShaderStage.Vertex,
-    Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Vertex, ShaderFormat.Spirv, Shader, "VSMain"), "VSMain");
+    Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Vertex, ShaderFormat.Dxbc, Shader, "VSMain"), "VSMain");
 ShaderModule pixelShader = device.CreateShaderModule(ShaderStage.Pixel,
-    Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Pixel, ShaderFormat.Spirv, Shader, "PSMain"), "PSMain");
+    Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Pixel, ShaderFormat.Dxbc, Shader, "PSMain"), "PSMain");
 
-Pipeline pipeline = device.CreateGraphicsPipeline(new GraphicsPipelineInfo()
+/*Pipeline pipeline = device.CreateGraphicsPipeline(new GraphicsPipelineInfo()
 {
     VertexShader = vertexShader,
     PixelShader = pixelShader,
@@ -135,10 +135,10 @@ Pipeline pipeline = device.CreateGraphicsPipeline(new GraphicsPipelineInfo()
         new InputElementDescription(Format.R32G32B32_Float, 8, 1, 0)
     ],
     VertexBuffers = [new VertexBufferDescription(0, 5 * sizeof(float))]
-});
+});*/
 
 pixelShader.Dispose();
-vertexShader.Dispose();*/
+vertexShader.Dispose();
 
 while (alive)
 {
