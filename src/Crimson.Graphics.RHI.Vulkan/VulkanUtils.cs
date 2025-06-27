@@ -15,6 +15,8 @@ internal static class VulkanUtils
             Format.R32G32_Float => VkFormat.R32G32Sfloat,
             Format.R32G32B32_Float => VkFormat.R32G32B32Sfloat,
             Format.R32G32B32A32_Float => VkFormat.R32G32B32A32Sfloat,
+            Format.R16_UInt => VkFormat.R16Uint,
+            Format.R32_UInt => VkFormat.R32Uint,
             _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
         };
     }

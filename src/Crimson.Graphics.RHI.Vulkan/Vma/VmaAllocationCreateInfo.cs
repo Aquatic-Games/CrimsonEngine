@@ -1,6 +1,6 @@
 namespace Crimson.Graphics.RHI.Vulkan.Vma
 {
-    public unsafe partial struct VmaAllocationCreateInfo
+    internal unsafe partial struct VmaAllocationCreateInfo
     {
         [NativeTypeName("VmaAllocationCreateFlags")]
         public uint flags;

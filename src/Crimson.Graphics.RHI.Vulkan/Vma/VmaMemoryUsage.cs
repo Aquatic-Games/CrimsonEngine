@@ -1,7 +1,7 @@
 namespace Crimson.Graphics.RHI.Vulkan.Vma
 {
     [NativeTypeName("unsigned int")]
-    public enum VmaMemoryUsage : uint
+    internal enum VmaMemoryUsage : uint
     {
         VMA_MEMORY_USAGE_UNKNOWN = 0,
         VMA_MEMORY_USAGE_GPU_ONLY = 1,

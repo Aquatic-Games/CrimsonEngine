@@ -2,7 +2,7 @@ namespace Crimson.Graphics.RHI.Vulkan.Vma
 {
     [NativeTypeName("unsigned int")]
     [Flags]
-    public enum VmaAllocationCreateFlagBits : uint
+    internal enum VmaAllocationCreateFlagBits : uint
     {
         VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT = 0x00000001,
         VMA_ALLOCATION_CREATE_NEVER_ALLOCATE_BIT = 0x00000002,

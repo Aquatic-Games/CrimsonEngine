@@ -53,6 +53,21 @@ internal sealed unsafe class VulkanCommandList : CommandList
         _vk.EndCommandBuffer(Buffer).Check("End command buffer");
     }
 
+    public override void CopyBufferToBuffer(Buffer source, uint srcOffset, Buffer dest, uint destOffset, uint copySize = 0)
+    {
+        VulkanBuffer vkSrc = (VulkanBuffer) source;
+        VulkanBuffer vkDest = (VulkanBuffer) dest;
+
+        BufferCopy copy = new()
+        {
+            Size = copySize == 0 ? Vk.WholeSize : copySize,
+            SrcOffset = srcOffset,
+            DstOffset = destOffset
+        };
+        
+        _vk.CmdCopyBuffer(Buffer, vkSrc.Buffer, vkDest.Buffer, 1, &copy);
+    }
+
     public override void BeginRenderPass(in ReadOnlySpan<ColorAttachmentInfo> colorAttachments)
     {
         RenderingAttachmentInfo* colorRenderAttachments = stackalloc RenderingAttachmentInfo[colorAttachments.Length];
@@ -112,10 +127,35 @@ internal sealed unsafe class VulkanCommandList : CommandList
         VulkanPipeline vkPipeline = (VulkanPipeline) pipeline;
         _vk.CmdBindPipeline(Buffer, PipelineBindPoint.Graphics, vkPipeline.Pipeline);
     }
+
+    public override void SetVertexBuffer(uint slot, Buffer buffer, uint offset = 0)
+    {
+        VulkanBuffer vkBuffer = (VulkanBuffer) buffer;
+        VkBuffer buf = vkBuffer.Buffer;
+        ulong off = offset;
+        _vk.CmdBindVertexBuffers(Buffer, slot, 1, &buf, &off);
+    }
     
+    public override void SetIndexBuffer(Buffer buffer, Format format, uint offset = 0)
+    {
+        VulkanBuffer vkBuffer = (VulkanBuffer) buffer;
+        IndexType type = format switch
+        {
+            Format.R16_UInt => IndexType.Uint16,
+            Format.R32_UInt => IndexType.Uint32,
+            _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
+        };
+        _vk.CmdBindIndexBuffer(Buffer, vkBuffer.Buffer, offset, type);
+    }
+
     public override void Draw(uint numVertices)
     {
         _vk.CmdDraw(Buffer, numVertices, 1, 0, 0);
+    }
+
+    public override void DrawIndexed(uint numIndices)
+    {
+        _vk.CmdDrawIndexed(Buffer, numIndices, 1, 0, 0, 0);
     }
 
     public override void Dispose()

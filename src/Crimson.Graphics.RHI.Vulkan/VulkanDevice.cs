@@ -1,6 +1,7 @@
 ﻿global using VkDevice = Silk.NET.Vulkan.Device;
 using System.Diagnostics;
 using Crimson.Core;
+using Crimson.Graphics.RHI.Vulkan.Vma;
 using Crimson.Math;
 using SDL3;
 using Silk.NET.Core;
@@ -28,6 +29,7 @@ public sealed unsafe class VulkanDevice : Device
     
     private readonly PhysicalDevice _physicalDevice;
     private readonly VkDevice _device;
+    private readonly VmaAllocator_T* _allocator;
 
     private readonly CommandPool _commandPool;
 
@@ -228,6 +230,17 @@ public sealed unsafe class VulkanDevice : Device
         _vk.GetDeviceQueue(_device, _queues.GraphicsIndex, 0, out _queues.Graphics);
         _vk.GetDeviceQueue(_device, _queues.PresentIndex, 0, out _queues.Present);
 
+        VmaAllocatorCreateInfo allocatorInfo = new()
+        {
+            vulkanApiVersion = Vk.Version13,
+            instance = _instance,
+            physicalDevice = _physicalDevice,
+            device = _device,
+        };
+        
+        Logger.Trace("Creating allocator.");
+        Vma.Vma.CreateAllocator(&allocatorInfo, out _allocator).Check("Create allocator");
+
         CommandPoolCreateInfo poolInfo = new()
         {
             SType = StructureType.CommandPoolCreateInfo,
@@ -266,6 +279,8 @@ public sealed unsafe class VulkanDevice : Device
         
         _vk.DestroyCommandPool(_device, _commandPool, null);
         
+        Vma.Vma.DestroyAllocator(_allocator);
+        
         _vk.DestroyDevice(_device, null);
         
         _surfaceExt.DestroySurface(_instance, _surface, null);
@@ -296,9 +311,9 @@ public sealed unsafe class VulkanDevice : Device
         return new VulkanPipeline(_vk, _device, in info);
     }
 
-    public override Buffer CreateBuffer<T>(BufferUsage usage, in ReadOnlySpan<T> data)
+    public override Buffer CreateBuffer(BufferUsage usage, uint sizeInBytes)
     {
-        throw new NotImplementedException();
+        return new VulkanBuffer(_vk, _device, _allocator, usage, sizeInBytes);
     }
 
     public override void ExecuteCommandList(CommandList cl)
@@ -317,6 +332,20 @@ public sealed unsafe class VulkanDevice : Device
         // (2 years later....)
         _vk.QueueSubmit(_queues.Graphics, 1, &submitInfo, new Fence()).Check("Submit queue");
         _vk.QueueWaitIdle(_queues.Graphics).Check("Wait for queue idle");
+    }
+
+    public override nint MapBuffer(Buffer buffer)
+    {
+        VulkanBuffer vkBuffer = (VulkanBuffer) buffer;
+        void* pData;
+        Vma.Vma.MapMemory(_allocator, vkBuffer.Allocation, &pData);
+        return (nint) pData;
+    }
+    
+    public override void UnmapBuffer(Buffer buffer)
+    {
+        VulkanBuffer vkBuffer = (VulkanBuffer) buffer;
+        Vma.Vma.UnmapMemory(_allocator, vkBuffer.Allocation);
     }
 
     public override Texture GetNextSwapchainTexture()

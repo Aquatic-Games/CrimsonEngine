@@ -12,5 +12,9 @@ public enum BufferUsage
     
     IndexBuffer = 1 << 1,
     
-    ConstantBuffer = 1 << 2
+    ConstantBuffer = 1 << 2,
+    
+    TransferDst = 1 << 8,
+    
+    TransferSrc = 1 << 9
 }

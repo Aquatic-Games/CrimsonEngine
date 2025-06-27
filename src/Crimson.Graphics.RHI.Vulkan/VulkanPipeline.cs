@@ -50,9 +50,41 @@ internal sealed unsafe class VulkanPipeline : Pipeline
             }
         };
 
+        VertexInputAttributeDescription* attributes =
+            stackalloc VertexInputAttributeDescription[info.InputLayout.Length];
+
+        for (int i = 0; i < info.InputLayout.Length; i++)
+        {
+            ref readonly InputElementDescription element = ref info.InputLayout[i];
+            attributes[i] = new VertexInputAttributeDescription
+            {
+                Format = element.Format.ToVk(),
+                Offset = element.Offset,
+                Location = element.Location,
+                Binding = element.Slot
+            };
+        }
+
+        VertexInputBindingDescription* bindings = stackalloc VertexInputBindingDescription[info.VertexBuffers.Length];
+        
+        for (int i = 0; i < info.VertexBuffers.Length; i++)
+        {
+            ref readonly VertexBufferDescription buffer = ref info.VertexBuffers[i];
+            bindings[i] = new VertexInputBindingDescription
+            {
+                Binding = buffer.Slot,
+                InputRate = VertexInputRate.Vertex,
+                Stride = buffer.Stride
+            };
+        }
+
         PipelineVertexInputStateCreateInfo vertexInputState = new()
         {
-            SType = StructureType.PipelineVertexInputStateCreateInfo
+            SType = StructureType.PipelineVertexInputStateCreateInfo,
+            VertexAttributeDescriptionCount = (uint) info.InputLayout.Length,
+            PVertexAttributeDescriptions = attributes,
+            VertexBindingDescriptionCount = (uint) info.VertexBuffers.Length,
+            PVertexBindingDescriptions = bindings
         };
 
         PipelineInputAssemblyStateCreateInfo inputAssemblyState = new()

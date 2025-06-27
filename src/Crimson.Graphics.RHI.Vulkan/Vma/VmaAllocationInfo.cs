@@ -2,7 +2,7 @@ using Silk.NET.Vulkan;
 
 namespace Crimson.Graphics.RHI.Vulkan.Vma
 {
-    public unsafe partial struct VmaAllocationInfo
+    internal unsafe partial struct VmaAllocationInfo
     {
         [NativeTypeName("uint32_t")]
         public uint memoryType;

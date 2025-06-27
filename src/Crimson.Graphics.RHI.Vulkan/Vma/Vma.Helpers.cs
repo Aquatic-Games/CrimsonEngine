@@ -2,7 +2,7 @@ using Silk.NET.Vulkan;
 
 namespace Crimson.Graphics.RHI.Vulkan.Vma;
 
-public unsafe partial class Vma
+internal unsafe partial class Vma
 {
     public static Result CreateAllocator(VmaAllocatorCreateInfo* pCreateInfo, out VmaAllocator_T* allocator)
     {

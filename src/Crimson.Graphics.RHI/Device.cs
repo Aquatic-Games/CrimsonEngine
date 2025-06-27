@@ -12,9 +12,13 @@ public abstract class Device : IDisposable
 
     public abstract Pipeline CreateGraphicsPipeline(in GraphicsPipelineInfo info);
 
-    public abstract Buffer CreateBuffer<T>(BufferUsage usage, in ReadOnlySpan<T> data) where T : unmanaged;
+    public abstract Buffer CreateBuffer(BufferUsage usage, uint sizeInBytes);
 
     public abstract void ExecuteCommandList(CommandList cl);
+
+    public abstract nint MapBuffer(Buffer buffer);
+
+    public abstract void UnmapBuffer(Buffer buffer);
 
     public abstract Texture GetNextSwapchainTexture();
 

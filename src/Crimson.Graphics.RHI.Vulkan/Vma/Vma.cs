@@ -7,7 +7,7 @@ namespace Crimson.Graphics.RHI.Vulkan.Vma
     // https://github.com/Aquatic-Games/grabs/blob/new/src/grabs.VulkanMemoryAllocator/Vma.cs
     // VMA is one of the main reasons I am writing an RHI in crimson instead of using GRABS for the moment. I don't want
     // to deal with handling VMA correctly again. I'll deal with it later.
-    public static unsafe partial class Vma
+    internal static unsafe partial class Vma
     {
         [DllImport("VulkanMemoryAllocator", CallingConvention = CallingConvention.Cdecl, EntryPoint = "vmaCreateAllocator", ExactSpelling = true)]
         [return: NativeTypeName("VkResult")]
@@ -29,5 +29,12 @@ namespace Crimson.Graphics.RHI.Vulkan.Vma
         
         [DllImport("VulkanMemoryAllocator", CallingConvention = CallingConvention.Cdecl, EntryPoint = "vmaDestroyImage", ExactSpelling = true)]
         public static extern void DestroyImage([NativeTypeName("VmaAllocator _Nonnull")] VmaAllocator_T* allocator, [NativeTypeName("VkImage _Nullable")] Image image, [NativeTypeName("VmaAllocation _Nullable")] VmaAllocation_T* allocation);
+        
+        [DllImport("VulkanMemoryAllocator", CallingConvention = CallingConvention.Cdecl, EntryPoint = "vmaMapMemory", ExactSpelling = true)]
+        [return: NativeTypeName("VkResult")]
+        public static extern Result MapMemory([NativeTypeName("VmaAllocator _Nonnull")] VmaAllocator_T* allocator, [NativeTypeName("VmaAllocation _Nonnull")] VmaAllocation_T* allocation, [NativeTypeName("void * _Nullable * _Nonnull")] void** ppData);
+
+        [DllImport("VulkanMemoryAllocator", CallingConvention = CallingConvention.Cdecl, EntryPoint = "vmaUnmapMemory", ExactSpelling = true)]
+        public static extern void UnmapMemory([NativeTypeName("VmaAllocator _Nonnull")] VmaAllocator_T* allocator, [NativeTypeName("VmaAllocation _Nonnull")] VmaAllocation_T* allocation);
     }
 }
