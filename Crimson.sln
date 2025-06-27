@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Graphics.RHI.Vulkan
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.RHI", "tests\Tests.RHI\Tests.RHI.csproj", "{1885F7A9-2817-4A60-B513-3003EB139C66}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Graphics.RHI.D3D11", "src\Crimson.Graphics.RHI.D3D11\Crimson.Graphics.RHI.D3D11.csproj", "{66639440-AD7C-404E-AD75-501AA31940D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -119,6 +121,10 @@ Global
 		{1885F7A9-2817-4A60-B513-3003EB139C66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1885F7A9-2817-4A60-B513-3003EB139C66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1885F7A9-2817-4A60-B513-3003EB139C66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66639440-AD7C-404E-AD75-501AA31940D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66639440-AD7C-404E-AD75-501AA31940D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66639440-AD7C-404E-AD75-501AA31940D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66639440-AD7C-404E-AD75-501AA31940D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A} = {4DB13778-0F69-4B82-A065-32546F54500F}

@@ -62,7 +62,7 @@ Logger.EnableConsole();
 
 WindowOptions options = new()
 {
-    Title = "Tests.RHI (Vulkan)",
+    Title = "Tests.RHI (D3D11)",
     Size = new Size<int>(1280, 720),
     Resizable = true
 };
