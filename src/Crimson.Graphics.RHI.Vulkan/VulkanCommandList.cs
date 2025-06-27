@@ -109,7 +109,9 @@ internal sealed unsafe class VulkanCommandList : CommandList
         
         _vk.CmdBeginRendering(Buffer, &renderingInfo);
 
-        Viewport viewport = new Viewport(0, 0, firstTexture.Size.Width, firstTexture.Size.Height, 0, 1);
+        // Flip the viewport
+        Viewport viewport = new Viewport(0, firstTexture.Size.Height, firstTexture.Size.Width,
+            -firstTexture.Size.Height, 0, 1);
         _vk.CmdSetViewport(Buffer, 0, 1, &viewport);
 
         Rect2D scissor = new Rect2D(new Offset2D(0, 0),
