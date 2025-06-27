@@ -35,6 +35,7 @@ public sealed unsafe class VulkanDevice : Device
 
     private readonly KhrSwapchain _swapchainExt;
     private readonly Fence _swapchainFence;
+    private Size<uint> _swapchainSize;
     private Format _swapchainFormat;
     private SwapchainKHR _swapchain;
     private VulkanTexture[] _swapchainTextures;
@@ -44,9 +45,10 @@ public sealed unsafe class VulkanDevice : Device
 
     public override Format SwapchainFormat => _swapchainFormat;
 
-    public VulkanDevice(string appName, IntPtr sdlWindow, bool debug)
+    public VulkanDevice(string appName, IntPtr sdlWindow, Size<uint> size, bool debug)
     {
         _vk = Vk.GetApi();
+        _swapchainSize = size;
         
         nint pAppName = SilkMarshal.StringToPtr(appName);
         nint pEngineName = SilkMarshal.StringToPtr("Crimson");
@@ -388,14 +390,31 @@ public sealed unsafe class VulkanDevice : Device
         else if (result is not Result.SuboptimalKhr)
             result.Check("Present");
     }
+    
+    public override void Resize(Size<uint> newSize)
+    {
+        _swapchainSize = newSize;
+        RecreateSwapchain();
+    }
 
     private void CreateSwapchain()
     {
         SurfaceCapabilitiesKHR capabilities;
         _surfaceExt.GetPhysicalDeviceSurfaceCapabilities(_physicalDevice, _surface, &capabilities)
             .Check("Get surface capabilities");
-
-        Extent2D extent = capabilities.CurrentExtent;
+        
+        Extent2D extent = new Extent2D(_swapchainSize.Width, _swapchainSize.Height);
+        
+        // Ensure swapchain is within bounds.
+        if (extent.Width > capabilities.MaxImageExtent.Width)
+            extent.Width = capabilities.MaxImageExtent.Width;
+        if (extent.Height > capabilities.MaxImageExtent.Height)
+            extent.Height = capabilities.MaxImageExtent.Height;
+        if (extent.Width < capabilities.MinImageExtent.Width)
+            extent.Width = capabilities.MinImageExtent.Width;
+        if (extent.Height < capabilities.MinImageExtent.Height)
+            extent.Height = capabilities.MinImageExtent.Height;
+        
         uint numImages = capabilities.MinImageCount;
         _swapchainFormat = Format.B8G8R8A8_UNorm;
 

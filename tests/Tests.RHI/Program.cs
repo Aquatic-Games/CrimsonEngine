@@ -74,7 +74,8 @@ Events.WindowClose += () => alive = false;
 
 Surface.Create(in options);
 
-Device device = new VulkanDevice("Tests.RHI", Surface.Info.Handle, true);
+Device device = new VulkanDevice("Tests.RHI", Surface.Info.Handle, options.Size.As<uint>(), true);
+Events.SurfaceSizeChanged += size => device.Resize(size.As<uint>());
 CommandList cl = device.CreateCommandList();
 
 ReadOnlySpan<float> vertices =

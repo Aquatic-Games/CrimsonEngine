@@ -1,4 +1,6 @@
-﻿namespace Crimson.Graphics.RHI;
+﻿using Crimson.Math;
+
+namespace Crimson.Graphics.RHI;
 
 public abstract class Device : IDisposable
 {
@@ -23,6 +25,8 @@ public abstract class Device : IDisposable
     public abstract Texture GetNextSwapchainTexture();
 
     public abstract void Present();
+
+    public abstract void Resize(Size<uint> newSize);
     
     public abstract void Dispose();
 }
