@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\Crimson.Graphics.RHI.D3D11\Crimson.Graphics.RHI.D3D11.csproj" />
       <ProjectReference Include="..\..\src\Crimson.Graphics.RHI.Vulkan\Crimson.Graphics.RHI.Vulkan.csproj" />
       <ProjectReference Include="..\..\src\Crimson.Graphics.RHI\Crimson.Graphics.RHI.csproj" />
       <ProjectReference Include="..\..\src\Crimson.Platform\Crimson.Platform.csproj" />

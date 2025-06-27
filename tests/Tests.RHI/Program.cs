@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Crimson.Core;
 using Crimson.Graphics.RHI;
+using Crimson.Graphics.RHI.D3D11;
 using Crimson.Graphics.RHI.Vulkan;
 using Crimson.Math;
 using Crimson.Platform;
@@ -74,11 +75,12 @@ Events.WindowClose += () => alive = false;
 
 Surface.Create(in options);
 
-Device device = new VulkanDevice("Tests.RHI", Surface.Info.Handle, options.Size.As<uint>(), true);
+//Device device = new VulkanDevice("Tests.RHI", Surface.Info.Handle, options.Size.As<uint>(), true);
+Device device = new D3D11Device(Surface.Info.Handle, options.Size.As<uint>(), true);
 Events.SurfaceSizeChanged += size => device.Resize(size.As<uint>());
 CommandList cl = device.CreateCommandList();
 
-ReadOnlySpan<float> vertices =
+/*ReadOnlySpan<float> vertices =
 [
     -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
     +0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
@@ -136,7 +138,7 @@ Pipeline pipeline = device.CreateGraphicsPipeline(new GraphicsPipelineInfo()
 });
 
 pixelShader.Dispose();
-vertexShader.Dispose();
+vertexShader.Dispose();*/
 
 while (alive)
 {
@@ -148,11 +150,11 @@ while (alive)
     
     cl.BeginRenderPass([new ColorAttachmentInfo(texture, Color.CornflowerBlue)]);
     
-    cl.SetGraphicsPipeline(pipeline);
+    /*cl.SetGraphicsPipeline(pipeline);
     cl.SetVertexBuffer(0, vertexBuffer);
     cl.SetIndexBuffer(indexBuffer, Format.R32_UInt);
     
-    cl.DrawIndexed(6);
+    cl.DrawIndexed(6);*/
     
     cl.EndRenderPass();
     
@@ -162,9 +164,9 @@ while (alive)
     device.Present();
 }
 
-pipeline.Dispose();
+/*pipeline.Dispose();
 indexBuffer.Dispose();
-vertexBuffer.Dispose();
+vertexBuffer.Dispose();*/
 cl.Dispose();
 device.Dispose();
 Surface.Destroy();
