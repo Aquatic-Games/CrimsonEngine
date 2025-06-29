@@ -13,7 +13,7 @@ internal sealed unsafe class VulkanShaderModule : ShaderModule
 
     public readonly string EntryPoint;
 
-    public VulkanShaderModule(Vk vk, VkDevice device, ShaderStage stage, in ReadOnlySpan<byte> spirv, string entryPoint)
+    public VulkanShaderModule(Vk vk, VkDevice device, in ReadOnlySpan<byte> spirv, string entryPoint)
     {
         _vk = vk;
         _device = device;

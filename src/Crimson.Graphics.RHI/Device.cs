@@ -10,7 +10,7 @@ public abstract class Device : IDisposable
 
     public abstract CommandList CreateCommandList();
 
-    public abstract ShaderModule CreateShaderModule(ShaderStage stage, byte[] compiled, string entryPoint);
+    public abstract ShaderModule CreateShaderModule(byte[] compiled, string entryPoint);
 
     public abstract Pipeline CreateGraphicsPipeline(in GraphicsPipelineInfo info);
 

@@ -3,12 +3,10 @@
 internal sealed class D3D11ShaderModule : ShaderModule
 {
     public readonly byte[] Data;
-    public readonly string EntryPoint;
 
-    public D3D11ShaderModule(byte[] data, string entryPoint)
+    public D3D11ShaderModule(byte[] data)
     {
         Data = data;
-        EntryPoint = entryPoint;
     }
     
     public override void Dispose() { }

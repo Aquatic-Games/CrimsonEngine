@@ -303,9 +303,9 @@ public sealed unsafe class VulkanDevice : Device
         return new VulkanCommandList(_vk, _device, _commandPool);
     }
 
-    public override ShaderModule CreateShaderModule(ShaderStage stage, byte[] compiled, string entryPoint)
+    public override ShaderModule CreateShaderModule(byte[] compiled, string entryPoint)
     {
-        return new VulkanShaderModule(_vk, _device, stage, compiled, entryPoint);
+        return new VulkanShaderModule(_vk, _device, compiled, entryPoint);
     }
 
     public override Pipeline CreateGraphicsPipeline(in GraphicsPipelineInfo info)

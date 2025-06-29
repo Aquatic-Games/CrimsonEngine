@@ -53,9 +53,9 @@ public class D3D11Device : Device
         return new D3D11CommandList(_device);
     }
     
-    public override ShaderModule CreateShaderModule(ShaderStage stage, byte[] compiled, string entryPoint)
+    public override ShaderModule CreateShaderModule(byte[] compiled, string entryPoint)
     {
-        return new D3D11ShaderModule(compiled, entryPoint);
+        return new D3D11ShaderModule(compiled);
     }
     
     public override Pipeline CreateGraphicsPipeline(in GraphicsPipelineInfo info)

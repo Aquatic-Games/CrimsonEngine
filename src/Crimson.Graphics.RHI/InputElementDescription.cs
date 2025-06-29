@@ -2,6 +2,8 @@ namespace Crimson.Graphics.RHI;
 
 public struct InputElementDescription
 {
+    public Semantic Semantic;
+    
     public Format Format;
 
     public uint Offset;
@@ -10,8 +12,9 @@ public struct InputElementDescription
 
     public uint Slot;
 
-    public InputElementDescription(Format format, uint offset, uint location, uint slot)
+    public InputElementDescription(Semantic semantic, Format format, uint offset, uint location, uint slot)
     {
+        Semantic = semantic;
         Format = format;
         Offset = offset;
         Location = location;

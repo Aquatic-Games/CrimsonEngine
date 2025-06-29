@@ -74,6 +74,9 @@ internal sealed class D3D11CommandList : CommandList
         D3D11Pipeline d3dPipeline = (D3D11Pipeline) pipeline;
         _context.VSSetShader(d3dPipeline.VertexShader);
         _context.PSSetShader(d3dPipeline.PixelShader);
+        
+        if (d3dPipeline.InputLayout != null)
+            _context.IASetInputLayout(d3dPipeline.InputLayout);
 
         _context.IASetPrimitiveTopology(d3dPipeline.PrimitiveTopology);
         
@@ -83,12 +86,14 @@ internal sealed class D3D11CommandList : CommandList
     
     public override void SetVertexBuffer(uint slot, Buffer buffer, uint stride, uint offset = 0)
     {
-        throw new NotImplementedException();
+        D3D11Buffer d3dBuffer = (D3D11Buffer) buffer;
+        _context.IASetVertexBuffer(slot, d3dBuffer.Buffer, stride, offset);
     }
     
     public override void SetIndexBuffer(Buffer buffer, Format format, uint offset = 0)
     {
-        throw new NotImplementedException();
+        D3D11Buffer d3dBuffer = (D3D11Buffer) buffer;
+        _context.IASetIndexBuffer(d3dBuffer.Buffer, format.ToD3D(), offset);
     }
     
     public override void Draw(uint numVertices)
@@ -98,7 +103,7 @@ internal sealed class D3D11CommandList : CommandList
     
     public override void DrawIndexed(uint numIndices)
     {
-        throw new NotImplementedException();
+        _context.DrawIndexed(numIndices, 0, 0);
     }
     
     public override void Dispose()

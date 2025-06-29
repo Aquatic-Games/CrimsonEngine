@@ -21,7 +21,7 @@ using ShaderStage = Crimson.Graphics.RHI.ShaderStage;
 using Surface = Crimson.Platform.Surface;
 using Texture = Crimson.Graphics.RHI.Texture;
 
-const string Shader = """
+/*const string Shader = """
                       struct VSOutput
                       {
                           float4 Position: SV_Position;
@@ -63,9 +63,9 @@ const string Shader = """
                           
                           return output;
                       }
-                      """;
+                      """;*/
 
-/*const string Shader = """
+const string Shader = """
                       struct VSInput
                       {
                           float2 Position: POSITION0;
@@ -101,7 +101,7 @@ const string Shader = """
                           
                           return output;
                       }
-                      """;*/
+                      """;
 
 Logger.EnableConsole();
 
@@ -125,7 +125,7 @@ Device device = new D3D11Device(Surface.Info.Handle, options.Size.As<uint>(), tr
 Events.SurfaceSizeChanged += size => device.Resize(size.As<uint>());
 CommandList cl = device.CreateCommandList();
 
-/*ReadOnlySpan<float> vertices =
+ReadOnlySpan<float> vertices =
 [
     -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
     +0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
@@ -162,23 +162,21 @@ cl.CopyBufferToBuffer(transferBuffer, verticesSize, indexBuffer, 0, indicesSize)
 cl.End();
 device.ExecuteCommandList(cl);
 
-transferBuffer.Dispose();*/
+transferBuffer.Dispose();
 
-ShaderModule vertexShader = device.CreateShaderModule(ShaderStage.Vertex,
-    Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Vertex, ShaderFormat.Dxbc, Shader, "VSMain"), "VSMain");
-ShaderModule pixelShader = device.CreateShaderModule(ShaderStage.Pixel,
-    Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Pixel, ShaderFormat.Dxbc, Shader, "PSMain"), "PSMain");
+ShaderModule vertexShader = device.CreateShaderModule(Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Vertex, ShaderFormat.Dxbc, Shader, "VSMain"), "VSMain");
+ShaderModule pixelShader = device.CreateShaderModule(Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Pixel, ShaderFormat.Dxbc, Shader, "PSMain"), "PSMain");
 
 Pipeline pipeline = device.CreateGraphicsPipeline(new GraphicsPipelineInfo()
 {
     VertexShader = vertexShader,
     PixelShader = pixelShader,
     ColorTargets = [device.SwapchainFormat],
-    /*InputLayout =
+    InputLayout =
     [
-        new InputElementDescription(Format.R32G32_Float, 0, 0, 0),
-        new InputElementDescription(Format.R32G32B32_Float, 8, 1, 0)
-    ]*/
+        new InputElementDescription(Semantic.Position, Format.R32G32_Float, 0, 0, 0),
+        new InputElementDescription(Semantic.Color, Format.R32G32B32_Float, 8, 1, 0)
+    ]
 });
 
 pixelShader.Dispose();
@@ -195,11 +193,11 @@ while (alive)
     cl.BeginRenderPass([new ColorAttachmentInfo(texture, Color.CornflowerBlue)]);
     
     cl.SetGraphicsPipeline(pipeline);
-    //cl.SetVertexBuffer(0, vertexBuffer, 5 * sizeof(float));
-    //cl.SetIndexBuffer(indexBuffer, Format.R32_UInt);
+    cl.SetVertexBuffer(0, vertexBuffer, 5 * sizeof(float));
+    cl.SetIndexBuffer(indexBuffer, Format.R32_UInt);
     
-    cl.Draw(6);
-    //cl.DrawIndexed(6);
+    //cl.Draw(6);
+    cl.DrawIndexed(6);
     
     cl.EndRenderPass();
     
@@ -210,8 +208,8 @@ while (alive)
 }
 
 pipeline.Dispose();
-//indexBuffer.Dispose();
-//vertexBuffer.Dispose();
+indexBuffer.Dispose();
+vertexBuffer.Dispose();
 cl.Dispose();
 device.Dispose();
 Surface.Destroy();
