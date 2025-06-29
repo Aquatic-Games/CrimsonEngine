@@ -71,7 +71,14 @@ internal sealed class D3D11CommandList : CommandList
     
     public override void SetGraphicsPipeline(Pipeline pipeline)
     {
-        throw new NotImplementedException();
+        D3D11Pipeline d3dPipeline = (D3D11Pipeline) pipeline;
+        _context.VSSetShader(d3dPipeline.VertexShader);
+        _context.PSSetShader(d3dPipeline.PixelShader);
+
+        _context.IASetPrimitiveTopology(d3dPipeline.PrimitiveTopology);
+        
+        _context.OMSetDepthStencilState(d3dPipeline.DepthStencilState);
+        _context.RSSetState(d3dPipeline.RasterizerState);
     }
     
     public override void SetVertexBuffer(uint slot, Buffer buffer, uint stride, uint offset = 0)
@@ -86,7 +93,7 @@ internal sealed class D3D11CommandList : CommandList
     
     public override void Draw(uint numVertices)
     {
-        throw new NotImplementedException();
+        _context.Draw(numVertices, 0);
     }
     
     public override void DrawIndexed(uint numIndices)
