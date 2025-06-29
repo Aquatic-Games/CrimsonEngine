@@ -67,7 +67,12 @@ public class D3D11Device : Device
     {
         return new D3D11Buffer(_device, usage, sizeInBytes);
     }
-    
+
+    public override Texture CreateTexture(in TextureInfo info)
+    {
+        throw new NotImplementedException();
+    }
+
     public override void ExecuteCommandList(CommandList cl)
     {
         D3D11CommandList d3dList = (D3D11CommandList) cl;

@@ -16,6 +16,8 @@ public abstract class Device : IDisposable
 
     public abstract Buffer CreateBuffer(BufferUsage usage, uint sizeInBytes);
 
+    public abstract Texture CreateTexture(in TextureInfo info);
+
     public abstract void ExecuteCommandList(CommandList cl);
 
     public abstract nint MapBuffer(Buffer buffer);

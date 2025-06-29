@@ -318,6 +318,11 @@ public sealed unsafe class VulkanDevice : Device
         return new VulkanBuffer(_vk, _device, _allocator, usage, sizeInBytes);
     }
 
+    public override Texture CreateTexture(in TextureInfo info)
+    {
+        return new VulkanTexture(_vk, _device, _allocator, in info);
+    }
+
     public override void ExecuteCommandList(CommandList cl)
     {
         VulkanCommandList vulkanCl = (VulkanCommandList) cl;

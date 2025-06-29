@@ -7,6 +7,7 @@ using Crimson.Math;
 using Crimson.Platform;
 using grabs.Graphics;
 using grabs.ShaderCompiler;
+using StbImageSharp;
 using Buffer = Crimson.Graphics.RHI.Buffer;
 using BufferUsage = Crimson.Graphics.RHI.BufferUsage;
 using ColorAttachmentInfo = Crimson.Graphics.RHI.ColorAttachmentInfo;
@@ -107,8 +108,8 @@ Logger.EnableConsole();
 
 WindowOptions options = new()
 {
-    //Title = "Tests.RHI (Vulkan)",
-    Title = "Tests.RHI (D3D11)",
+    Title = "Tests.RHI (Vulkan)",
+    //Title = "Tests.RHI (D3D11)",
     Size = new Size<int>(1280, 720),
     Resizable = true
 };
@@ -120,8 +121,8 @@ Events.WindowClose += () => alive = false;
 
 Surface.Create(in options);
 
-//Device device = new VulkanDevice("Tests.RHI", Surface.Info.Handle, options.Size.As<uint>(), true);
-Device device = new D3D11Device(Surface.Info.Handle, options.Size.As<uint>(), true);
+Device device = new VulkanDevice("Tests.RHI", Surface.Info.Handle, options.Size.As<uint>(), true);
+//Device device = new D3D11Device(Surface.Info.Handle, options.Size.As<uint>(), true);
 Events.SurfaceSizeChanged += size => device.Resize(size.As<uint>());
 CommandList cl = device.CreateCommandList();
 
@@ -164,8 +165,18 @@ device.ExecuteCommandList(cl);
 
 transferBuffer.Dispose();
 
-ShaderModule vertexShader = device.CreateShaderModule(Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Vertex, ShaderFormat.Dxbc, Shader, "VSMain"), "VSMain");
-ShaderModule pixelShader = device.CreateShaderModule(Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Pixel, ShaderFormat.Dxbc, Shader, "PSMain"), "PSMain");
+ImageResult result = ImageResult.FromMemory(File.ReadAllBytes("/home/aqua/Pictures/awesomeface.png"),
+    ColorComponents.RedGreenBlueAlpha);
+
+Texture texture = device.CreateTexture(new TextureInfo(TextureType.Texture2D, (uint) result.Width, (uint) result.Height,
+    Format.R8B8B8A8_UNorm, TextureUsage.ShaderResource));
+
+ShaderModule vertexShader =
+    device.CreateShaderModule(
+        Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Vertex, ShaderFormat.Spirv, Shader, "VSMain"), "VSMain");
+ShaderModule pixelShader =
+    device.CreateShaderModule(
+        Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Pixel, ShaderFormat.Spirv, Shader, "PSMain"), "PSMain");
 
 Pipeline pipeline = device.CreateGraphicsPipeline(new GraphicsPipelineInfo()
 {
@@ -186,11 +197,11 @@ while (alive)
 {
     Events.ProcessEvents();
 
-    Texture texture = device.GetNextSwapchainTexture();
+    Texture swapchainTexture = device.GetNextSwapchainTexture();
     
     cl.Begin();
     
-    cl.BeginRenderPass([new ColorAttachmentInfo(texture, Color.CornflowerBlue)]);
+    cl.BeginRenderPass([new ColorAttachmentInfo(swapchainTexture, Color.CornflowerBlue)]);
     
     cl.SetGraphicsPipeline(pipeline);
     cl.SetVertexBuffer(0, vertexBuffer, 5 * sizeof(float));
@@ -208,6 +219,7 @@ while (alive)
 }
 
 pipeline.Dispose();
+texture.Dispose();
 indexBuffer.Dispose();
 vertexBuffer.Dispose();
 cl.Dispose();
