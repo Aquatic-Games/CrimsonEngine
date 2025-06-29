@@ -68,6 +68,51 @@ internal sealed unsafe class VulkanCommandList : CommandList
         _vk.CmdCopyBuffer(Buffer, vkSrc.Buffer, vkDest.Buffer, 1, &copy);
     }
 
+    public override void CopyBufferToTexture(Buffer source, uint srcOffset, Texture dest,
+        Rectangle<uint>? region = null, uint mipLevel = 0, uint layer = 0)
+    {
+        VulkanBuffer vkSrc = (VulkanBuffer) source;
+        VulkanTexture vkDest = (VulkanTexture) dest;
+
+        ImageMemoryBarrier barrier = new()
+        {
+            SType = StructureType.ImageMemoryBarrier,
+            Image = vkDest.Image,
+            SubresourceRange = new ImageSubresourceRange()
+            {
+                AspectMask = ImageAspectFlags.ColorBit,
+                LayerCount = 1,
+                BaseArrayLayer = 0,
+                LevelCount = 1,
+                BaseMipLevel = 0
+            },
+            DstAccessMask = AccessFlags.TransferWriteBit,
+            OldLayout = ImageLayout.Undefined,
+            NewLayout = ImageLayout.TransferDstOptimal
+        };
+
+        _vk.CmdPipelineBarrier(Buffer, PipelineStageFlags.HostBit, PipelineStageFlags.TransferBit, 0, 0, null, 0, null,
+            1, &barrier);
+
+        Rectangle<uint> copyRegion = region ?? new Rectangle<uint>(Vector2T<uint>.Zero, vkDest.Size);
+        
+        BufferImageCopy copy = new()
+        {
+            BufferOffset = srcOffset,
+            ImageOffset = new Offset3D((int) copyRegion.X, (int) copyRegion.Y),
+            ImageExtent = new Extent3D(copyRegion.Width, copyRegion.Height, 1),
+            ImageSubresource = new ImageSubresourceLayers()
+            {
+                AspectMask = ImageAspectFlags.ColorBit,
+                LayerCount = 1,
+                BaseArrayLayer = layer,
+                MipLevel = mipLevel,
+            }
+        };
+
+        _vk.CmdCopyBufferToImage(Buffer, vkSrc.Buffer, vkDest.Image, ImageLayout.TransferDstOptimal, 1, &copy);
+    }
+
     public override void BeginRenderPass(in ReadOnlySpan<ColorAttachmentInfo> colorAttachments)
     {
         RenderingAttachmentInfo* colorRenderAttachments = stackalloc RenderingAttachmentInfo[colorAttachments.Length];

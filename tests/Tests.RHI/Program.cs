@@ -171,6 +171,22 @@ ImageResult result = ImageResult.FromMemory(File.ReadAllBytes("/home/aqua/Pictur
 Texture texture = device.CreateTexture(new TextureInfo(TextureType.Texture2D, (uint) result.Width, (uint) result.Height,
     Format.R8B8B8A8_UNorm, TextureUsage.ShaderResource));
 
+transferBuffer = device.CreateBuffer(BufferUsage.TransferSrc, (uint) (result.Width * result.Height * 4));
+mapBuffer = device.MapBuffer(transferBuffer);
+unsafe
+{
+    fixed (byte* pData = result.Data)
+        Unsafe.CopyBlock((void*) mapBuffer, pData, (uint) (result.Width * result.Height * 4));
+}
+device.UnmapBuffer(transferBuffer);
+
+cl.Begin();
+cl.CopyBufferToTexture(transferBuffer, 0, texture);
+cl.End();
+device.ExecuteCommandList(cl);
+
+transferBuffer.Dispose();
+
 ShaderModule vertexShader =
     device.CreateShaderModule(
         Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Vertex, ShaderFormat.Spirv, Shader, "VSMain"), "VSMain");

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Crimson.Math;
 using Vortice.Direct3D11;
 using Vortice.Mathematics;
 using Color = Crimson.Math.Color;
@@ -35,7 +36,13 @@ internal sealed class D3D11CommandList : CommandList
         _context.CopySubresourceRegion(d3dDest.Buffer, 0, destOffset, 0, 0, d3dSrc.Buffer, 0,
             new Box((int) srcOffset, 0, 0, (int) (srcOffset + (copySize == 0 ? d3dSrc.BufferSize : copySize)), 1, 1));
     }
-    
+
+    public override void CopyBufferToTexture(Buffer source, uint srcOffset, Texture dest,
+        Rectangle<uint>? region = null, uint mipLevel = 0, uint layer = 0)
+    {
+        throw new NotImplementedException();
+    }
+
     public override void BeginRenderPass(in ReadOnlySpan<ColorAttachmentInfo> colorAttachments)
     {
         ID3D11RenderTargetView[] renderTargets = new ID3D11RenderTargetView[colorAttachments.Length];

@@ -1,3 +1,5 @@
+using Crimson.Math;
+
 namespace Crimson.Graphics.RHI;
 
 public abstract class CommandList : IDisposable
@@ -7,6 +9,8 @@ public abstract class CommandList : IDisposable
     public abstract void End();
 
     public abstract void CopyBufferToBuffer(Buffer source, uint srcOffset, Buffer dest, uint destOffset, uint copySize = 0);
+
+    public abstract void CopyBufferToTexture(Buffer source, uint srcOffset, Texture dest, Rectangle<uint>? region = null, uint mipLevel = 0, uint layer = 0);
 
     public abstract void BeginRenderPass(in ReadOnlySpan<ColorAttachmentInfo> colorAttachments);
 

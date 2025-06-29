@@ -12,9 +12,10 @@ internal sealed unsafe class VulkanTexture : Texture
     private readonly VmaAllocator_T* _allocator;
 
     private readonly VmaAllocation_T* _allocation;
-    private readonly Image _image;
     
+    public readonly Image Image;
     public readonly ImageView ImageView;
+    
     public readonly bool IsSwapchainTexture;
 
     public VulkanTexture(Vk vk, VkDevice device, VmaAllocator_T* allocator, in TextureInfo info) : base(new Size<uint>(info.Width, info.Height))
@@ -77,13 +78,13 @@ internal sealed unsafe class VulkanTexture : Texture
         };
 
         Logger.Trace("Creating image.");
-        Vma.Vma.CreateImage(_allocator, &imageInfo, &allocInfo, out _image, out _allocation, out _)
+        Vma.Vma.CreateImage(_allocator, &imageInfo, &allocInfo, out Image, out _allocation, out _)
             .Check("Create image");
 
         ImageViewCreateInfo viewInfo = new()
         {
             SType = StructureType.ImageViewCreateInfo,
-            Image = _image,
+            Image = Image,
             Format = imageInfo.Format,
             ViewType = viewType,
             Components = new ComponentMapping()
@@ -111,7 +112,7 @@ internal sealed unsafe class VulkanTexture : Texture
     {
         _vk = vk;
         _device = device;
-        _image = swapchainImage;
+        Image = swapchainImage;
         IsSwapchainTexture = true;
 
         ImageViewCreateInfo viewInfo = new()
@@ -146,7 +147,7 @@ internal sealed unsafe class VulkanTexture : Texture
         _vk.DestroyImageView(_device, ImageView, null);
         
         if (!IsSwapchainTexture)
-            Vma.Vma.DestroyImage(_allocator, _image, _allocation);
+            Vma.Vma.DestroyImage(_allocator, Image, _allocation);
     }
 
     public void Transition(CommandBuffer cb, ImageLayout oldLayout, ImageLayout newLayout)
@@ -154,7 +155,7 @@ internal sealed unsafe class VulkanTexture : Texture
         ImageMemoryBarrier barrier = new()
         {
             SType = StructureType.ImageMemoryBarrier,
-            Image = _image,
+            Image = Image,
             OldLayout = oldLayout,
             NewLayout = newLayout,
             DstAccessMask = AccessFlags.ColorAttachmentWriteBit,
