@@ -1,18 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
-      <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
-      <ProjectReference Include="..\Crimson.Graphics\Crimson.Graphics.csproj" />
+      <ProjectReference Include="..\Crimson.Graphics.RHI\Crimson.Graphics.RHI.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="SDL3-CS" Version="3.2.16.3" />
-      <PackageReference Include="SDL3-CS.Native" Version="3.2.14" />
+      <PackageReference Include="Vortice.Direct3D11" Version="3.6.2" />
     </ItemGroup>
 
 </Project>

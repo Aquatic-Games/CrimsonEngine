@@ -153,6 +153,8 @@ public static class Renderer
     /// </summary>
     public static void Destroy()
     {
+        // Dispose then set to null to prevent trying to use a disposed texture,
+        // which is a downside of making everything static.
         Texture.EmptyNormal.Dispose();
         Texture.EmptyNormal = null!;
         Texture.Black.Dispose();
