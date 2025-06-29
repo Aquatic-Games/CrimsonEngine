@@ -6,9 +6,12 @@ namespace Crimson.Graphics.RHI.D3D11;
 internal sealed class D3D11Buffer : Buffer
 {
     public readonly ID3D11Buffer Buffer;
+    public readonly uint BufferSize;
 
     public D3D11Buffer(ID3D11Device device, BufferUsage usage, uint sizeInBytes)
     {
+        BufferSize = sizeInBytes;
+        
         BindFlags flags = BindFlags.None;
         CpuAccessFlags cpuAccess = CpuAccessFlags.None;
         ResourceUsage resUsage = ResourceUsage.Default;

@@ -29,7 +29,11 @@ internal sealed class D3D11CommandList : CommandList
     
     public override void CopyBufferToBuffer(Buffer source, uint srcOffset, Buffer dest, uint destOffset, uint copySize = 0)
     {
-        throw new NotImplementedException();
+        D3D11Buffer d3dSrc = (D3D11Buffer) source;
+        D3D11Buffer d3dDest = (D3D11Buffer) dest;
+
+        _context.CopySubresourceRegion(d3dDest.Buffer, 0, destOffset, 0, 0, d3dSrc.Buffer, 0,
+            new Box((int) srcOffset, 0, 0, (int) (srcOffset + (copySize == 0 ? d3dSrc.BufferSize : copySize)), 1, 1));
     }
     
     public override void BeginRenderPass(in ReadOnlySpan<ColorAttachmentInfo> colorAttachments)

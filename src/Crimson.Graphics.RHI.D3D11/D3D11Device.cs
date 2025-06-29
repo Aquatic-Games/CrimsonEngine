@@ -74,14 +74,17 @@ public class D3D11Device : Device
         _context.ExecuteCommandList(d3dList.CommandList, false);
     }
     
-    public override IntPtr MapBuffer(Buffer buffer)
+    public override nint MapBuffer(Buffer buffer)
     {
-        throw new NotImplementedException();
+        D3D11Buffer d3dBuffer = (D3D11Buffer) buffer;
+        MappedSubresource res = _context.Map(d3dBuffer.Buffer, MapMode.Write);
+        return res.DataPointer;
     }
     
     public override void UnmapBuffer(Buffer buffer)
     {
-        throw new NotImplementedException();
+        D3D11Buffer d3dBuffer = (D3D11Buffer) buffer;
+        _context.Unmap(d3dBuffer.Buffer);
     }
     
     public override Texture GetNextSwapchainTexture()

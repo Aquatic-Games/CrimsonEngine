@@ -101,7 +101,7 @@ Buffer vertexBuffer = device.CreateBuffer(BufferUsage.VertexBuffer | BufferUsage
 Buffer indexBuffer = device.CreateBuffer(BufferUsage.IndexBuffer | BufferUsage.TransferDst, indicesSize);
 
 Buffer transferBuffer = device.CreateBuffer(BufferUsage.TransferSrc, verticesSize + indicesSize);
-/*nint mapBuffer = device.MapBuffer(transferBuffer);
+nint mapBuffer = device.MapBuffer(transferBuffer);
 unsafe
 {
     fixed (float* pVertices = vertices)
@@ -115,7 +115,7 @@ cl.Begin();
 cl.CopyBufferToBuffer(transferBuffer, 0, vertexBuffer, 0, verticesSize);
 cl.CopyBufferToBuffer(transferBuffer, verticesSize, indexBuffer, 0, indicesSize);
 cl.End();
-device.ExecuteCommandList(cl);*/
+device.ExecuteCommandList(cl);
 
 transferBuffer.Dispose();
 
