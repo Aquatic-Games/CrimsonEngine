@@ -22,6 +22,50 @@ using Surface = Crimson.Platform.Surface;
 using Texture = Crimson.Graphics.RHI.Texture;
 
 const string Shader = """
+                      struct VSOutput
+                      {
+                          float4 Position: SV_Position;
+                      };
+
+                      struct PSOutput
+                      {
+                          float4 Color: SV_Target0;
+                      };
+
+                      VSOutput VSMain(const in uint vertex: SV_VertexID)
+                      {
+                          float2 vertices[] =
+                          {
+                              float2(-0.5, -0.5),
+                              float2(+0.5, -0.5),
+                              float2(+0.5, +0.5),
+                              float2(-0.5, +0.5)
+                          };
+                          
+                          uint indices[] =
+                          {
+                              0, 1, 3,
+                              1, 2, 3
+                          };
+
+                          VSOutput output;
+                          
+                          output.Position = float4(vertices[indices[vertex]], 0.0, 1.0);
+                          
+                          return output;
+                      }
+
+                      PSOutput PSMain()
+                      {
+                          PSOutput output;
+                          
+                          output.Color = float4(1.0, 0.5, 0.25, 1.0);
+                          
+                          return output;
+                      }
+                      """;
+
+/*const string Shader = """
                       struct VSInput
                       {
                           float2 Position: POSITION0;
@@ -57,13 +101,14 @@ const string Shader = """
                           
                           return output;
                       }
-                      """;
+                      """;*/
 
 Logger.EnableConsole();
 
 WindowOptions options = new()
 {
-    Title = "Tests.RHI (D3D11)",
+    Title = "Tests.RHI (Vulkan)",
+    //Title = "Tests.RHI (D3D11)",
     Size = new Size<int>(1280, 720),
     Resizable = true
 };
@@ -75,8 +120,8 @@ Events.WindowClose += () => alive = false;
 
 Surface.Create(in options);
 
-//Device device = new VulkanDevice("Tests.RHI", Surface.Info.Handle, options.Size.As<uint>(), true);
-Device device = new D3D11Device(Surface.Info.Handle, options.Size.As<uint>(), true);
+Device device = new VulkanDevice("Tests.RHI", Surface.Info.Handle, options.Size.As<uint>(), true);
+//Device device = new D3D11Device(Surface.Info.Handle, options.Size.As<uint>(), true);
 Events.SurfaceSizeChanged += size => device.Resize(size.As<uint>());
 CommandList cl = device.CreateCommandList();
 
@@ -120,22 +165,21 @@ device.ExecuteCommandList(cl);
 transferBuffer.Dispose();
 
 ShaderModule vertexShader = device.CreateShaderModule(ShaderStage.Vertex,
-    Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Vertex, ShaderFormat.Dxbc, Shader, "VSMain"), "VSMain");
+    Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Vertex, ShaderFormat.Spirv, Shader, "VSMain"), "VSMain");
 ShaderModule pixelShader = device.CreateShaderModule(ShaderStage.Pixel,
-    Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Pixel, ShaderFormat.Dxbc, Shader, "PSMain"), "PSMain");
+    Compiler.CompileHlsl(grabs.Graphics.ShaderStage.Pixel, ShaderFormat.Spirv, Shader, "PSMain"), "PSMain");
 
-/*Pipeline pipeline = device.CreateGraphicsPipeline(new GraphicsPipelineInfo()
+Pipeline pipeline = device.CreateGraphicsPipeline(new GraphicsPipelineInfo()
 {
     VertexShader = vertexShader,
     PixelShader = pixelShader,
     ColorTargets = [device.SwapchainFormat],
-    InputLayout =
+    /*InputLayout =
     [
         new InputElementDescription(Format.R32G32_Float, 0, 0, 0),
         new InputElementDescription(Format.R32G32B32_Float, 8, 1, 0)
-    ],
-    VertexBuffers = [new VertexBufferDescription(0, 5 * sizeof(float))]
-});*/
+    ]*/
+});
 
 pixelShader.Dispose();
 vertexShader.Dispose();
@@ -150,11 +194,12 @@ while (alive)
     
     cl.BeginRenderPass([new ColorAttachmentInfo(texture, Color.CornflowerBlue)]);
     
-    /*cl.SetGraphicsPipeline(pipeline);
-    cl.SetVertexBuffer(0, vertexBuffer);
-    cl.SetIndexBuffer(indexBuffer, Format.R32_UInt);
+    cl.SetGraphicsPipeline(pipeline);
+    //cl.SetVertexBuffer(0, vertexBuffer, 5 * sizeof(float));
+    //cl.SetIndexBuffer(indexBuffer, Format.R32_UInt);
     
-    cl.DrawIndexed(6);*/
+    cl.Draw(6);
+    //cl.DrawIndexed(6);
     
     cl.EndRenderPass();
     
@@ -164,9 +209,9 @@ while (alive)
     device.Present();
 }
 
-/*pipeline.Dispose();
+pipeline.Dispose();
 indexBuffer.Dispose();
-vertexBuffer.Dispose();*/
+vertexBuffer.Dispose();
 cl.Dispose();
 device.Dispose();
 Surface.Destroy();

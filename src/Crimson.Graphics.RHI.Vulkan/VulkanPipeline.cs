@@ -65,26 +65,19 @@ internal sealed unsafe class VulkanPipeline : Pipeline
             };
         }
 
-        VertexInputBindingDescription* bindings = stackalloc VertexInputBindingDescription[info.VertexBuffers.Length];
-        
-        for (int i = 0; i < info.VertexBuffers.Length; i++)
+        VertexInputBindingDescription binding = new()
         {
-            ref readonly VertexBufferDescription buffer = ref info.VertexBuffers[i];
-            bindings[i] = new VertexInputBindingDescription
-            {
-                Binding = buffer.Slot,
-                InputRate = VertexInputRate.Vertex,
-                Stride = buffer.Stride
-            };
-        }
+            Binding = 0,
+            InputRate = VertexInputRate.Vertex
+        };
 
         PipelineVertexInputStateCreateInfo vertexInputState = new()
         {
             SType = StructureType.PipelineVertexInputStateCreateInfo,
             VertexAttributeDescriptionCount = (uint) info.InputLayout.Length,
             PVertexAttributeDescriptions = attributes,
-            VertexBindingDescriptionCount = (uint) info.VertexBuffers.Length,
-            PVertexBindingDescriptions = bindings
+            VertexBindingDescriptionCount = 1,
+            PVertexBindingDescriptions = &binding
         };
 
         PipelineInputAssemblyStateCreateInfo inputAssemblyState = new()
@@ -117,17 +110,30 @@ internal sealed unsafe class VulkanPipeline : Pipeline
         {
             SType = StructureType.PipelineDepthStencilStateCreateInfo,
         };
+
+        uint numStates = 2;
         
-        DynamicState* pStates = stackalloc DynamicState[]
+        DynamicState* pStates = stackalloc DynamicState[3]
         {
             DynamicState.Viewport,
-            DynamicState.Scissor
+            DynamicState.Scissor,
+            0
         };
+        
+        // Vulkan requires if VertexInputBindingStride state is set, that at least 1 vertex buffer is bound using
+        // vkCmdBindVertexBuffers2. For shaders where the geometry is generated from within the shader (for example a
+        // fullscreen shader), no vertex buffer is bound. Therefore we only enable this state if there is a defined
+        // input layout (which basically guarantees that a vertex buffer will be bound.)
+        if (info.InputLayout.Length > 0)
+        {
+            pStates[2] = DynamicState.VertexInputBindingStride;
+            numStates = 3;
+        }
 
         PipelineDynamicStateCreateInfo dynamicState = new()
         {
             SType = StructureType.PipelineDynamicStateCreateInfo,
-            DynamicStateCount = 2,
+            DynamicStateCount = numStates,
             PDynamicStates = pStates
         };
 

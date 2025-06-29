@@ -14,7 +14,7 @@ public abstract class CommandList : IDisposable
 
     public abstract void SetGraphicsPipeline(Pipeline pipeline);
 
-    public abstract void SetVertexBuffer(uint slot, Buffer buffer, uint offset = 0);
+    public abstract void SetVertexBuffer(uint slot, Buffer buffer, uint stride, uint offset = 0);
 
     public abstract void SetIndexBuffer(Buffer buffer, Format format, uint offset = 0);
 

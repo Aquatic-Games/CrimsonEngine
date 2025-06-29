@@ -74,7 +74,7 @@ internal sealed class D3D11CommandList : CommandList
         throw new NotImplementedException();
     }
     
-    public override void SetVertexBuffer(uint slot, Buffer buffer, uint offset = 0)
+    public override void SetVertexBuffer(uint slot, Buffer buffer, uint stride, uint offset = 0)
     {
         throw new NotImplementedException();
     }
