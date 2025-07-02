@@ -26,6 +26,7 @@ public static class Renderer
     private static TextureBatcher _uiBatcher;
     private static ImGuiRenderer? _imGuiRenderer;
     private static DeferredRenderer? _deferredRenderer;
+    private static SpriteRenderer? _spriteRenderer;
 
     internal static IntPtr Device;
 
@@ -124,15 +125,16 @@ public static class Renderer
             _imGuiRenderer = new ImGuiRenderer(Device, RenderSize, MainTargetFormat);
         }
 
-        if (options.Type.HasFlag(RendererType.Create3D))
+        if ((options.Type & RendererType.Create3D) != 0)
         {
             Logger.Trace("Creating deferred 3D renderer.");
             _deferredRenderer = new DeferredRenderer(Device, _swapchainSize, MainTargetFormat);
         }
 
-        if (options.Type.HasFlag(RendererType.Create2D))
+        if ((options.Type & RendererType.Create2D) != 0)
         {
-            throw new NotImplementedException();
+            Logger.Trace("Creating sprite renderer.");
+            _spriteRenderer = new SpriteRenderer();
         }
 
         Logger.Trace("Creating default textures.");
@@ -178,6 +180,15 @@ public static class Renderer
     {
         Debug.Assert(_deferredRenderer != null, "Renderer has not been created with 3D rendering enabled.");
         _deferredRenderer.AddToQueue(renderable, worldMatrix);
+    }
+
+    /// <summary>
+    /// Draw a <see cref="Sprite"/> to the screen using the build-in renderers.
+    /// </summary>
+    /// <param name="sprite">The sprite to draw.</param>
+    public static void DrawSprite(Sprite sprite)
+    {
+        Debug.Assert(_spriteRenderer != null, "Renderer has not been created with 2D rendering enabled.");
     }
 
     /// <summary>
