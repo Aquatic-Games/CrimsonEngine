@@ -43,4 +43,10 @@ public static class Matrix
             Vector4T<T>.UnitW
         );
     }
+
+    public static Matrix<T> Translate<T>(Vector3T<T> translation) where T : INumber<T>
+    {
+        return new Matrix<T>(Vector4T<T>.UnitX, Vector4T<T>.UnitY, Vector4T<T>.UnitZ,
+            new Vector4T<T>(translation.X, translation.Y, translation.Z, T.One));
+    }
 }

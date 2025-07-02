@@ -36,7 +36,7 @@ internal class TextureBatcher : IDisposable
     private readonly List<Draw> _drawQueue;
     private readonly List<DrawList> _drawList;
     
-    public unsafe TextureBatcher(IntPtr device, SDL.GPUTextureFormat format)
+    public unsafe TextureBatcher(IntPtr device, SDL.GPUTextureFormat format, bool useOppositeWindingOrder = false)
     {
         _device = device;
 

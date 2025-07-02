@@ -134,7 +134,7 @@ public static class Renderer
         if ((options.Type & RendererType.Create2D) != 0)
         {
             Logger.Trace("Creating sprite renderer.");
-            _spriteRenderer = new SpriteRenderer();
+            _spriteRenderer = new SpriteRenderer(Device, MainTargetFormat);
         }
 
         Logger.Trace("Creating default textures.");
@@ -183,12 +183,15 @@ public static class Renderer
     }
 
     /// <summary>
-    /// Draw a <see cref="Sprite"/> to the screen using the build-in renderers.
+    /// Draw a <see cref="Sprite"/> to the screen using the built-in renderers.
     /// </summary>
     /// <param name="sprite">The sprite to draw.</param>
-    public static void DrawSprite(Sprite sprite)
+    /// <param name="matrix">The matrix.</param>
+    /// <remarks>Set the sprite's color to red to see just how deep the rabbit hole goes.</remarks>
+    public static void DrawSprite(Sprite sprite, Matrix<float> matrix)
     {
         Debug.Assert(_spriteRenderer != null, "Renderer has not been created with 2D rendering enabled.");
+        _spriteRenderer.DrawSprite(in sprite, matrix);
     }
 
     /// <summary>
@@ -307,6 +310,9 @@ public static class Renderer
         if (Camera.Skybox?.Render(cb, swapchainTexture, _depthTexture, !hasCleared, Camera.Matrices) ?? false)
             hasCleared = true;
 
+        if (_spriteRenderer?.Render(cb, swapchainTexture, !hasCleared, _swapchainSize, Camera.Matrices) ?? false)
+            hasCleared = true;
+
         Matrix4x4 projection =
             Matrix4x4.CreateOrthographicOffCenter(0, _swapchainSize.Width, _swapchainSize.Height, 0, -1, 1);
 
@@ -318,7 +324,7 @@ public static class Renderer
 
         _imGuiRenderer?.Render(cb, swapchainTexture, !hasCleared);
 
-        SDL.SubmitGPUCommandBuffer(cb);
+        SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
     }
 
     /// <summary>
