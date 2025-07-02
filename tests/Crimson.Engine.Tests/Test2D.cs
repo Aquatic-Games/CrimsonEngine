@@ -7,8 +7,13 @@ namespace Crimson.Engine.Tests;
 
 public class Test2D : Scene
 {
+    private Texture _texture = null!;
+    
     public override void Initialize()
     {
+        // TODO: Texture.Debug?
+        _texture = Content.Content.Load<Texture>("/home/aqua/Pictures/DEBUG.png");
+        
         Camera.Type = CameraType.Orthographic;
         
         Texture spriteTexture = Content.Content.Load<Texture>("/home/aqua/Pictures/BAGELMIP.png");
@@ -18,5 +23,12 @@ public class Test2D : Scene
         AddEntity(entity);
         
         base.Initialize();
+    }
+
+    public override void Draw()
+    {
+        base.Draw();
+        
+        Renderer.DrawImage(_texture, Vector2T<int>.Zero, new Rectangle<int>(Vector2T<int>.Zero, Renderer.RenderSize));
     }
 }

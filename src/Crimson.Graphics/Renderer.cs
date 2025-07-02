@@ -193,16 +193,19 @@ public static class Renderer
         Debug.Assert(_spriteRenderer != null, "Renderer has not been created with 2D rendering enabled.");
         _spriteRenderer.DrawSprite(in sprite, matrix);
     }
-
+    
     /// <summary>
-    /// Draw an image to the screen.
+    /// Draw an image to the screen with the given size.
     /// </summary>
     /// <param name="texture">The texture to use as the image.</param>
     /// <param name="position">The position, in pixels.</param>
+    /// <param name="size">The size, in pixels.</param>
+    /// <param name="source">The source rectangle to use, if any.</param>
     /// <param name="tint">The tint to use, if any.</param>
-    public static void DrawImage(Texture texture, in Vector2T<int> position, in Color? tint = null)
+    public static void DrawImage(Texture texture, Vector2T<int> position, Size<int> size, Rectangle<int>? source = null,
+        Color? tint = null)
     {
-        Size<int> size = texture.Size;
+        Rectangle<int> src = source ?? new Rectangle<int>(Vector2T<int>.Zero, texture.Size);
         
         Vector2T<int> topLeft = position;
         Vector2T<int> topRight = position + new Vector2T<int>(size.Width, 0);
@@ -210,25 +213,20 @@ public static class Renderer
         Vector2T<int> bottomRight = position + new Vector2T<int>(size.Width, size.Height);
 
         _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft.As<float>(), topRight.As<float>(),
-            bottomLeft.As<float>(), bottomRight.As<float>(), tint ?? Color.White));
+            bottomLeft.As<float>(), bottomRight.As<float>(), src, tint ?? Color.White));
     }
 
     /// <summary>
-    /// Draw an image to the screen with the given size.
+    /// Draw an image to the screen.
     /// </summary>
     /// <param name="texture">The texture to use as the image.</param>
     /// <param name="position">The position, in pixels.</param>
-    /// <param name="size">The size, in pixels.</param>
+    /// <param name="source">The source rectangle to use, if any.</param>
     /// <param name="tint">The tint to use, if any.</param>
-    public static void DrawImage(Texture texture, in Vector2T<int> position, in Size<int> size, Color? tint = null)
+    public static void DrawImage(Texture texture, Vector2T<int> position, Rectangle<int>? source = null,
+        Color? tint = null)
     {
-        Vector2T<int> topLeft = position;
-        Vector2T<int> topRight = position + new Vector2T<int>(size.Width, 0);
-        Vector2T<int> bottomLeft = position + new Vector2T<int>(0, size.Height);
-        Vector2T<int> bottomRight = position + new Vector2T<int>(size.Width, size.Height);
-
-        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft.As<float>(), topRight.As<float>(),
-            bottomLeft.As<float>(), bottomRight.As<float>(), tint ?? Color.White));
+        DrawImage(texture, position, source?.Size ?? texture.Size, source, tint);
     }
 
     /// <summary>
@@ -279,7 +277,7 @@ public static class Renderer
         }
 
         _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(Texture.White, topLeft, topRight, bottomLeft, bottomRight,
-            color));
+            new Rectangle<int>(0, 0, 1, 1), color));
     }
 
     public static void NewFrame()

@@ -47,7 +47,7 @@ public class IntroScene : Scene
 
     public override void Draw()
     {
-        Renderer.DrawImage(_logo, Vector2T<int>.Zero, Renderer.RenderSize, Color.White with { A = _logoAlpha });
-        Renderer.DrawImage(_logo2, Vector2T<int>.Zero, Renderer.RenderSize, Color.White with { A = _logo2Alpha });
+        Renderer.DrawImage(_logo, Vector2T<int>.Zero, Renderer.RenderSize, tint: Color.White with { A = _logoAlpha });
+        Renderer.DrawImage(_logo2, Vector2T<int>.Zero, Renderer.RenderSize, tint: Color.White with { A = _logo2Alpha });
     }
 }

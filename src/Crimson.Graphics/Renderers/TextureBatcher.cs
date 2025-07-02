@@ -36,7 +36,7 @@ internal class TextureBatcher : IDisposable
     private readonly List<Draw> _drawQueue;
     private readonly List<DrawList> _drawList;
     
-    public unsafe TextureBatcher(IntPtr device, SDL.GPUTextureFormat format, bool useOppositeWindingOrder = false)
+    public unsafe TextureBatcher(IntPtr device, SDL.GPUTextureFormat format)
     {
         _device = device;
 
@@ -162,10 +162,18 @@ internal class TextureBatcher : IDisposable
             uint vOffset = bufferOffset * NumVertices;
             uint iOffset = bufferOffset * NumIndices;
 
-            _vertices[vOffset + 0] = new Vertex(draw.TopLeft, new Vector2T<float>(0, 0), draw.Tint);
-            _vertices[vOffset + 1] = new Vertex(draw.TopRight, new Vector2T<float>(1, 0), draw.Tint);
-            _vertices[vOffset + 2] = new Vertex(draw.BottomRight, new Vector2T<float>(1, 1), draw.Tint);
-            _vertices[vOffset + 3] = new Vertex(draw.BottomLeft, new Vector2T<float>(0, 1), draw.Tint);
+            Size<float> texSize = texture.Size.As<float>();
+            Rectangle<int> source = draw.Source;
+
+            float texX = source.X / texSize.Width;
+            float texY = source.Y / texSize.Height;
+            float texW = source.Width / texSize.Width;
+            float texH = source.Height / texSize.Height;
+
+            _vertices[vOffset + 0] = new Vertex(draw.TopLeft, new Vector2T<float>(texX, texY), draw.Tint);
+            _vertices[vOffset + 1] = new Vertex(draw.TopRight, new Vector2T<float>(texX + texW, texY), draw.Tint);
+            _vertices[vOffset + 2] = new Vertex(draw.BottomRight, new Vector2T<float>(texX + texW, texY + texH), draw.Tint);
+            _vertices[vOffset + 3] = new Vertex(draw.BottomLeft, new Vector2T<float>(texX, texY + texH), draw.Tint);
 
             _indices[iOffset + 0] = 0 + vOffset;
             _indices[iOffset + 1] = 1 + vOffset;
@@ -338,15 +346,18 @@ internal class TextureBatcher : IDisposable
         public readonly Vector2T<float> TopRight;
         public readonly Vector2T<float> BottomLeft;
         public readonly Vector2T<float> BottomRight;
+        public readonly Rectangle<int> Source;
         public readonly Color Tint;
 
-        public Draw(Texture texture, Vector2T<float> topLeft, Vector2T<float> topRight, Vector2T<float> bottomLeft, Vector2T<float> bottomRight, Color tint)
+        public Draw(Texture texture, Vector2T<float> topLeft, Vector2T<float> topRight, Vector2T<float> bottomLeft,
+            Vector2T<float> bottomRight, Rectangle<int> source, Color tint)
         {
             Texture = texture;
             TopLeft = topLeft;
             TopRight = topRight;
             BottomLeft = bottomLeft;
             BottomRight = bottomRight;
+            Source = source;
             Tint = tint;
         }
     }
