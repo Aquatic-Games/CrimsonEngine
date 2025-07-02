@@ -29,6 +29,6 @@ public class Test2D : Scene
     {
         base.Draw();
         
-        Renderer.DrawImage(_texture, Vector2T<int>.Zero, new Rectangle<int>(Vector2T<int>.Zero, Renderer.RenderSize));
+        Renderer.DrawImage(_texture, Vector2T<int>.Zero, new Rectangle<int>(128, 0, 128, 64));
     }
 }
