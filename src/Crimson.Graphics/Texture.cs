@@ -13,6 +13,7 @@ namespace Crimson.Graphics;
 public class Texture : IContentResource<Texture>, IDisposable
 {
     private readonly IntPtr _device;
+    private readonly uint _numMipLevels;
     
     internal readonly IntPtr TextureHandle;
 
@@ -27,30 +28,51 @@ public class Texture : IContentResource<Texture>, IDisposable
     /// <param name="size">The size, in pixels.</param>
     /// <param name="data">The data.</param>
     /// <param name="format">The <see cref="PixelFormat"/> of the texture.</param>
-    public unsafe Texture(in Size<int> size, byte[] data, PixelFormat format)
+    public Texture(in Size<int> size, byte[] data, PixelFormat format)
     {
         Size = size;
 
         _device = Renderer.Device;
+        _numMipLevels = SdlUtils.CalculateMipLevels((uint) size.Width, (uint) size.Height);
 
         SDL.GPUTextureCreateInfo textureInfo = new()
         {
             Type = SDL.GPUTextureType.Texturetype2D,
-            Format = format.ToSdl(out uint rowPitch),
+            Format = format.ToSdl(out _),
             Width = (uint) size.Width,
             Height = (uint) size.Height,
             LayerCountOrDepth = 1,
-            NumLevels = SdlUtils.CalculateMipLevels((uint) size.Width, (uint) size.Height),
+            NumLevels = _numMipLevels,
             Usage = SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget
         };
 
         Logger.Trace("Creating texture.");
         TextureHandle = SDL.CreateGPUTexture(_device, in textureInfo).Check("Create texture");
+        Update(new Rectangle<int>(Vector2T<int>.Zero, Size), data);
+    }
 
+    /// <summary>
+    /// Create a <see cref="Texture"/> from the given bitmap.
+    /// </summary>
+    /// <param name="bitmap">The <see cref="Bitmap"/> to use.</param>
+    public Texture(Bitmap bitmap) : this(bitmap.Size, bitmap.Data, bitmap.Format) { }
+
+    /// <summary>
+    /// Create a <see cref="Texture"/> from the given path. 
+    /// </summary>
+    /// <param name="path">The path to load from.</param>
+    public Texture(string path) : this(new Bitmap(path)) { }
+
+    public unsafe void Update(Rectangle<int> location, byte[] data)
+    {
+        // TODO: Obviously, creating/deleting transfer buffers and executing command lists etc is slow for every texture
+        //       update, especially when updating often like in the case of the Font. Perhaps some way to keep the
+        //       command buffer around, only submitting on use, or some way to update multiple times is needed?
+        
         SDL.GPUTransferBufferCreateInfo transInfo = new()
         {
             Usage = SDL.GPUTransferBufferUsage.Upload,
-            Size = (uint) size.Width * (uint) size.Height * rowPitch
+            Size = (uint) data.Length
         };
 
         Logger.Trace("Creating transfer buffer");
@@ -68,16 +90,16 @@ public class Texture : IContentResource<Texture>, IDisposable
         {
             TransferBuffer = transBuffer,
             Offset = 0,
-            PixelsPerRow = (uint) size.Width
+            PixelsPerRow = (uint) Size.Width
         };
 
         SDL.GPUTextureRegion dest = new()
         {
             Texture = TextureHandle,
-            X = 0,
-            Y = 0,
-            W = (uint) size.Width,
-            H = (uint) size.Height,
+            X = (uint) location.X,
+            Y = (uint) location.Y,
+            W = (uint) location.Width,
+            H = (uint) location.Height,
             D = 1,
             MipLevel = 0
         };
@@ -86,27 +108,15 @@ public class Texture : IContentResource<Texture>, IDisposable
         
         SDL.EndGPUCopyPass(pass);
 
-        if (textureInfo.NumLevels > 1)
+        if (_numMipLevels > 1)
         {
-            Logger.Trace($"Generating mipmaps. (Level {textureInfo.NumLevels})");
+            Logger.Trace($"Generating mipmaps. (Level {_numMipLevels})");
             SDL.GenerateMipmapsForGPUTexture(cb, TextureHandle);
         }
 
         SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
         SDL.ReleaseGPUTransferBuffer(_device, transBuffer);
     }
-
-    /// <summary>
-    /// Create a <see cref="Texture"/> from the given bitmap.
-    /// </summary>
-    /// <param name="bitmap">The <see cref="Bitmap"/> to use.</param>
-    public Texture(Bitmap bitmap) : this(bitmap.Size, bitmap.Data, bitmap.Format) { }
-
-    /// <summary>
-    /// Create a <see cref="Texture"/> from the given path. 
-    /// </summary>
-    /// <param name="path">The path to load from.</param>
-    public Texture(string path) : this(new Bitmap(path)) { }
 
     /// <summary>
     /// Dispose of this <see cref="Texture"/>.
