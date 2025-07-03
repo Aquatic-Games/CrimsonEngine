@@ -1,4 +1,5 @@
 using System.Text;
+using Crimson.Content;
 using Crimson.Graphics.Renderers;
 using Crimson.Math;
 using FreeTypeSharp;
@@ -6,7 +7,7 @@ using static FreeTypeSharp.FT;
 
 namespace Crimson.Graphics;
 
-public unsafe class Font : IDisposable
+public unsafe class Font : IContentResource<Font>, IDisposable
 {
     private readonly FT_FaceRec_* _face;
     private readonly List<Texture> _fontAtlases;
@@ -45,6 +46,12 @@ public unsafe class Font : IDisposable
     public void Dispose()
     {
         FT_Done_Face(_face).Check("Done face");
+        
+        foreach (Texture texture in _fontAtlases)
+            texture.Dispose();
+        
+        _fontAtlases.Clear();
+        _characters.Clear();
     }
 
     private void DrawCharacter(TextureBatcher batcher, Character c, Vector2T<int> position, Color color)
@@ -147,6 +154,24 @@ public unsafe class Font : IDisposable
             Bearing = bearing;
             Advance = advance;
         }
+    }
+
+    public static Font LoadResource(string fullPath, bool hasExtension)
+    {
+        if (hasExtension)
+            return new Font(fullPath);
+        
+        ReadOnlySpan<string> acceptedExtensions = [".ttf", ".odt"];
+
+        foreach (string extension in acceptedExtensions)
+        {
+            fullPath = Path.ChangeExtension(fullPath, extension);
+            if (File.Exists(fullPath))
+                return new Font(fullPath);
+        }
+
+        throw new FileNotFoundException(
+            $"No font with the accepted extensions ({string.Join(", ", acceptedExtensions!)}) was found.");
     }
 }
 

@@ -14,8 +14,7 @@ public class Test2D : Scene
     {
         // TODO: Texture.Debug?
         _texture = Content.Content.Load<Texture>("/home/aqua/Pictures/DEBUG.png");
-
-        _font = new Font("/home/aqua/Documents/Roboto-Regular.ttf");
+        _font = Content.Content.Load<Font>("/home/aqua/Documents/Roboto-Regular");
         
         Camera.Type = CameraType.Orthographic;
         
