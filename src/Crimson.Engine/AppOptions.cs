@@ -7,31 +7,62 @@ namespace Crimson.Engine;
 /// <summary>
 /// Describes how an <see cref="App"/> should be created.
 /// </summary>
-/// <param name="Name">The app's name.</param>
-/// <param name="Version">The app's version.</param>
-public record struct AppOptions(string Name, Version Version)
+public record struct AppOptions
 {
     /// <summary>
     /// The app's name.
     /// </summary>
-    public readonly string Name = Name;
+    public readonly string Name;
 
     /// <summary>
     /// The app's version.
     /// </summary>
-    public readonly Version Version = Version;
+    public readonly Version Version;
+
+    /// <summary>
+    /// The app type. This influences various things such as the default <see cref="Camera"/> type, and the default <see cref="RendererOptions"/>.
+    /// </summary>
+    public readonly AppType Type;
 
     /// <summary>
     /// The <see cref="WindowOptions"/> to use when the <see cref="Surface"/> is created.
     /// </summary>
-    public WindowOptions Window = new WindowOptions() with { Title = Name };
+    public WindowOptions Window;
 
-    public RendererOptions Renderer = new RendererOptions
+    /// <summary>
+    /// The <see cref="RendererOptions"/> to use when the <see cref="Crimson.Graphics.Renderer"/> is created.
+    /// </summary>
+    public RendererOptions Renderer;
+
+    /// Create the default <see cref="AppOptions"/>.
+    /// <param name="name">The app's name.</param>
+    /// <param name="version">The app's version.</param>
+    /// <param name="type">The app type. This influences various things such as the default <see cref="Camera"/> type,
+    /// and the default <see cref="RendererOptions"/>.</param>
+    public AppOptions(string name, Version version, AppType type = AppType.Type3D)
     {
-        Type = RendererType.Create3D,
+        Name = name;
+        Version = version;
+        Type = type;
+
+        Window = new WindowOptions() with { Title = Name };
+
+        RendererType rendererType = type switch
+        {
+            AppType.TypeUI => RendererType.UiOnly,
+            AppType.Type2D => RendererType.Create2D,
+            AppType.Type3D => RendererType.Create3D,
+            AppType.TypeBoth => RendererType.CreateBoth,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+        
+        Renderer = new RendererOptions
+        {
+            Type = rendererType,
 #if DEBUG
-        Debug = true,
+            Debug = true,
 #endif
-        CreateImGuiRenderer = true
-    };
+            CreateImGuiRenderer = true
+        };
+    }
 }
