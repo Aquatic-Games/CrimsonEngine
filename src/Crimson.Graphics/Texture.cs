@@ -25,10 +25,10 @@ public class Texture : IContentResource<Texture>, IDisposable
     /// <summary>
     /// Create a <see cref="Texture"/>.
     /// </summary>
-    /// <param name="size">The size, in pixels.</param>
+    /// <param name="size">The size, in pixels. If <see langword="null"/> is provided, a blank texture will be created.</param>
     /// <param name="data">The data.</param>
     /// <param name="format">The <see cref="PixelFormat"/> of the texture.</param>
-    public Texture(in Size<int> size, byte[] data, PixelFormat format)
+    public Texture(in Size<int> size, byte[]? data, PixelFormat format)
     {
         Size = size;
 
@@ -48,7 +48,9 @@ public class Texture : IContentResource<Texture>, IDisposable
 
         Logger.Trace("Creating texture.");
         TextureHandle = SDL.CreateGPUTexture(_device, in textureInfo).Check("Create texture");
-        Update(new Rectangle<int>(Vector2T<int>.Zero, Size), data);
+        
+        if (data != null)
+            Update(new Rectangle<int>(Vector2T<int>.Zero, Size), data);
     }
 
     /// <summary>
@@ -90,7 +92,7 @@ public class Texture : IContentResource<Texture>, IDisposable
         {
             TransferBuffer = transBuffer,
             Offset = 0,
-            PixelsPerRow = (uint) Size.Width
+            PixelsPerRow = (uint) location.Width
         };
 
         SDL.GPUTextureRegion dest = new()

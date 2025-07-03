@@ -19,6 +19,16 @@ public readonly struct Size<T> :
     where T : INumber<T>
 {
     /// <summary>
+    /// A size with a width and height of 0.
+    /// </summary>
+    public static Size<T> Zero => new Size<T>(T.Zero);
+
+    /// <summary>
+    /// A size with a width and height of 1.
+    /// </summary>
+    public static Size<T> One => new Size<T>(T.One);
+    
+    /// <summary>
     /// The width.
     /// </summary>
     public readonly T Width;

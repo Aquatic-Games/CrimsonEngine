@@ -230,6 +230,19 @@ public static class Renderer
     }
 
     /// <summary>
+    /// Draw text to the screen.
+    /// </summary>
+    /// <param name="font">The <see cref="Font"/> to use.</param>
+    /// <param name="position">The position, in pixels.</param>
+    /// <param name="size">The font size, in pixels.</param>
+    /// <param name="text">The text to draw.</param>
+    /// <param name="color">The text's color.</param>
+    public static void DrawText(Font font, Vector2T<int> position, uint size, string text, Color color)
+    {
+        font.Draw(_uiBatcher, position, size, text, color);
+    }
+
+    /// <summary>
     /// Draw a line from a to b.
     /// </summary>
     /// <param name="a">The first point.</param>

@@ -8,11 +8,14 @@ namespace Crimson.Engine.Tests;
 public class Test2D : Scene
 {
     private Texture _texture = null!;
+    private Font _font = null!;
     
     public override void Initialize()
     {
         // TODO: Texture.Debug?
         _texture = Content.Content.Load<Texture>("/home/aqua/Pictures/DEBUG.png");
+
+        _font = new Font("/home/aqua/Documents/Roboto-Regular.ttf");
         
         Camera.Type = CameraType.Orthographic;
         
@@ -29,6 +32,8 @@ public class Test2D : Scene
     {
         base.Draw();
         
-        Renderer.DrawImage(_texture, Vector2T<int>.Zero, new Rectangle<int>(128, 0, 128, 64));
+        Renderer.DrawText(_font, new Vector2T<int>(100), 48, "Hello World!", Color.White);
+        
+        //Renderer.DrawImage(_texture, Vector2T<int>.Zero, new Rectangle<int>(128, 0, 128, 64));
     }
 }

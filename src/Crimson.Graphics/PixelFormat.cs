@@ -8,5 +8,5 @@ public enum PixelFormat
     /// <summary>
     /// 8-Bit RGBA.
     /// </summary>
-    RGBA8
+    RGBA8,
 }
