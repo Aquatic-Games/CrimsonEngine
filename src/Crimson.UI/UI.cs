@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using Crimson.Math;
 using Crimson.UI.Controls;
+using Crimson.UI.Controls.Layouts;
 
 namespace Crimson.UI;
 
@@ -14,7 +15,7 @@ public static class UI
     {
         _screenRegion = screenRegion;
 
-        BaseControl = new Button();
+        BaseControl = new AnchorLayout();
         BaseControl.CalculateLayout(_screenRegion);
     }
 
