@@ -293,6 +293,39 @@ public static class Renderer
             new Rectangle<int>(0, 0, 1, 1), color));
     }
 
+    public static void DrawFilledRectangle(Vector2T<int> position, Size<int> size, Color color)
+    {
+        Vector2T<int> topLeft = position;
+        Vector2T<int> topRight = new Vector2T<int>(position.X + size.Width, position.Y);
+        Vector2T<int> bottomLeft = new Vector2T<int>(position.X, position.Y + size.Height);
+        Vector2T<int> bottomRight = new Vector2T<int>(position.X + size.Width, position.Y + size.Height);
+
+        _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(Texture.White, topLeft.As<float>(), topRight.As<float>(),
+            bottomLeft.As<float>(), bottomRight.As<float>(), new Rectangle<int>(0, 0, 1, 1), color));
+    }
+
+    public static void DrawBorderRectangle(Vector2T<int> position, Size<int> size, int borderWidth, Color color)
+    {
+        Size<int> hSize = new Size<int>(size.Width, borderWidth);
+        Size<int> vSize = new Size<int>(borderWidth, size.Height);
+        
+        // Top
+        DrawFilledRectangle(position, hSize, color);
+        // Left
+        DrawFilledRectangle(position, vSize, color);
+        // Bottom
+        DrawFilledRectangle(position + new Vector2T<int>(0, size.Height - borderWidth), hSize, color);
+        // Right
+        DrawFilledRectangle(position + new Vector2T<int>(size.Width - borderWidth, 0), vSize, color);
+    }
+
+    public static void DrawRectangle(Vector2T<int> position, Size<int> size, Color fillColor, int borderWidth,
+        Color borderColor)
+    {
+        DrawFilledRectangle(position, size, fillColor);
+        DrawBorderRectangle(position, size, borderWidth, borderColor);
+    }
+
     public static void NewFrame()
     {
         Camera = default;

@@ -34,5 +34,7 @@ public class Test2D : Scene
         Renderer.DrawText(_font, new Vector2T<int>(100), 48, "Hello World!", Color.White);
         
         //Renderer.DrawImage(_texture, Vector2T<int>.Zero, new Rectangle<int>(128, 0, 128, 64));
+
+        Renderer.DrawRectangle(new Vector2T<int>(10), new Size<int>(200, 100), Color.Orange, 5, Color.White);
     }
 }
