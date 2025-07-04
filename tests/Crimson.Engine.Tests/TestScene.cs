@@ -11,6 +11,8 @@ using Crimson.Physics;
 using Crimson.Physics.Shapes;
 using Crimson.Physics.Shapes.Descriptions;
 using Crimson.Platform;
+using Crimson.UI.Controls;
+using Crimson.UI.Controls.Layouts;
 using Hexa.NET.ImGui;
 using SharpGLTF.Schema2;
 using Material = Crimson.Graphics.Materials.Material;
@@ -78,9 +80,20 @@ public class TestScene : Scene
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/back.png"));*/
         Camera.Skybox = Content.Content.Load<Skybox>("/home/aqua/Pictures/skybox/spacebox/nizzine/");
         
-        Console.WriteLine(Matrix<float>.Identity);
-        
-        Console.WriteLine(Matrix<double>.Identity[3][3]);
+        AnchorLayout layout = (AnchorLayout) UI.UI.BaseControl;
+        layout.Add(Anchor.TopLeft, Vector2T<int>.Zero, new Size<int>(200, 100), new Button("Top Left"));
+        layout.Add(Anchor.TopMiddle, Vector2T<int>.Zero, new Size<int>(200, 100), new Button("Top Middle"));
+        layout.Add(Anchor.TopRight, Vector2T<int>.Zero, new Size<int>(200, 100), new Button("Top Right"));
+        layout.Add(Anchor.CenterLeft, Vector2T<int>.Zero, new Size<int>(200, 100), new Button("Center Left"));
+        layout.Add(Anchor.CenterMiddle, Vector2T<int>.Zero, new Size<int>(200, 100), new Button("Center Middle"));
+        layout.Add(Anchor.CenterRight, Vector2T<int>.Zero, new Size<int>(200, 100), new Button("Center Right"));
+        layout.Add(Anchor.BottomLeft, Vector2T<int>.Zero, new Size<int>(200, 100), new Button("Bottom Left"));
+        layout.Add(Anchor.BottomMiddle, Vector2T<int>.Zero, new Size<int>(200, 100), new Button("Bottom Middle"));
+        layout.Add(Anchor.BottomRight, Vector2T<int>.Zero, new Size<int>(200, 100), new Button("Bottom Right"));
+
+        layout.Add(Anchor.CenterMiddle, new Vector2T<int>(50), new Size<int>(100),
+            new Button("hello", () => Console.WriteLine("hi!"))
+                { Theme = UI.UI.Theme with { ButtonColor = Color.Brown } });
         
         base.Initialize();
     }
@@ -121,6 +134,6 @@ public class TestScene : Scene
         //App.Renderer.DrawImage(_texture, Vector2.Zero);
         //App.Renderer.DrawImage(_texture, new Vector2(100));
         
-        Renderer.DrawLine(new Vector2T<int>(0, 0), new Vector2T<int>(1280, 720), Color.White, 5);
+        //Renderer.DrawLine(new Vector2T<int>(0, 0), new Vector2T<int>(1280, 720), Color.White, 5);
     }
 }

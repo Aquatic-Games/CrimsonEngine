@@ -7,12 +7,12 @@ public class Button : Control
 {
     public string Text;
 
-    public Action? Clicked;
+    public Action? OnClicked;
 
-    public Button(string text, Action? clicked = null)
+    public Button(string text, Action? onClicked = null)
     {
         Text = text;
-        Clicked = clicked;
+        OnClicked = onClicked;
     }
     
     protected internal override void Update(float dt, ref bool mouseCaptured, Vector2T<int> mousePos)
@@ -20,7 +20,7 @@ public class Button : Control
         base.Update(dt, ref mouseCaptured, mousePos);
         
         if (IsClicked)
-            Clicked?.Invoke();
+            OnClicked?.Invoke();
     }
 
     protected internal override void Draw()
@@ -33,8 +33,9 @@ public class Button : Control
             color = Theme.ButtonHoveredColor;
         else
             color = Theme.ButtonColor;
-        
-        Renderer.DrawRectangle(ScreenRegion.Position, ScreenRegion.Size, color, 2, Theme.ButtonBorderColor);
+
+        Renderer.DrawRectangle(ScreenRegion.Position, ScreenRegion.Size, color, Theme.BorderSize,
+            Theme.ButtonBorderColor);
 
         Size<int> textSize = Theme.Font.MeasureText(Text, Theme.TextSize);
         Vector2T<int> textPos = ScreenRegion.Position + new Vector2T<int>(ScreenRegion.Width / 2 - textSize.Width / 2, ScreenRegion.Height / 2 - textSize.Height / 2);
