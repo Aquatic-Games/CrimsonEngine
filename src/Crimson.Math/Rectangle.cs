@@ -23,4 +23,10 @@ public readonly struct Rectangle<T> where T : INumber<T>
     }
 
     public Rectangle(T x, T y, T width, T height) : this(new Vector2T<T>(x, y), new Size<T>(width, height)) { }
+
+    public bool Contains(Vector2T<T> point)
+    {
+        return point.X >= X && point.X < X + Width &&
+               point.Y >= Y && point.Y < Y + Height;
+    }
 }

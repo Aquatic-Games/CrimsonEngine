@@ -10,6 +10,7 @@
       <ProjectReference Include="..\Crimson.Physics\Crimson.Physics.csproj" />
       <ProjectReference Include="..\Crimson.Graphics\Crimson.Graphics.csproj" />
       <ProjectReference Include="..\Crimson.Platform\Crimson.Platform.csproj" />
+      <ProjectReference Include="..\Crimson.UI\Crimson.UI.csproj" />
     </ItemGroup>
 
 </Project>

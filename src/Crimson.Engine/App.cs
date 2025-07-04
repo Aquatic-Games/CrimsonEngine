@@ -108,6 +108,9 @@ public static class App
             Logger.Debug("Creating imgui controller.");
             _imGuiController = new ImGuiController(context);
         }
+        
+        Logger.Debug("Creating UI.");
+        UI.UI.Create(new Rectangle<int>(Vector2T<int>.Zero, Renderer.RenderSize));
 
         _deltaWatch = Stopwatch.StartNew();
         
@@ -143,12 +146,14 @@ public static class App
             _globalApp.PreUpdate(dt);
             Physics.Physics.Step(1 / 60.0f);
             _currentScene.Update(dt);
+            UI.UI.Update(dt);
             _globalApp.PostUpdate(dt);
             
             Renderer.NewFrame();
             
             _globalApp.PreDraw();
             _currentScene.Draw();
+            UI.UI.Draw();
             _globalApp.PostDraw();
             
             Renderer.Render();
