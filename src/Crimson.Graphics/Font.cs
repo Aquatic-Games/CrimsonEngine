@@ -27,15 +27,50 @@ public unsafe class Font : IContentResource<Font>, IDisposable
         _characters = [];
     }
 
+    public Size<int> MeasureText(string text, uint size)
+    {
+        int currentWidth = 0;
+        int width = 0;
+        int height = 0;
+
+        foreach (char c in text)
+        {
+            Character character = GetCharacter(c, size);
+
+            if (c == '\n')
+            {
+                height += (int) size;
+                currentWidth = 0;
+                continue;
+            }
+
+            if (character.LineHeight > height)
+                height =  character.LineHeight;
+
+            currentWidth += character.Advance;
+            if (currentWidth > width)
+                width = currentWidth;
+        }
+        
+        return new Size<int>(width, height);
+    }
+
     internal void Draw(TextureBatcher batcher, Vector2T<int> position, uint size, string text, Color color)
     {
         Vector2T<int> currentPos = position;
         
         foreach (char c in text)
         {
+            if (c == '\n')
+            {
+                currentPos = new Vector2T<int>(position.X, currentPos.Y + (int) size);
+                continue;
+            }
+            
             Character character = GetCharacter(c, size);
 
-            Vector2T<int> pos = currentPos + new Vector2T<int>(character.Bearing.X, -character.Bearing.Y);
+            Vector2T<int> pos = currentPos +
+                                new Vector2T<int>(character.Bearing.X, -character.Bearing.Y + character.Ascender);
             
             DrawCharacter(batcher, character, pos, color);
 
@@ -117,7 +152,8 @@ public unsafe class Font : IContentResource<Font>, IDisposable
             }
 
             character = new Character(texture, region, new Vector2T<int>(slot->bitmap_left, slot->bitmap_top),
-                (int) (slot->advance.x >> 6));
+                (int) (slot->advance.x >> 6), (int) (_face->size->metrics.ascender >> 6),
+                (int) (_face->size->metrics.height >> 6));
             _characters.Add((c, size), character);
         }
 
@@ -146,13 +182,18 @@ public unsafe class Font : IContentResource<Font>, IDisposable
         public readonly Rectangle<int> Region;
         public readonly Vector2T<int> Bearing;
         public readonly int Advance;
+
+        public readonly int Ascender;
+        public readonly int LineHeight;
         
-        public Character(Texture texture, Rectangle<int> region, Vector2T<int> bearing, int advance)
+        public Character(Texture texture, Rectangle<int> region, Vector2T<int> bearing, int advance, int ascender, int lineHeight)
         {
             Texture = texture;
             Region = region;
             Bearing = bearing;
             Advance = advance;
+            Ascender = ascender;
+            LineHeight = lineHeight;
         }
     }
 

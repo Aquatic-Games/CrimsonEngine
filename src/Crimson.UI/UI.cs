@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Crimson.Graphics;
 using Crimson.Math;
 using Crimson.UI.Controls;
 using Crimson.UI.Controls.Layouts;
@@ -11,9 +12,13 @@ public static class UI
     
     public static Control BaseControl = null!;
 
+    public static Theme Theme;
+
     public static void Create(Rectangle<int> screenRegion)
     {
         _screenRegion = screenRegion;
+        // TODO: Obviously this only works on my machine.
+        Theme = Theme.Light(new Font("/home/aqua/Documents/Roboto-Regular.ttf"));
 
         BaseControl = new AnchorLayout();
         BaseControl.CalculateLayout(_screenRegion);

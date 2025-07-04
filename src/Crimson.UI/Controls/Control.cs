@@ -10,6 +10,8 @@ public abstract class Control
     protected bool IsHovered;
     protected bool IsHeld;
     protected bool IsClicked;
+
+    public Theme Theme = UI.Theme;
     
     protected internal virtual void Initialize() { }
 
