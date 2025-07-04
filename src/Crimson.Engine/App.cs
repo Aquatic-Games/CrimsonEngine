@@ -188,5 +188,6 @@ public static class App
     private static void OnSurfaceSizeChanged(Size<int> newSize)
     {
         Renderer.Resize(newSize);
+        UI.UI.Resize(new Rectangle<int>(Vector2T<int>.Zero, newSize));
     }
 }
