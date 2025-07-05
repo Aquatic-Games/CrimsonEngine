@@ -1,3 +1,6 @@
 [submodule "lib/grabs"]
 	path = lib/grabs
 	url = https://github.com/Aquatic-Games/grabs
+[submodule "lib/MixrSharp"]
+	path = lib/MixrSharp
+	url = https://github.com/Aquatic-Games/MixrSharp

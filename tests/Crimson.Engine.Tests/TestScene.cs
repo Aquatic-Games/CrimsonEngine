@@ -1,4 +1,5 @@
 using System.Numerics;
+using Crimson.Audio;
 using Crimson.Data;
 using Crimson.Engine.Entities;
 using Crimson.Engine.Entities.Components;
@@ -36,6 +37,9 @@ public class TestScene : Scene
         //App.Surface.CursorVisible = false;
 
         _texture = Content.Content.Load<Texture>("DEBUG");
+
+        StreamSound sound = new StreamSound("/home/aqua/Music/kf-battle.ogg");
+        sound.Play();
         
         MaterialDefinition def = new(_texture)
         {
