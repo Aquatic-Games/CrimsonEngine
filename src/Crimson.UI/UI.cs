@@ -21,8 +21,10 @@ public static class UI
         _screenRegion = screenRegion;
         
         Theme = Theme.Light;
+        // The content manager doesn't have the ability to load persistent resources yet so we have to manually do what
+        // the content manager does.
         Theme.Font = options.DefaultFont != null
-            ? new Font(options.DefaultFont)
+            ? Font.LoadResource(Content.Content.GetFullyQualifiedName(options.DefaultFont), false)
             : new Font(Resources.LoadEmbeddedResource("Crimson.UI.Roboto-Regular.ttf",
                 Assembly.GetExecutingAssembly()));
 

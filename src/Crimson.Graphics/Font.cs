@@ -19,6 +19,9 @@ public unsafe class Font : IContentResource<Font>, IDisposable
     
     public Font(string path)
     {
+        if (!File.Exists(path))
+            throw new FileNotFoundException("Could not load a font with the given path.", path);
+        
         byte[] pathBytes = Encoding.UTF8.GetBytes(path);
         
         fixed (byte* pPath = pathBytes)
