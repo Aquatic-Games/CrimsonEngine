@@ -57,8 +57,38 @@ public static class Input
     public static bool IsKeyDown(Key key)
         => _keysDown.Contains(key);
 
+    public static bool IsKeyDown(out Key key, params ReadOnlySpan<Key> keys)
+    {
+        foreach (Key k in keys)
+        {
+            if (_keysDown.Contains(k))
+            {
+                key = k;
+                return true;
+            }
+        }
+
+        key = Key.Unknown;
+        return false;
+    }
+
     public static bool IsKeyPressed(Key key)
         => _keysPressed.Contains(key);
+    
+    public static bool IsKeyPressed(out Key key, params ReadOnlySpan<Key> keys)
+    {
+        foreach (Key k in keys)
+        {
+            if (_keysPressed.Contains(k))
+            {
+                key = k;
+                return true;
+            }
+        }
+
+        key = Key.Unknown;
+        return false;
+    }
 
     public static bool IsMouseButtonDown(MouseButton button)
         => _buttonsDown.Contains(button);
