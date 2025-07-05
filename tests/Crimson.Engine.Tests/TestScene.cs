@@ -35,7 +35,7 @@ public class TestScene : Scene
         //App.Renderer.VSync = false;
         //App.Surface.CursorVisible = false;
 
-        _texture = Content.Content.Load<Texture>("awesomeface");
+        _texture = Content.Content.Load<Texture>("DEBUG");
         
         MaterialDefinition def = new(_texture)
         {
