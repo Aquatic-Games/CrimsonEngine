@@ -10,14 +10,11 @@ namespace Crimson.Engine.Tests;
 public class Test2D : Scene
 {
     private Texture _texture = null!;
-    private Font _font = null!;
     
     public override void Initialize()
     {
         // TODO: Texture.Debug?
         _texture = Content.Content.Load<Texture>("DEBUG");
-        _texture = Content.Content.Load<Texture>("DEBUG");
-        _font = Content.Content.Load<Font>("/home/aqua/Documents/Roboto-Regular");
         
         Camera.Type = CameraType.Orthographic;
         
@@ -53,12 +50,12 @@ public class Test2D : Scene
         base.Draw();
 
         // Check baseline alignment and size calculation with various letters
-        const string text = "Hello World!\nHello Everything!\nqtLpa";
+        const string text = "Hello World!\nHello Everything!\nこれは日本語のテキストです！\nqtLpa";
         const uint size = 48;
         
-        Renderer.DrawFilledRectangle(Vector2T<int>.Zero, _font.MeasureText(text, size), Color.Orange);
+        Renderer.DrawFilledRectangle(Vector2T<int>.Zero, UI.UI.Theme.Font.MeasureText(text, size), Color.Orange);
         
-        Renderer.DrawText(_font, new Vector2T<int>(0), size, text, Color.White);
+        Renderer.DrawText(UI.UI.Theme.Font, new Vector2T<int>(0), size, text, Color.White);
         
         Renderer.DrawImage(_texture, Vector2T<int>.Zero, new Rectangle<int>(128, 0, 128, 64));
 

@@ -5,7 +5,7 @@ namespace Crimson.UI;
 
 public struct Theme
 {
-    public Font Font;
+    public Font Font = null!;
 
     public Color TextColor;
 
@@ -27,16 +27,15 @@ public struct Theme
 
     public Color CheckboxSelectedColor;
 
-    public Theme(Font font)
+    public Theme()
     {
-        Font = font;
         BorderSize = 2;
         TextSize = 24;
         HeadingSize = 48;
         Padding = 12;
     }
 
-    public static Theme Light(Font font) => new Theme(font)
+    public static Theme Light => new Theme
     {
         TextColor = Color.White,
         ButtonColor = Color.Gray,

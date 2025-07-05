@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Text;
 using Crimson.Content;
 using Crimson.Graphics.Renderers;
@@ -9,6 +10,7 @@ namespace Crimson.Graphics;
 
 public unsafe class Font : IContentResource<Font>, IDisposable
 {
+    private GCHandle _fontBytes;
     private readonly FT_FaceRec_* _face;
     private readonly List<Texture> _fontAtlases;
     private readonly Dictionary<(char c, uint size), Character> _characters;
@@ -23,6 +25,20 @@ public unsafe class Font : IContentResource<Font>, IDisposable
         fixed (FT_FaceRec_** face = &_face)
             FT_New_Face(_library, pPath, 0, face).Check("New face");
 
+        _fontAtlases = [new Texture(AtlasSize, null, PixelFormat.RGBA8)];
+        _characters = [];
+    }
+
+    public Font(byte[] bytes)
+    {
+        _fontBytes = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+
+        fixed (FT_FaceRec_** face = &_face)
+        {
+            FT_New_Memory_Face(_library, (byte*) _fontBytes.AddrOfPinnedObject(), bytes.Length, 0, face)
+                .Check("New memory face");
+        }
+        
         _fontAtlases = [new Texture(AtlasSize, null, PixelFormat.RGBA8)];
         _characters = [];
     }
@@ -81,6 +97,8 @@ public unsafe class Font : IContentResource<Font>, IDisposable
     public void Dispose()
     {
         FT_Done_Face(_face).Check("Done face");
+        if (_fontBytes.IsAllocated)
+            _fontBytes.Free();
         
         foreach (Texture texture in _fontAtlases)
             texture.Dispose();

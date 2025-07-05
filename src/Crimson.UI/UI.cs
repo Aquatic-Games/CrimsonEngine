@@ -1,4 +1,6 @@
 ﻿using System.Numerics;
+using System.Reflection;
+using Crimson.Content;
 using Crimson.Graphics;
 using Crimson.Math;
 using Crimson.UI.Controls;
@@ -14,14 +16,23 @@ public static class UI
 
     public static Theme Theme;
 
-    public static void Create(Rectangle<int> screenRegion)
+    public static void Create(Rectangle<int> screenRegion, UIOptions options)
     {
         _screenRegion = screenRegion;
-        // TODO: Obviously this only works on my machine.
-        Theme = Theme.Light(new Font("/home/aqua/Documents/Roboto-Regular.ttf"));
+        
+        Theme = Theme.Light;
+        Theme.Font = options.DefaultFont != null
+            ? new Font(options.DefaultFont)
+            : new Font(Resources.LoadEmbeddedResource("Crimson.UI.Roboto-Regular.ttf",
+                Assembly.GetExecutingAssembly()));
 
         BaseControl = new AnchorLayout();
         BaseControl.CalculateLayout(_screenRegion);
+    }
+
+    public static void Destroy()
+    {
+        Theme.Font.Dispose();
     }
 
     public static void Update(float dt)

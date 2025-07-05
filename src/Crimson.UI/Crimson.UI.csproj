@@ -13,4 +13,9 @@
       <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Include="Roboto-Regular.ttf" />
+      <EmbeddedResource Include="OFL.txt" />
+    </ItemGroup>
+
 </Project>

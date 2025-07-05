@@ -110,7 +110,7 @@ public static class App
         }
         
         Logger.Debug("Creating UI.");
-        UI.UI.Create(new Rectangle<int>(Vector2T<int>.Zero, Renderer.RenderSize));
+        UI.UI.Create(new Rectangle<int>(Vector2T<int>.Zero, Renderer.RenderSize), options.UI);
 
         _deltaWatch = Stopwatch.StartNew();
         
@@ -163,6 +163,7 @@ public static class App
         
         _currentScene.Dispose();
         _globalApp.Dispose();
+        UI.UI.Destroy();
         Physics.Physics.Destroy();
         Input.Input.Destroy();
         Renderer.Destroy();

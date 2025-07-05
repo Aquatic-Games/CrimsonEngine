@@ -1,5 +1,6 @@
 using Crimson.Graphics;
 using Crimson.Platform;
+using Crimson.UI;
 using Version = Crimson.Core.Version;
 
 namespace Crimson.Engine;
@@ -34,6 +35,8 @@ public record struct AppOptions
     /// </summary>
     public RendererOptions Renderer;
 
+    public UIOptions UI;
+
     /// Create the default <see cref="AppOptions"/>.
     /// <param name="name">The app's name.</param>
     /// <param name="version">The app's version.</param>
@@ -64,5 +67,7 @@ public record struct AppOptions
 #endif
             CreateImGuiRenderer = true
         };
+
+        UI = new UIOptions();
     }
 }
