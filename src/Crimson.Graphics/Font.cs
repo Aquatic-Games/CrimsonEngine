@@ -12,7 +12,7 @@ public unsafe class Font : IContentResource<Font>, IDisposable
 {
     private GCHandle _fontBytes;
     private readonly FT_FaceRec_* _face;
-    private readonly List<Texture> _fontAtlases;
+    private readonly List<FontAtlas> _fontAtlases;
     private readonly Dictionary<(char c, uint size), Character> _characters;
 
     private Vector2T<int> _currentRegionOffset;
@@ -25,7 +25,7 @@ public unsafe class Font : IContentResource<Font>, IDisposable
         fixed (FT_FaceRec_** face = &_face)
             FT_New_Face(_library, pPath, 0, face).Check("New face");
 
-        _fontAtlases = [new Texture(AtlasSize, null, PixelFormat.RGBA8)];
+        _fontAtlases = [new FontAtlas(new Texture(AtlasSize, null, PixelFormat.RGBA8))];
         _characters = [];
     }
 
@@ -39,7 +39,7 @@ public unsafe class Font : IContentResource<Font>, IDisposable
                 .Check("New memory face");
         }
         
-        _fontAtlases = [new Texture(AtlasSize, null, PixelFormat.RGBA8)];
+        _fontAtlases = [new FontAtlas(new Texture(AtlasSize, null, PixelFormat.RGBA8))];
         _characters = [];
     }
 
@@ -100,8 +100,8 @@ public unsafe class Font : IContentResource<Font>, IDisposable
         if (_fontBytes.IsAllocated)
             _fontBytes.Free();
         
-        foreach (Texture texture in _fontAtlases)
-            texture.Dispose();
+        foreach (FontAtlas atlas in _fontAtlases)
+            atlas.Texture.Dispose();
         
         _fontAtlases.Clear();
         _characters.Clear();
@@ -129,22 +129,28 @@ public unsafe class Font : IContentResource<Font>, IDisposable
             FT_Set_Pixel_Sizes(_face, 0, size).Check("Set pixel sizes");
             FT_Load_Char(_face, c, FT_LOAD.FT_LOAD_RENDER).Check("Load char");
 
+            FontAtlas atlas = _fontAtlases[^1];
+            
             Size<int> glyphSize = new Size<int>((int) slot->bitmap.width, (int) slot->bitmap.rows);
+            if (glyphSize.Height >= atlas.RowCharHeight)
+                atlas.RowCharHeight = glyphSize.Height;
 
             if (_currentRegionOffset.X + glyphSize.Width >= AtlasSize.Width)
             {
-                _currentRegionOffset = new Vector2T<int>(0, (int) (_currentRegionOffset.Y + glyphSize.Height));
+                _currentRegionOffset = new Vector2T<int>(0, (int) (_currentRegionOffset.Y + atlas.RowCharHeight));
+                atlas.RowCharHeight = 0;
                 if (_currentRegionOffset.Y + glyphSize.Height >= AtlasSize.Height)
                 {
                     _currentRegionOffset = Vector2T<int>.Zero;
-                    _fontAtlases.Add(new Texture(AtlasSize, null, PixelFormat.RGBA8));
+                    _fontAtlases.Add(new FontAtlas(new Texture(AtlasSize, null, PixelFormat.RGBA8)));
+                    atlas = _fontAtlases[^1];
                 }
             }
 
             Rectangle<int> region = new Rectangle<int>(_currentRegionOffset, glyphSize);
             _currentRegionOffset += new Vector2T<int>(glyphSize.Width, 0);
             
-            Texture texture = _fontAtlases[^1];
+            Texture texture = atlas.Texture;
             
             // The texture can only be updated if the glyph size is not 0.
             if (glyphSize != Size<int>.Zero)
@@ -212,6 +218,17 @@ public unsafe class Font : IContentResource<Font>, IDisposable
             Advance = advance;
             Ascender = ascender;
             LineHeight = lineHeight;
+        }
+    }
+
+    private class FontAtlas
+    {
+        public Texture Texture;
+        public int RowCharHeight;
+
+        public FontAtlas(Texture texture)
+        {
+            Texture = texture;
         }
     }
 

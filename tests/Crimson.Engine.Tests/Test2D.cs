@@ -10,6 +10,7 @@ namespace Crimson.Engine.Tests;
 public class Test2D : Scene
 {
     private Texture _texture = null!;
+    private float _f;
     
     public override void Initialize()
     {
@@ -45,12 +46,23 @@ public class Test2D : Scene
         base.Initialize();
     }
 
+    public override void Update(float dt)
+    {
+        base.Update(dt);
+
+        _f += dt;
+
+        if (_f >= float.Pi * 2)
+            _f -= float.Pi * 2;
+    }
+
     public override void Draw()
     {
         base.Draw();
 
         // Check baseline alignment and size calculation with various letters
         const string text = "Hello World!\nHello Everything!\nこれは日本語のテキストです！\nqtLpa";
+        //uint size = (uint) (((float.Sin(_f) + 1) / 2) * 100);
         const uint size = 48;
         
         Renderer.DrawFilledRectangle(Vector2T<int>.Zero, UI.UI.Theme.Font.MeasureText(text, size), Color.Orange);
