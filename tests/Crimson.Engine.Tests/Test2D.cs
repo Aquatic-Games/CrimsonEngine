@@ -15,7 +15,8 @@ public class Test2D : Scene
     public override void Initialize()
     {
         // TODO: Texture.Debug?
-        _texture = Content.Content.Load<Texture>("/home/aqua/Pictures/DEBUG.png");
+        _texture = Content.Content.Load<Texture>("DEBUG");
+        _texture = Content.Content.Load<Texture>("DEBUG");
         _font = Content.Content.Load<Font>("/home/aqua/Documents/Roboto-Regular");
         
         Camera.Type = CameraType.Orthographic;
@@ -40,8 +41,9 @@ public class Test2D : Scene
         layout.Add(Anchor.CenterMiddle, new Vector2T<int>(50), new Size<int>(100),
             new Button("hello", () => Console.WriteLine("hi!"))
                 { Theme = UI.UI.Theme with { ButtonColor = Color.Brown } });*/
-        
-        layout.Add(Anchor.TopLeft, new Vector2T<int>(10), new Size<int>(30), new Checkbox("Checkbox", b => Console.WriteLine(b)));
+
+        layout.Add(Anchor.TopLeft, new Vector2T<int>(10), new Size<int>(30),
+            new Checkbox("Checkbox", b => Console.WriteLine(b)));
         
         base.Initialize();
     }
@@ -50,14 +52,15 @@ public class Test2D : Scene
     {
         base.Draw();
 
-        /*const string text = "Hello World!\nHello Everything!\nAqua";
+        // Check baseline alignment and size calculation with various letters
+        const string text = "Hello World!\nHello Everything!\nqtLpa";
         const uint size = 48;
         
         Renderer.DrawFilledRectangle(Vector2T<int>.Zero, _font.MeasureText(text, size), Color.Orange);
         
-        Renderer.DrawText(_font, new Vector2T<int>(0), size, text, Color.White);*/
+        Renderer.DrawText(_font, new Vector2T<int>(0), size, text, Color.White);
         
-        //Renderer.DrawImage(_texture, Vector2T<int>.Zero, new Rectangle<int>(128, 0, 128, 64));
+        Renderer.DrawImage(_texture, Vector2T<int>.Zero, new Rectangle<int>(128, 0, 128, 64));
 
         //Renderer.DrawRectangle(new Vector2T<int>(10), new Size<int>(200, 100), Color.Orange, 5, Color.White);
     }

@@ -34,22 +34,23 @@ public static class Content
 
     public static T Load<T>(string resName) where T : IContentResource<T>
     {
-        Logger.Debug($"Loading content resource \"{resName}\".");
-        
         string fullPath = Path.IsPathRooted(resName) ? resName : Path.Combine(_contentPathBase, resName);
         bool hasExtension = Path.HasExtension(resName);
-        
-        Logger.Trace($"  Path: {fullPath}");
-        Logger.Trace($"  Has Extension: {hasExtension}");
 
         T resource;
         if (_loadedResources.TryGetValue(fullPath, out IContentResourceBase res))
             resource = (T) res;
         else
+        {
+            Logger.Debug($"Loading content resource \"{resName}\".");
+            Logger.Trace($"  Path: {fullPath}");
+            Logger.Trace($"  Has Extension: {hasExtension}");
+            
             resource = T.LoadResource(fullPath, hasExtension);
-        _loadedResources.Add(fullPath, resource);
-        if (resource is IDisposable disposable)
-            _disposableResources.Add(fullPath, disposable);
+            _loadedResources.Add(fullPath, resource);
+            if (resource is IDisposable disposable)
+                _disposableResources.Add(fullPath, disposable);
+        }
 
         return resource;
     }
