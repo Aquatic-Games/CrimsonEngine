@@ -97,6 +97,9 @@ public static class App
         Logger.Debug("Initializing graphics subsystem.");
         Renderer.Create(_appName, in options.Renderer, Surface.Info);
         
+        Logger.Debug("Initializing audio subsystem.");
+        Audio.Audio.Create();
+        
         Logger.Debug("Initializing input manager.");
         Input.Input.Create();
         
@@ -166,6 +169,7 @@ public static class App
         UI.UI.Destroy();
         Physics.Physics.Destroy();
         Input.Input.Destroy();
+        Audio.Audio.Destroy();
         Renderer.Destroy();
         Surface.Destroy();
         Events.Destroy();
