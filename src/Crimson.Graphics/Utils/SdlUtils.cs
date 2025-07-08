@@ -62,7 +62,7 @@ internal static class SdlUtils
         return SDL.CreateGPUBuffer(device, in bufferInfo).Check("Create buffer");
     }
 
-    public static unsafe IntPtr CreateBuffer<T>(IntPtr device, SDL.GPUBufferUsageFlags usage, T[] data) where T : unmanaged
+    public static unsafe IntPtr CreateBuffer<T>(IntPtr device, SDL.GPUBufferUsageFlags usage, ReadOnlySpan<T> data) where T : unmanaged
     {
         uint size = (uint) (data.Length * sizeof(T));
         
@@ -99,6 +99,9 @@ internal static class SdlUtils
         
         return buffer;
     }
+
+    public static IntPtr CreateBuffer<T>(IntPtr device, SDL.GPUBufferUsageFlags usage, T[] data) where T : unmanaged
+        => CreateBuffer<T>(device, usage, data.AsSpan());
 
     public static IntPtr CreateTransferBuffer(IntPtr device, SDL.GPUTransferBufferUsage usage, uint size)
     {

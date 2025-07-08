@@ -38,6 +38,17 @@ public class Renderable : IDisposable
 
         Material = mesh.Material;
     }
+
+    public Renderable(ReadOnlySpan<Vertex> vertices, ReadOnlySpan<uint> indices, Material material)
+    {
+        _device = Renderer.Device;
+        
+        VertexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Vertex, vertices);
+        IndexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Index, indices);
+
+        NumIndices = (uint) indices.Length;
+        Material = material;
+    }
     
     /// <summary>
     /// Dispose of this <see cref="Renderable"/>.

@@ -33,6 +33,12 @@ public class CompoundShape : Shape
         _masses.Add(child.Mass);
     }
 
+    public void RemoveChild(int index)
+    {
+        ref BigCompound compound = ref Simulation.Shapes.GetShape<BigCompound>(Index.Index);
+        compound.RemoveAt(index, Simulation.BufferPool);
+    }
+
     public Child GetChild(int index)
     {
         ref BigCompound compound = ref Simulation.Shapes.GetShape<BigCompound>(Index.Index);
