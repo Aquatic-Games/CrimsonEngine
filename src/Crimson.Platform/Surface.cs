@@ -11,6 +11,8 @@ namespace Crimson.Platform;
 public static class Surface
 {
     private static IntPtr _window;
+    private static string _title;
+    private static string _details;
 
     /// <summary>
     /// The surface's size, in pixels.
@@ -25,6 +27,26 @@ public static class Surface
             return new Size<int>(w, h);
         }
         set => SDL.SetWindowSize(_window, value.Width, value.Height);
+    }
+
+    public static string Title
+    {
+        get => _title;
+        set
+        {
+            _title = value;
+            SDL.SetWindowTitle(_window, _title + _details);
+        }
+    }
+
+    public static string Details
+    {
+        get => _details;
+        set
+        {
+            _details = value;
+            SDL.SetWindowTitle(_window, _title + _details);
+        }
     }
 
     /// <summary>
@@ -108,6 +130,8 @@ public static class Surface
     /// <exception cref="Exception">Thrown if the surface failed to create.</exception>
     public static void Create(in WindowOptions options)
     {
+        _title = options.Title;
+        
         Logger.Trace("Initializing SDL.");
         if (!SDL.Init(SDL.InitFlags.Video))
             throw new Exception($"Failed to initialize SDL: {SDL.GetError()}");
@@ -121,7 +145,7 @@ public static class Surface
             flags |= SDL.WindowFlags.Fullscreen;
         
         Logger.Trace("Creating window.");
-        _window = SDL.CreateWindow(options.Title, options.Size.Width, options.Size.Height, flags);
+        _window = SDL.CreateWindow(_title, options.Size.Width, options.Size.Height, flags);
 
         if (_window == IntPtr.Zero)
             throw new Exception($"Failed to create window: {SDL.GetError()}");

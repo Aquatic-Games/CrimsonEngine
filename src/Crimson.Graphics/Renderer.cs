@@ -32,6 +32,8 @@ public static class Renderer
 
     internal static SDL.GPUTextureFormat MainTargetFormat;
 
+    public static string Backend => SDL.GetGPUDeviceDriver(Device) ?? "Unknown";
+
     /// <summary>
     /// The 3D <see cref="Crimson.Graphics.Camera"/> that will be used when drawing.
     /// </summary>

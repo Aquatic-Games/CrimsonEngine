@@ -96,6 +96,7 @@ public static class App
         
         Logger.Debug("Initializing graphics subsystem.");
         Renderer.Create(_appName, in options.Renderer, Surface.Info);
+        Surface.Details = $" - {Renderer.Backend}";
         
         Logger.Debug("Initializing audio subsystem.");
         Audio.Audio.Create();
