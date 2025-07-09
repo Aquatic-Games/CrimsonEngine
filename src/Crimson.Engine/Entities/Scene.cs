@@ -91,8 +91,19 @@ public abstract class Scene : IDisposable
     /// <param name="dt">The delta time since the last frame.</param>
     public virtual void Update(float dt)
     {
-        foreach (Entity entity in _entities)
+        for (int i = 0; i < _entities.Count; i++)
+        {
+            Entity entity = _entities[i];
             entity.Update(dt);
+
+            if (entity.ShouldDestroy)
+            {
+                entity.Dispose();
+                _entities.Remove(entity);
+                _entitiesMap.Remove(entity.Name);
+                i--;
+            }
+        }
 
         foreach (Entity entity in _entitiesToAdd)
         {

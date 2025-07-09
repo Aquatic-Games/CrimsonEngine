@@ -28,7 +28,8 @@ public class Texture : IContentResource<Texture>, IDisposable
     /// <param name="size">The size, in pixels. If <see langword="null"/> is provided, a blank texture will be created.</param>
     /// <param name="data">The data.</param>
     /// <param name="format">The <see cref="PixelFormat"/> of the texture.</param>
-    public Texture(in Size<int> size, byte[]? data, PixelFormat format)
+    /// <param name="name">The texture's name used during debugging, if any.</param>
+    public Texture(in Size<int> size, byte[]? data, PixelFormat format, string? name = null)
     {
         Size = size;
 
@@ -49,6 +50,9 @@ public class Texture : IContentResource<Texture>, IDisposable
         Logger.Trace("Creating texture.");
         TextureHandle = SDL.CreateGPUTexture(_device, in textureInfo).Check("Create texture");
         
+        if (name != null)
+            SDL.SetGPUTextureName(_device, TextureHandle, name);
+        
         if (data != null)
             Update(new Rectangle<int>(Vector2T<int>.Zero, Size), data);
     }
@@ -57,13 +61,15 @@ public class Texture : IContentResource<Texture>, IDisposable
     /// Create a <see cref="Texture"/> from the given bitmap.
     /// </summary>
     /// <param name="bitmap">The <see cref="Bitmap"/> to use.</param>
-    public Texture(Bitmap bitmap) : this(bitmap.Size, bitmap.Data, bitmap.Format) { }
+    /// <param name="name">The texture's name used during debugging, if any.</param>
+    public Texture(Bitmap bitmap, string? name = null) : this(bitmap.Size, bitmap.Data, bitmap.Format, name) { }
 
     /// <summary>
     /// Create a <see cref="Texture"/> from the given path. 
     /// </summary>
     /// <param name="path">The path to load from.</param>
-    public Texture(string path) : this(new Bitmap(path)) { }
+    /// <param name="name">The texture's name used during debugging, if any. If nothing is provided, the path will be used.</param>
+    public Texture(string path) : this(new Bitmap(path), path) { }
 
     public unsafe void Update(Rectangle<int> location, byte[] data)
     {

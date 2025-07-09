@@ -25,6 +25,9 @@ public abstract class Component : IDisposable
     
     protected void GetComponent<T>() where T : Component 
         => Entity.GetComponent<T>();
+    
+    protected void Destroy()
+        => Entity.Destroy();
 
     protected bool TryAddEntity(Entity entity)
         => App.ActiveScene.TryAddEntity(entity);

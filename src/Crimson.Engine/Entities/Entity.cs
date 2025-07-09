@@ -15,6 +15,8 @@ public class Entity : IDisposable
 
     public Transform Transform;
 
+    public bool ShouldDestroy;
+
     public Entity? Parent { get; internal set; }
 
     public Matrix4x4 WorldMatrix => Transform.WorldMatrix * (Parent?.WorldMatrix ?? Matrix4x4.Identity);
@@ -115,6 +117,11 @@ public class Entity : IDisposable
             throw new Exception($"Could not get child with name '{name}'.");
 
         return child!;
+    }
+
+    public void Destroy()
+    {
+        ShouldDestroy = true;
     }
     
     public virtual void Initialize()
