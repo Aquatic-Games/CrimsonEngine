@@ -3,7 +3,6 @@ using Crimson.Core;
 using Crimson.Engine.Entities;
 using Crimson.Graphics;
 using Crimson.Math;
-using Crimson.Physics;
 using Crimson.Platform;
 
 namespace Crimson.Engine;
@@ -14,6 +13,7 @@ namespace Crimson.Engine;
 public static class App
 {
     private static string _appName;
+    private static string _appVersion;
     private static bool _isRunning;
     private static GlobalApp _globalApp;
 
@@ -29,6 +29,8 @@ public static class App
     /// The app name.
     /// </summary>
     public static string Name => _appName;
+
+    public static string Version => _appVersion;
     
     /// <summary>
     /// Is the app running? If false, the subsystems may not be initialized.
@@ -83,6 +85,7 @@ public static class App
         Logger.Info($"    Version: {options.Version}");
         
         _appName = options.Name;
+        _appVersion = options.Version;
         _globalApp = globalApp ?? new GlobalApp();
         _currentScene = scene;
         
@@ -96,7 +99,7 @@ public static class App
         
         Logger.Debug("Initializing graphics subsystem.");
         Renderer.Create(_appName, in options.Renderer, Surface.Info);
-        Surface.Details = $" - {Renderer.Backend}";
+        Surface.Details = $" v{Version} - {Renderer.Backend}";
         
         Logger.Debug("Initializing audio subsystem.");
         Audio.Audio.Create();

@@ -1,7 +1,6 @@
 using Crimson.Graphics;
 using Crimson.Platform;
 using Crimson.UI;
-using Version = Crimson.Core.Version;
 
 namespace Crimson.Engine;
 
@@ -18,7 +17,7 @@ public record struct AppOptions
     /// <summary>
     /// The app's version.
     /// </summary>
-    public readonly Version Version;
+    public readonly string Version;
 
     /// <summary>
     /// The app type. This influences various things such as the default <see cref="Camera"/> type, and the default <see cref="RendererOptions"/>.
@@ -42,7 +41,7 @@ public record struct AppOptions
     /// <param name="version">The app's version.</param>
     /// <param name="type">The app type. This influences various things such as the default <see cref="Camera"/> type,
     /// and the default <see cref="RendererOptions"/>.</param>
-    public AppOptions(string name, Version version, AppType type = AppType.Type3D)
+    public AppOptions(string name, string version, AppType type = AppType.Type3D)
     {
         Name = name;
         Version = version;
