@@ -18,7 +18,7 @@ float SpecularD(const float roughness, const float n, const float h)
     const float a2 = a * a;
     const float nDotH = max(dot(n, h), 0.0);
 
-    const float denominator = (nDotH * nDotH) * (a2 - 1) + 1;
+    const float denominator = (nDotH * nDotH) * (a2 - 1.0) + 1.0;
 
     return a2 / (M_PI * denominator * denominator);
 }
@@ -43,7 +43,15 @@ float SpecularF(const float v, const float h)
 
     const float vDotH = max(dot(v, h), 0.0);
 
-    return f0 + (1 - f0) * pow(1 - vDotH, 5.0);
+    return f0 + (1 - f0) * pow(clamp(1 - vDotH, 0.0, 1.0), 5.0);
+}
+
+float BRDF(const float dfg, const float n, const float v, const float l)
+{
+    const float nDotL = max(dot(n, l), 0.0);
+    const float nDotV = max(dot(n, v), 0.0);
+
+    return dfg / (4.0 * nDotL * nDotV) + 0.0001;
 }
 
 #endif

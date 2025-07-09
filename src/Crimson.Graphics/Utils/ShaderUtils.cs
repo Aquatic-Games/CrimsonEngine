@@ -89,7 +89,7 @@ internal static class ShaderUtils
 
         Logger.Trace("Compiling shader.");
         byte[] compiled =
-            Compiler.CompileHlsl(grabsStage, grabsFormat, hlsl, entryPoint, Path.GetDirectoryName(fullPath));
+            Compiler.CompileHlsl(grabsStage, grabsFormat, hlsl, entryPoint, Path.GetDirectoryName(fullPath), true);
         
         fixed (byte* pData = compiled)
         {

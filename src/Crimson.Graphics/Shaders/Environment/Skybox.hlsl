@@ -20,7 +20,7 @@ VSOutput VSMain(const in float3 position: TEXCOORD0)
 {
     VSOutput output;
 
-    output.Position = mul(gCamera.Projection, mul((float3x3) gCamera.View, float4(position, 1.0))).xyww;
+    output.Position = mul(vCamera.Projection, mul((float3x3) vCamera.View, float4(position, 1.0))).xyww;
     output.TexCoord = position;
     
     return output;

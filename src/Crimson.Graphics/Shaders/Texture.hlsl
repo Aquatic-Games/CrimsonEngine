@@ -28,7 +28,7 @@ VSOutput VSMain(const in VSInput input)
 {
     VSOutput output;
 
-    output.Position = mul(gCamera.Projection, mul(gCamera.View, float4(input.Position, 0.0, 1.0)));
+    output.Position = mul(vCamera.Projection, mul(vCamera.View, float4(input.Position, 0.0, 1.0)));
     output.TexCoord = input.TexCoord;
     output.Tint = input.Tint;
     

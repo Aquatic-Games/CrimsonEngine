@@ -5,20 +5,25 @@ namespace Crimson.Graphics.Renderers.Structs;
 /// <summary>
 /// A set of camera matrices passed to a shader.
 /// </summary>
-internal struct CameraMatrices
+internal readonly struct CameraMatrices
 {
-    public const uint SizeInBytes = 128;
+    public const uint SizeInBytes = 144;
     
     /// <summary>
     /// The projection matrix.
     /// </summary>
-    public Matrix4x4 Projection;
+    public readonly Matrix4x4 Projection;
     
     /// <summary>
     /// The view matrix.
     /// </summary>
-    public Matrix4x4 View;
+    public readonly Matrix4x4 View;
 
+    /// <summary>
+    /// The camera position.
+    /// </summary>
+    public readonly Vector4 Position;
+    
     /// <summary>
     /// Create a new <see cref="CameraMatrices"/>.
     /// </summary>
@@ -28,5 +33,8 @@ internal struct CameraMatrices
     {
         Projection = projection;
         View = view;
+
+        if (Matrix4x4.Invert(view, out Matrix4x4 invView))
+            Position = new Vector4(invView.Translation, 0);
     }
 }

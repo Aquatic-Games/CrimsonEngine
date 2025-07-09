@@ -41,7 +41,7 @@ internal class DeferredRenderer : IDisposable
         IntPtr passVtx = ShaderUtils.LoadGraphicsShader(device, SDL.GPUShaderStage.Vertex, "Deferred/DeferredPass",
             "VSMain", 0, 0);
         IntPtr passPxl = ShaderUtils.LoadGraphicsShader(device, SDL.GPUShaderStage.Fragment, "Deferred/DeferredPass",
-            "PSMain", 0, 1);
+            "PSMain", 1, 4);
 
         SDL.GPUColorTargetDescription targetDesc = new()
         {
@@ -225,15 +225,35 @@ internal class DeferredRenderer : IDisposable
         IntPtr lightingPass = SDL.BeginGPURenderPass(cb, new IntPtr(&compositeInfo), 1, IntPtr.Zero)
             .Check("Begin lighting pass");
         
+        SDL.PushGPUFragmentUniformData(cb, 0, new IntPtr(&camera), CameraMatrices.SizeInBytes);
+        
         SDL.BindGPUGraphicsPipeline(lightingPass, _passPipeline);
 
-        SDL.GPUTextureSamplerBinding albedoTargetBinding = new()
+        SDL.GPUTextureSamplerBinding* passBindings = stackalloc SDL.GPUTextureSamplerBinding[]
         {
-            Texture = _albedoTexture,
-            Sampler = _passSampler
+            new SDL.GPUTextureSamplerBinding
+            {
+                Texture = _albedoTexture,
+                Sampler = _passSampler
+            },
+            new SDL.GPUTextureSamplerBinding
+            {
+                Texture = _positionTexture,
+                Sampler = _passSampler
+            },
+            new SDL.GPUTextureSamplerBinding
+            {
+                Texture = _normalTexture,
+                Sampler = _passSampler
+            },
+            new SDL.GPUTextureSamplerBinding
+            {
+                Texture = _metallicRoughnessTexture,
+                Sampler = _passSampler
+            }
         };
 
-        SDL.BindGPUFragmentSamplers(lightingPass, 0, new IntPtr(&albedoTargetBinding), 1);
+        SDL.BindGPUFragmentSamplers(lightingPass, 0, (IntPtr) passBindings, 4);
         
         SDL.DrawGPUPrimitives(lightingPass, 6, 1, 0, 0);
         

@@ -10,6 +10,7 @@ struct VSOutput
     float4 Position: SV_Position;
     float4 Color: COLOR0;
     float2 TexCoord: TEXCOORD0;
+    float3 Normal: NORMAL0;
     float3 WorldSpace: POSITION0;
 };
 
@@ -25,9 +26,10 @@ VSOutput VSMain(const in Vertex input)
     VSOutput output;
 
     output.Color = input.Color;
-    output.WorldSpace = mul(gWorld, float4(input.Position, 1.0)).xyz;
-    output.Position = mul(gCamera.Projection, mul(gCamera.View, float4(output.WorldSpace, 1.0)));
+    output.WorldSpace = mul(vWorld, float4(input.Position, 1.0)).xyz;
+    output.Position = mul(vCamera.Projection, mul(vCamera.View, float4(output.WorldSpace, 1.0)));
     output.TexCoord = input.TexCoord;
+    output.Normal = input.Normal;
     
     return output;
 }
@@ -45,7 +47,7 @@ GBufferOutput PSMain(const in VSOutput input)
 
     output.Albedo = float4(albedo, 1.0);
     output.Position = float4(input.WorldSpace, 1.0);
-    output.Normal = float4(normal, 1.0);
+    output.Normal = float4(input.Normal, 1.0);
     output.MetallicRoughness = float4(metallic, roughness, occlusion, emission);
     
     return output;
