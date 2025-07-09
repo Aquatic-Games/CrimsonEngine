@@ -1,3 +1,6 @@
+#ifndef CS_MATERIAL_H
+#define CS_MATERIAL_H
+
 #include "../Common.hlsli"
 
 struct Material
@@ -10,3 +13,5 @@ struct Material
 };
 
 CBUFFER_PXL(gMaterial, 0, Material)
+
+#endif

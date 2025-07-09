@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CS_COMMON_H
+#define CS_COMMON_H
 
 #define SAMPLER(Type, Name, Index) \
     Texture##Type Name : register(t##Index, space2);\
@@ -17,3 +18,5 @@ struct Camera
     float4x4 Projection;
     float4x4 View;
 };
+
+#endif

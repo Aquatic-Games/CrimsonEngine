@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#ifndef CS_CRIMSON_H
+#define CS_CRIMSON_H
 
 #include "Common.hlsli"
 
@@ -12,3 +13,5 @@ struct Vertex
 
 CBUFFER_VTX(gCamera, 0, Camera)
 CBUFFER_VTX(gWorld, 1, float4x4)
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef CS_BRDF_H
+#define CS_BRDF_H
+
 #include "../Math.hlsli"
 
 // Based on "Real Shading in Unreal Engine 4
@@ -42,3 +45,5 @@ float SpecularF(const float v, const float h)
 
     return f0 + (1 - f0) * pow(1 - vDotH, 5.0);
 }
+
+#endif
