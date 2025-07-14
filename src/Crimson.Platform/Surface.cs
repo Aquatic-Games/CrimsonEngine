@@ -50,6 +50,12 @@ public static class Surface
         }
     }
 
+    public static bool Fullscreen
+    {
+        get => (SDL.GetWindowFlags(Window) & SDL.WindowFlags.Fullscreen) != 0;
+        set => SDL.SetWindowFullscreen(Window, value);
+    }
+
     /// <summary>
     /// Gets/sets if the cursor is visible. If false, the cursor will be invisible and locked to the surface.
     /// </summary>
