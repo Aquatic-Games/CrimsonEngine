@@ -51,7 +51,7 @@ float BRDF(const float dfg, const float n, const float v, const float l)
     const float nDotL = max(dot(n, l), 0.0);
     const float nDotV = max(dot(n, v), 0.0);
 
-    return dfg / (4.0 * nDotL * nDotV) + 0.0001;
+    return dfg / ((4.0 * nDotL * nDotV) + 0.0001);
 }
 
 #endif
