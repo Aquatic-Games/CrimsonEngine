@@ -23,7 +23,7 @@ internal class SpriteRenderer : IDisposable
         Vector2T<float> bottomRight = new Vector2T<float>(halfSize.Width, -halfSize.Height) * matrix;
 
         _batcher.AddToDrawQueue(new TextureBatcher.Draw(sprite.Texture, topLeft, topRight, bottomLeft, bottomRight,
-            new Rectangle<int>(Vector2T<int>.Zero, sprite.Texture.Size), Color.White));
+            new Rectangle<int>(Vector2T<int>.Zero, sprite.Texture.Size), Color.White, BlendMode.Blend));
     }
 
     public bool Render(IntPtr cb, IntPtr swapchainTarget, bool shouldClear, Size<int> swapchainSize, CameraMatrices matrices)

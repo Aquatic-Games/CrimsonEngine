@@ -72,6 +72,11 @@ public static class Renderer
     }
 
     /// <summary>
+    /// The main renderer debug textures.
+    /// </summary>
+    public static Texture[] DebugRendererTextures => _deferredRenderer!.DebugTextures;
+    
+    /// <summary>
     /// Create the graphics subsystem.
     /// </summary>
     /// <param name="appName">The application name.</param>
@@ -204,8 +209,9 @@ public static class Renderer
     /// <param name="size">The size, in pixels.</param>
     /// <param name="source">The source rectangle to use, if any.</param>
     /// <param name="tint">The tint to use, if any.</param>
+    /// <param name="blend">The blending mode to use on draw.</param>
     public static void DrawImage(Texture texture, Vector2T<int> position, Size<int> size, Rectangle<int>? source = null,
-        Color? tint = null)
+        Color? tint = null, BlendMode blend = BlendMode.Blend)
     {
         Rectangle<int> src = source ?? new Rectangle<int>(Vector2T<int>.Zero, texture.Size);
         
@@ -215,7 +221,7 @@ public static class Renderer
         Vector2T<int> bottomRight = position + new Vector2T<int>(size.Width, size.Height);
 
         _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(texture, topLeft.As<float>(), topRight.As<float>(),
-            bottomLeft.As<float>(), bottomRight.As<float>(), src, tint ?? Color.White));
+            bottomLeft.As<float>(), bottomRight.As<float>(), src, tint ?? Color.White, blend));
     }
 
     /// <summary>
@@ -225,10 +231,11 @@ public static class Renderer
     /// <param name="position">The position, in pixels.</param>
     /// <param name="source">The source rectangle to use, if any.</param>
     /// <param name="tint">The tint to use, if any.</param>
+    /// <param name="blend">The blending mode to use on draw.</param>
     public static void DrawImage(Texture texture, Vector2T<int> position, Rectangle<int>? source = null,
-        Color? tint = null)
+        Color? tint = null, BlendMode blend = BlendMode.Blend)
     {
-        DrawImage(texture, position, source?.Size ?? texture.Size, source, tint);
+        DrawImage(texture, position, source?.Size ?? texture.Size, source, tint, blend);
     }
 
     /// <summary>
@@ -292,7 +299,7 @@ public static class Renderer
         }
 
         _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(Texture.White, topLeft, topRight, bottomLeft, bottomRight,
-            new Rectangle<int>(0, 0, 1, 1), color));
+            new Rectangle<int>(0, 0, 1, 1), color, BlendMode.Blend));
     }
 
     public static void DrawFilledRectangle(Vector2T<int> position, Size<int> size, Color color)
@@ -303,7 +310,7 @@ public static class Renderer
         Vector2T<int> bottomRight = new Vector2T<int>(position.X + size.Width, position.Y + size.Height);
 
         _uiBatcher.AddToDrawQueue(new TextureBatcher.Draw(Texture.White, topLeft.As<float>(), topRight.As<float>(),
-            bottomLeft.As<float>(), bottomRight.As<float>(), new Rectangle<int>(0, 0, 1, 1), color));
+            bottomLeft.As<float>(), bottomRight.As<float>(), new Rectangle<int>(0, 0, 1, 1), color, BlendMode.Blend));
     }
 
     public static void DrawBorderRectangle(Vector2T<int> position, Size<int> size, int borderWidth, Color color)

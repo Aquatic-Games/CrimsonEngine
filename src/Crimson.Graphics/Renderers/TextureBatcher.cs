@@ -29,7 +29,8 @@ internal class TextureBatcher : IDisposable
 
     private IntPtr _transferBuffer;
 
-    private readonly IntPtr _pipeline;
+    private readonly IntPtr _blendPipeline;
+    private readonly IntPtr _noBlendPipeline;
 
     private readonly IntPtr _sampler;
 
@@ -112,7 +113,9 @@ internal class TextureBatcher : IDisposable
             }
         };
 
-        _pipeline = SDL.CreateGPUGraphicsPipeline(device, in pipelineInfo).Check("Create GPU pipeline");
+        _blendPipeline = SDL.CreateGPUGraphicsPipeline(device, in pipelineInfo).Check("Create GPU pipeline");
+        targetDesc.BlendState = SdlUtils.NoBlend;
+        _noBlendPipeline = SDL.CreateGPUGraphicsPipeline(device, in pipelineInfo).Check("Create GPU pipeline");
         
         SDL.ReleaseGPUShader(device, pixelShader);
         SDL.ReleaseGPUShader(device, vertexShader);
@@ -147,17 +150,19 @@ internal class TextureBatcher : IDisposable
         uint bufferOffset = 0;
         uint lastBufferOffset = 0;
         Texture? texture = null;
+        BlendMode blendMode = BlendMode.Blend;
 
         foreach (Draw draw in _drawQueue)
         {
-            if (draw.Texture != texture && numDraws != 0)
+            if ((draw.Texture != texture || draw.Blend != blendMode) && numDraws != 0)
             {
-                _drawList.Add(new DrawList(texture, numDraws, lastBufferOffset));
+                _drawList.Add(new DrawList(texture, numDraws, lastBufferOffset, blendMode));
                 lastBufferOffset = bufferOffset;
                 numDraws = 0;
             }
 
             texture = draw.Texture;
+            blendMode = draw.Blend;
 
             uint vOffset = bufferOffset * NumVertices;
             uint iOffset = bufferOffset * NumIndices;
@@ -186,7 +191,7 @@ internal class TextureBatcher : IDisposable
             bufferOffset++;
         }
         
-        _drawList.Add(new DrawList(texture, numDraws, lastBufferOffset));
+        _drawList.Add(new DrawList(texture, numDraws, lastBufferOffset, blendMode));
         _drawQueue.Clear();
         
         uint numVertexBytes = bufferOffset * NumVertices * Vertex.SizeInBytes;
@@ -259,8 +264,6 @@ internal class TextureBatcher : IDisposable
         SDL.SetGPUViewport(renderPass,
             new SDL.GPUViewport { X = 0, Y = 0, W = size.Width, H = size.Height, MinDepth = 0, MaxDepth = 1 });
         
-        SDL.BindGPUGraphicsPipeline(renderPass, _pipeline);
-        
         SDL.GPUBufferBinding vertexBinding = new()
         {
             Buffer = _vertexBuffer,
@@ -296,6 +299,15 @@ internal class TextureBatcher : IDisposable
         Debug.Assert(drawList.NumDraws != 0);
         Debug.Assert(drawList.Texture != null);
 
+        IntPtr pipeline = drawList.Blend switch
+        {
+            BlendMode.None => _noBlendPipeline,
+            BlendMode.Blend => _blendPipeline,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        
+        SDL.BindGPUGraphicsPipeline(pass, pipeline);
+        
         SDL.GPUTextureSamplerBinding samplerBinding = new()
         {
             Sampler = _sampler,
@@ -310,7 +322,8 @@ internal class TextureBatcher : IDisposable
     public void Dispose()
     {
         SDL.ReleaseGPUSampler(_device, _sampler);
-        SDL.ReleaseGPUGraphicsPipeline(_device, _pipeline);
+        SDL.ReleaseGPUGraphicsPipeline(_device, _blendPipeline);
+        SDL.ReleaseGPUGraphicsPipeline(_device, _noBlendPipeline);
         SDL.ReleaseGPUTransferBuffer(_device, _transferBuffer);
         SDL.ReleaseGPUBuffer(_device, _indexBuffer);
         SDL.ReleaseGPUBuffer(_device, _vertexBuffer);
@@ -332,11 +345,12 @@ internal class TextureBatcher : IDisposable
         }
     }
 
-    private readonly struct DrawList(Texture? texture, uint numDraws, uint offset)
+    private readonly struct DrawList(Texture? texture, uint numDraws, uint offset, BlendMode blend)
     {
         public readonly Texture? Texture = texture;
         public readonly uint NumDraws = numDraws;
         public readonly uint Offset = offset;
+        public readonly BlendMode Blend = blend;
     }
 
     public readonly struct Draw
@@ -348,9 +362,10 @@ internal class TextureBatcher : IDisposable
         public readonly Vector2T<float> BottomRight;
         public readonly Rectangle<int> Source;
         public readonly Color Tint;
+        public readonly BlendMode Blend;
 
         public Draw(Texture texture, Vector2T<float> topLeft, Vector2T<float> topRight, Vector2T<float> bottomLeft,
-            Vector2T<float> bottomRight, Rectangle<int> source, Color tint)
+            Vector2T<float> bottomRight, Rectangle<int> source, Color tint, BlendMode blend)
         {
             Texture = texture;
             TopLeft = topLeft;
@@ -359,6 +374,7 @@ internal class TextureBatcher : IDisposable
             BottomRight = bottomRight;
             Source = source;
             Tint = tint;
+            Blend = blend;
         }
     }
 }

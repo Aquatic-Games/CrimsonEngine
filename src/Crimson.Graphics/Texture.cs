@@ -14,8 +14,14 @@ public class Texture : IContentResource<Texture>, IDisposable
 {
     private readonly IntPtr _device;
     private readonly uint _numMipLevels;
+    private readonly bool _isOwnedByRenderer;
     
     internal readonly IntPtr TextureHandle;
+
+    /// <summary>
+    /// The texture's friendly name, if any.
+    /// </summary>
+    public readonly string? Name;
 
     /// <summary>
     /// The texture's size in pixels.
@@ -31,6 +37,7 @@ public class Texture : IContentResource<Texture>, IDisposable
     /// <param name="name">The texture's name used during debugging, if any.</param>
     public Texture(in Size<int> size, byte[]? data, PixelFormat format, string? name = null)
     {
+        Name = name;
         Size = size;
 
         _device = Renderer.Device;
@@ -70,6 +77,14 @@ public class Texture : IContentResource<Texture>, IDisposable
     /// <param name="path">The path to load from.</param>
     /// <param name="name">The texture's name used during debugging, if any. If nothing is provided, the path will be used.</param>
     public Texture(string path) : this(new Bitmap(path), path) { }
+
+    internal Texture(IntPtr textureHandle, Size<int> size, string name)
+    {
+        Name = name;
+        Size = size;
+        TextureHandle = textureHandle;
+        _isOwnedByRenderer = true;
+    }
 
     public unsafe void Update(Rectangle<int> location, byte[] data)
     {
@@ -131,6 +146,9 @@ public class Texture : IContentResource<Texture>, IDisposable
     /// </summary>
     public void Dispose()
     {
+        if (_isOwnedByRenderer)
+            return;
+        
         SDL.ReleaseGPUTexture(_device, TextureHandle);
     }
     

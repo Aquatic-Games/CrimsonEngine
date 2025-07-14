@@ -16,6 +16,11 @@ internal static class SdlUtils
         ColorBlendOp = SDL.GPUBlendOp.Add,
         AlphaBlendOp = SDL.GPUBlendOp.Add,
     };
+
+    public static SDL.GPUColorTargetBlendState NoBlend => new()
+    {
+        EnableBlend = 0
+    };
     
     public static IntPtr Check(this IntPtr ptr, string operation)
     {

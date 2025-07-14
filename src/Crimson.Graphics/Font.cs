@@ -120,7 +120,7 @@ public unsafe class Font : IContentResource<Font>, IDisposable
         Vector2T<float> bottomRight = new Vector2T<float>(position.X + size.Width, position.Y + size.Height);
 
         batcher.AddToDrawQueue(new TextureBatcher.Draw(c.Texture, topLeft, topRight, bottomLeft, bottomRight, c.Region,
-            color));
+            color, BlendMode.Blend));
     }
 
     private Character GetCharacter(char c, uint size)

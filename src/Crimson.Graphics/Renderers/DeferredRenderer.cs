@@ -8,10 +8,7 @@ namespace Crimson.Graphics.Renderers;
 
 internal class DeferredRenderer : IDisposable
 {
-    // Most of the gbuffers are just representing RGBA8 pixel data. Only the position buffer needs any higher accuracy.
-    // As such using R8G8B8A8_UNorm when possible significantly reduces data throughput.
-    private const SDL.GPUTextureFormat GBufferInputFormat = SDL.GPUTextureFormat.R8G8B8A8Unorm;
-    private const SDL.GPUTextureFormat GBufferPositionFormat = SDL.GPUTextureFormat.R32G32B32A32Float;
+    private const SDL.GPUTextureFormat GBufferFormat = SDL.GPUTextureFormat.R32G32B32A32Float;
     
     private readonly IntPtr _device;
     
@@ -24,19 +21,29 @@ internal class DeferredRenderer : IDisposable
     private readonly IntPtr _passSampler;
 
     private readonly List<WorldRenderable> _drawQueue;
+
+    public Texture[] DebugTextures;
     
     public unsafe DeferredRenderer(IntPtr device, Size<int> size, SDL.GPUTextureFormat outFormat)
     {
         _device = device;
 
-        _albedoTexture = CreateGBufferTexture(_device, size, GBufferInputFormat);
+        _albedoTexture = CreateGBufferTexture(_device, size, GBufferFormat);
         SDL.SetGPUTextureName(_device, _albedoTexture, "Albedo GBuffer");
-        _positionTexture = CreateGBufferTexture(_device, size, GBufferPositionFormat);
+        _positionTexture = CreateGBufferTexture(_device, size, GBufferFormat);
         SDL.SetGPUTextureName(_device, _positionTexture, "Position GBuffer");
-        _normalTexture = CreateGBufferTexture(_device, size, GBufferInputFormat);
+        _normalTexture = CreateGBufferTexture(_device, size, GBufferFormat);
         SDL.SetGPUTextureName(_device, _normalTexture, "Normal GBuffer");
-        _metallicRoughnessTexture = CreateGBufferTexture(_device, size, GBufferInputFormat);
+        _metallicRoughnessTexture = CreateGBufferTexture(_device, size, GBufferFormat);
         SDL.SetGPUTextureName(_device, _metallicRoughnessTexture, "Metallic-Roughness-Occlusion GBuffer");
+
+        DebugTextures =
+        [
+            new Texture(_albedoTexture, size, "Albedo"),
+            new Texture(_positionTexture, size, "Position"),
+            new Texture(_normalTexture, size, "Normals"),
+            new Texture(_metallicRoughnessTexture, size, "Metallic-Roughness-Occlusion")
+        ];
 
         IntPtr passVtx = ShaderUtils.LoadGraphicsShader(device, SDL.GPUShaderStage.Vertex, "Deferred/DeferredPass",
             "VSMain", 0, 0);
@@ -276,10 +283,18 @@ internal class DeferredRenderer : IDisposable
         SDL.ReleaseGPUTexture(_device, _normalTexture);
         SDL.ReleaseGPUTexture(_device, _metallicRoughnessTexture);
 
-        _albedoTexture = CreateGBufferTexture(_device, newSize, GBufferInputFormat);
-        _positionTexture = CreateGBufferTexture(_device, newSize, GBufferPositionFormat);
-        _normalTexture = CreateGBufferTexture(_device, newSize, GBufferInputFormat);
-        _metallicRoughnessTexture = CreateGBufferTexture(_device, newSize, GBufferInputFormat);
+        _albedoTexture = CreateGBufferTexture(_device, newSize, GBufferFormat);
+        _positionTexture = CreateGBufferTexture(_device, newSize, GBufferFormat);
+        _normalTexture = CreateGBufferTexture(_device, newSize, GBufferFormat);
+        _metallicRoughnessTexture = CreateGBufferTexture(_device, newSize, GBufferFormat);
+        
+        DebugTextures =
+        [
+            new Texture(_albedoTexture, newSize, "Albedo"),
+            new Texture(_positionTexture, newSize, "Position"),
+            new Texture(_normalTexture, newSize, "Normals"),
+            new Texture(_metallicRoughnessTexture, newSize, "Metallic-Roughness-Occlusion")
+        ];
     }
     
     public void Dispose()
