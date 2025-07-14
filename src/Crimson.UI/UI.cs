@@ -28,13 +28,18 @@ public static class UI
             : new Font(Resources.LoadEmbeddedResource("Crimson.UI.Roboto-Regular.ttf",
                 Assembly.GetExecutingAssembly()));
 
-        BaseControl = new AnchorLayout();
-        BaseControl.CalculateLayout(_screenRegion);
+        Clear();
     }
 
     public static void Destroy()
     {
         Theme.Font.Dispose();
+    }
+
+    public static void Clear()
+    {
+        BaseControl = new AnchorLayout();
+        BaseControl.CalculateLayout(_screenRegion);
     }
 
     public static void Update(float dt)

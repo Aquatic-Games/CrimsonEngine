@@ -132,5 +132,7 @@ public abstract class Scene : IDisposable
             entity.Dispose();
         
         Content.Content.UnloadAllResources();
+        
+        UI.UI.Clear();
     }
 }
