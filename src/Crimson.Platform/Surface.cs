@@ -10,9 +10,10 @@ namespace Crimson.Platform;
 /// </summary>
 public static class Surface
 {
-    private static IntPtr _window;
     private static string _title;
     private static string _details;
+    
+    internal static IntPtr Window;
 
     /// <summary>
     /// The surface's size, in pixels.
@@ -22,11 +23,11 @@ public static class Surface
     {
         get
         {
-            SDL.GetWindowSizeInPixels(_window, out int w, out int h);
+            SDL.GetWindowSizeInPixels(Window, out int w, out int h);
 
             return new Size<int>(w, h);
         }
-        set => SDL.SetWindowSize(_window, value.Width, value.Height);
+        set => SDL.SetWindowSize(Window, value.Width, value.Height);
     }
 
     public static string Title
@@ -35,7 +36,7 @@ public static class Surface
         set
         {
             _title = value;
-            SDL.SetWindowTitle(_window, _title + _details);
+            SDL.SetWindowTitle(Window, _title + _details);
         }
     }
 
@@ -45,7 +46,7 @@ public static class Surface
         set
         {
             _details = value;
-            SDL.SetWindowTitle(_window, _title + _details);
+            SDL.SetWindowTitle(Window, _title + _details);
         }
     }
 
@@ -55,8 +56,8 @@ public static class Surface
     /// <remarks>Only works on platforms that support mouse input.</remarks>
     public static bool CursorVisible
     {
-        get => SDL.GetWindowRelativeMouseMode(_window);
-        set => SDL.SetWindowRelativeMouseMode(_window, !value);
+        get => SDL.GetWindowRelativeMouseMode(Window);
+        set => SDL.SetWindowRelativeMouseMode(Window, !value);
     }
     
     /// <summary>
@@ -64,13 +65,13 @@ public static class Surface
     /// </summary>
     public static bool AllowTextInput
     {
-        get => SDL.TextInputActive(_window);
+        get => SDL.TextInputActive(Window);
         set
         {
             if (value)
-                SDL.StartTextInput(_window);
+                SDL.StartTextInput(Window);
             else
-                SDL.StopTextInput(_window);
+                SDL.StopTextInput(Window);
         }
     }
     
@@ -119,7 +120,7 @@ public static class Surface
 
             return info;*/
 
-            return new SurfaceInfo(_window, Size);
+            return new SurfaceInfo(Window, Size);
         }
     }
 
@@ -145,9 +146,9 @@ public static class Surface
             flags |= SDL.WindowFlags.Fullscreen;
         
         Logger.Trace("Creating window.");
-        _window = SDL.CreateWindow(_title, options.Size.Width, options.Size.Height, flags);
+        Window = SDL.CreateWindow(_title, options.Size.Width, options.Size.Height, flags);
 
-        if (_window == IntPtr.Zero)
+        if (Window == IntPtr.Zero)
             throw new Exception($"Failed to create window: {SDL.GetError()}");
     }
 
@@ -156,6 +157,6 @@ public static class Surface
     /// </summary>
     public static void Destroy()
     {
-        SDL.DestroyWindow(_window);
+        SDL.DestroyWindow(Window);
     }
 }
