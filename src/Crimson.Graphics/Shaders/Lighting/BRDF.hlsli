@@ -11,7 +11,7 @@ float4 DiffuseBRDF(const float4 albedo)
     return albedo / M_PI;
 }
 
-float SpecularD(const float roughness, const float n, const float h)
+float SpecularD(const float roughness, const float3 n, const float3 h)
 {
     // a = Roughness^2
     const float a = roughness * roughness;
@@ -23,7 +23,7 @@ float SpecularD(const float roughness, const float n, const float h)
     return a2 / (M_PI * denominator * denominator);
 }
 
-float SpecularG(const float n, const float v, const float l, const float roughness)
+float SpecularG(const float3 n, const float3 v, const float3 l, const float roughness)
 {
     const float rough = roughness + 1.0;
     const float k = (rough * rough) / 8.0;
@@ -37,13 +37,13 @@ float SpecularG(const float n, const float v, const float l, const float roughne
     return gv * gl;
 }
 
-float3 SpecularF(const float v, const float h, const float3 f0)
+float3 SpecularF(const float3 v, const float3 h, const float3 f0)
 {
     const float vDotH = max(dot(v, h), 0.0);
     return f0 + (1.0 - f0) * pow(clamp(1.0 - vDotH, 0.0, 1.0), 5.0);
 }
 
-float3 BRDF(const float3 dfg, const float n, const float v, const float l)
+float3 BRDF(const float3 dfg, const float3 n, const float3 v, const float3 l)
 {
     const float nDotL = max(dot(n, l), 0.0);
     const float nDotV = max(dot(n, v), 0.0);

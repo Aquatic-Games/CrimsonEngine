@@ -40,7 +40,7 @@ public class Material : IDisposable
         Albedo = definition.Albedo;
         Normal = definition.Normal ?? Texture.EmptyNormal;
         Metallic = definition.Metallic ?? Texture.White;
-        Roughness = definition.Roughness ?? Texture.Black;
+        Roughness = definition.Roughness ?? Texture.White;
         Occlusion = definition.Occlusion ?? Texture.White;
         Emission = definition.Emission ?? Texture.Black;
 
