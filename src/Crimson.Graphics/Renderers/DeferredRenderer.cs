@@ -77,8 +77,8 @@ internal class DeferredRenderer : IDisposable
             MinFilter = SDL.GPUFilter.Linear,
             MagFilter = SDL.GPUFilter.Linear,
             MipmapMode = SDL.GPUSamplerMipmapMode.Linear,
-            AddressModeU = SDL.GPUSamplerAddressMode.ClampToEdge,
-            AddressModeV = SDL.GPUSamplerAddressMode.ClampToEdge
+            AddressModeU = SDL.GPUSamplerAddressMode.Repeat,
+            AddressModeV = SDL.GPUSamplerAddressMode.Repeat
         };
 
         _passSampler = SDL.CreateGPUSampler(_device, in samplerInfo).Check("Create sampler");
