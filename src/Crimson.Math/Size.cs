@@ -91,6 +91,9 @@ public readonly struct Size<T> :
     public bool Equals(Size<T> other)
         => this == other;
 
+    public static explicit operator Vector2T<T>(Size<T> size)
+        => new Vector2T<T>(size.Width, size.Height);
+
     public override bool Equals(object? obj)
     {
         return obj is Size<T> other && Equals(other);

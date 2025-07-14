@@ -67,20 +67,16 @@ PSOutput PSMain(const in VSOutput input)
     
     const float3 n = normalize(normal.xyz);
     const float3 v = normalize(camPos - worldPos);
-
-    const float3 lightPos = float3(0.0, 2.0, 0.0);
     
-    const float3 l = normalize(lightPos - worldPos);
+    const float3 l = normalize(-float3(0.0, 1.0, 0.0));
+    
     const float3 h = normalize(v + l);
-    const float distance = length(lightPos - worldPos);
-    const float attenuation = 1.0 / (distance * distance);
-    const float3 radiance = (float3) 1.0 * attenuation;
 
     const float d = SpecularD(roughness, n, h);
-    const float f = SpecularF(v, h);
-    const float g = SpecularG(n, v, h, roughness);
+    const float3 f = SpecularF(v, h, lerp(0.04, albedo, metallic));
+    const float g = SpecularG(n, v, l, roughness);
 
-    const float brdf = BRDF(d * f * g, n, v, l);
+    const float3 brdf = BRDF(d * f * g, n, v, l);
 
     const float3 kS = f;
     float3 kD = (float3) 1.0 - kS;
@@ -88,7 +84,7 @@ PSOutput PSMain(const in VSOutput input)
 
     float nDotL = max(dot(n, l), 0.0);
 
-    const float light = (kD * albedo / M_PI + brdf) * radiance * nDotL;
+    const float light = (kD * albedo / M_PI + brdf) * 1.0 * nDotL;
     
     output.Color = float4((float3) light + (float3) 0.13 * albedo * occlusion, 1.0);
     

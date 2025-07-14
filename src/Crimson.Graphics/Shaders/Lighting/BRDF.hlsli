@@ -25,28 +25,25 @@ float SpecularD(const float roughness, const float n, const float h)
 
 float SpecularG(const float n, const float v, const float l, const float roughness)
 {
-    const float rough = roughness + 1;
+    const float rough = roughness + 1.0;
     const float k = (rough * rough) / 8.0;
 
     const float nDotV = max(dot(n, v), 0.0);
     const float nDotL = max(dot(n, l), 0.0);
     
-    const float gv = nDotV / (nDotV * (1 - k) + k);
-    const float gl = nDotL / (nDotL * (1 - k) + k);
+    const float gv = nDotV / (nDotV * (1.0 - k) + k);
+    const float gl = nDotL / (nDotL * (1.0 - k) + k);
 
     return gv * gl;
 }
 
-float SpecularF(const float v, const float h)
+float3 SpecularF(const float v, const float h, const float3 f0)
 {
-    const float f0 = 0.04;
-
     const float vDotH = max(dot(v, h), 0.0);
-
-    return f0 + (1 - f0) * pow(clamp(1 - vDotH, 0.0, 1.0), 5.0);
+    return f0 + (1.0 - f0) * pow(clamp(1.0 - vDotH, 0.0, 1.0), 5.0);
 }
 
-float BRDF(const float dfg, const float n, const float v, const float l)
+float3 BRDF(const float3 dfg, const float n, const float v, const float l)
 {
     const float nDotL = max(dot(n, l), 0.0);
     const float nDotV = max(dot(n, v), 0.0);
