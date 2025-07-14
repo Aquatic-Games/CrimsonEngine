@@ -5,6 +5,8 @@
 #include "../Crimson.hlsli"
 #include "Material.hlsli"
 
+#include "../Math.hlsli"
+
 struct VSOutput
 {
     float4 Position: SV_Position;
@@ -38,7 +40,9 @@ GBufferOutput PSMain(const in VSOutput input)
 {
     GBufferOutput output;
 
-    const float3 albedo = SAMPLE(Albedo, input.TexCoord).rgb * input.Color.rgb * gMaterial.AlbedoTint.rgb;
+    const float4 albedo = SAMPLE(Albedo, input.TexCoord) * input.Color * gMaterial.AlbedoTint;
+    clip(albedo.a - GetBayerValue(input.Position.xy));
+    
     const float3 normal = SAMPLE(Normal, input.TexCoord).rgb * 2.0 - 1.0;
     const float metallic = SAMPLE(Metallic, input.TexCoord).r * gMaterial.MetallicMultiplier;
     const float roughness = SAMPLE(Roughness, input.TexCoord).r * gMaterial.RoughnessMultiplier;
@@ -56,7 +60,7 @@ GBufferOutput PSMain(const in VSOutput input)
 
     float3x3 tbn = float3x3(t, b, n);
 
-    output.Albedo = float4(albedo, 1.0);
+    output.Albedo = float4(albedo.rgb, 1.0);
     output.Position = float4(input.WorldSpace, 1.0);
     output.Normal = float4(normalize(mul(normal, tbn)), 1.0);
     output.MetallicRoughness = float4(metallic, roughness, occlusion, emission);
