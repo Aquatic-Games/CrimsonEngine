@@ -66,7 +66,7 @@ public static class Events
                 }
                 case SDL.EventType.WindowResized:
                 {
-                    SurfaceSizeChanged(new Size<int>(sdlEvent.Window.Data1, sdlEvent.Window.Data2));
+                    SurfaceSizeChanged(Surface.Size);
                     break;
                 }
                 
@@ -95,7 +95,7 @@ public static class Events
                 }
                 case SDL.EventType.MouseMotion:
                 {
-                    MouseMove(new Vector2(sdlEvent.Motion.X, sdlEvent.Motion.Y),
+                    MouseMove(new Vector2(sdlEvent.Motion.X, sdlEvent.Motion.Y) * Surface.DisplayScale,
                         new Vector2(sdlEvent.Motion.XRel, sdlEvent.Motion.YRel));
                     break;
                 }
@@ -105,7 +105,7 @@ public static class Events
                     break;
                 }
 
-                case SDL.EventType.TextInput :
+                case SDL.EventType.TextInput:
                 {
                     string text = new string((sbyte*) sdlEvent.Text.Text);
                     Console.WriteLine(text);

@@ -130,6 +130,8 @@ public static class Surface
         }
     }
 
+    public static float DisplayScale => SDL.GetWindowDisplayScale(Window);
+    
     /// <summary>
     /// Create the <see cref="Surface"/> with the given options.
     /// </summary>
@@ -143,7 +145,7 @@ public static class Surface
         if (!SDL.Init(SDL.InitFlags.Video))
             throw new Exception($"Failed to initialize SDL: {SDL.GetError()}");
         
-        SDL.WindowFlags flags = SDL.WindowFlags.InputFocus | SDL.WindowFlags.MouseFocus;
+        SDL.WindowFlags flags = SDL.WindowFlags.InputFocus | SDL.WindowFlags.MouseFocus | SDL.WindowFlags.HighPixelDensity;
 
         if (options.Resizable)
             flags |= SDL.WindowFlags.Resizable;
