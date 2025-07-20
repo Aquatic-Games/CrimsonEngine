@@ -98,7 +98,7 @@ public static class Renderer
             SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreatePreferLowPowerBoolean, true);
         }
 
-        if (OperatingSystem.IsWindows())
+        if (OperatingSystem.IsWindows() && !EnvVar.IsTrue(EnvVar.ForceVulkan))
         {
             SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateShadersDXILBoolean, true);
             // Use D3D12 on windows

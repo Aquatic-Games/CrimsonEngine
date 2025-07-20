@@ -1,4 +1,5 @@
-﻿using Crimson.Core;
+﻿using System.Diagnostics;
+using Crimson.Core;
 using Crimson.Graphics;
 using Crimson.Math;
 using SDL3;
@@ -150,7 +151,7 @@ public static class Surface
         if (options.Resizable)
             flags |= SDL.WindowFlags.Resizable;
 
-        if (options.FullScreen)
+        if (options.FullScreen || EnvVar.IsTrue(EnvVar.Fullscreen))
             flags |= SDL.WindowFlags.Fullscreen;
         
         Logger.Trace("Creating window.");
@@ -158,6 +159,18 @@ public static class Surface
 
         if (Window == IntPtr.Zero)
             throw new Exception($"Failed to create window: {SDL.GetError()}");
+
+        if (EnvVar.TryGetInt(EnvVar.SurfaceDisplay, out int displayId))
+        {
+            uint[]? displays = SDL.GetDisplays(out _);
+            Debug.Assert(displays != null);
+
+            if (displayId >= 0 && displayId < displays.Length)
+            {
+                int centered = (int) SDL.WindowPosCenteredDisplay((int) displays[displayId]);
+                SDL.SetWindowPosition(Window, centered, centered);
+            }
+        }
     }
 
     /// <summary>
