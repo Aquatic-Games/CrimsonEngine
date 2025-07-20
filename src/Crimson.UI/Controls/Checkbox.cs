@@ -31,30 +31,32 @@ public class Checkbox : Control
 
     protected internal override void Draw()
     {
+        Theme theme = Theme.AsScaled(Scale);
+        
         Color color;
 
         if (IsClicked)
-            color = Theme.ButtonClickedColor;
+            color = theme.ButtonClickedColor;
         else if (IsHovered)
-            color = Theme.ButtonHoveredColor;
+            color = theme.ButtonHoveredColor;
         else
-            color = Theme.ButtonColor;
+            color = theme.ButtonColor;
 
-        Renderer.DrawRectangle(ScreenRegion.Position, ScreenRegion.Size, color, Theme.BorderSize,
-            Theme.ButtonBorderColor);
+        Renderer.DrawRectangle(ScreenRegion.Position, ScreenRegion.Size, color, theme.BorderSize,
+            theme.ButtonBorderColor);
 
-        int halfPadding = Theme.Padding / 2;
+        int halfPadding = theme.Padding / 2;
 
         if (Checked)
         {
             Renderer.DrawFilledRectangle(ScreenRegion.Position + new Vector2T<int>(halfPadding),
-                ScreenRegion.Size - new Size<int>(halfPadding * 2), Theme.CheckboxSelectedColor);
+                ScreenRegion.Size - new Size<int>(halfPadding * 2), theme.CheckboxSelectedColor);
         }
 
-        Size<int> textSize = Theme.Font.MeasureText(Text, Theme.TextSize);
+        Size<int> textSize = theme.Font.MeasureText(Text, theme.TextSize);
         
-        Renderer.DrawText(Theme.Font,
-            ScreenRegion.Position + new Vector2T<int>(ScreenRegion.Width + halfPadding, ScreenRegion.Height / 2 - textSize.Height / 2), Theme.TextSize, Text,
-            Theme.TextColor);
+        Renderer.DrawText(theme.Font,
+            ScreenRegion.Position + new Vector2T<int>(ScreenRegion.Width + halfPadding, ScreenRegion.Height / 2 - textSize.Height / 2), theme.TextSize, Text,
+            theme.TextColor);
     }
 }

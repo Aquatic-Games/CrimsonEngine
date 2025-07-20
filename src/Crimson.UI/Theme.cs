@@ -35,6 +35,17 @@ public struct Theme
         Padding = 12;
     }
 
+    public Theme AsScaled(float scale)
+    {
+        return this with
+        {
+            TextSize = (uint) (TextSize * scale),
+            HeadingSize = (uint) (HeadingSize * scale),
+            Padding = (int) (Padding * scale),
+            BorderSize = int.Max((int) (BorderSize * scale), 1)
+        };
+    }
+
     public static Theme Light => new Theme
     {
         TextColor = Color.White,

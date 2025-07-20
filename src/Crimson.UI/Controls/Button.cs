@@ -25,21 +25,23 @@ public class Button : Control
 
     protected internal override void Draw()
     {
+        Theme theme = Theme.AsScaled(Scale);
+        
         Color color;
         
         if (IsHeld)
-            color = Theme.ButtonClickedColor;
+            color = theme.ButtonClickedColor;
         else if (IsHovered)
-            color = Theme.ButtonHoveredColor;
+            color = theme.ButtonHoveredColor;
         else
-            color = Theme.ButtonColor;
+            color = theme.ButtonColor;
 
-        Renderer.DrawRectangle(ScreenRegion.Position, ScreenRegion.Size, color, Theme.BorderSize,
-            Theme.ButtonBorderColor);
+        Renderer.DrawRectangle(ScreenRegion.Position, ScreenRegion.Size, color, theme.BorderSize,
+            theme.ButtonBorderColor);
 
-        Size<int> textSize = Theme.Font.MeasureText(Text, Theme.TextSize);
+        Size<int> textSize = theme.Font.MeasureText(Text, theme.TextSize);
         Vector2T<int> textPos = ScreenRegion.Position + new Vector2T<int>(ScreenRegion.Width / 2 - textSize.Width / 2, ScreenRegion.Height / 2 - textSize.Height / 2);
         
-        Renderer.DrawText(Theme.Font, textPos, Theme.TextSize, Text, Theme.TextColor);
+        Renderer.DrawText(theme.Font, textPos, theme.TextSize, Text, theme.TextColor);
     }
 }

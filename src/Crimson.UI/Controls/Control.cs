@@ -6,6 +6,7 @@ namespace Crimson.UI.Controls;
 public abstract class Control
 {
     protected Rectangle<int> ScreenRegion;
+    protected float Scale;
 
     protected bool IsHovered;
     protected bool IsHeld;
@@ -41,8 +42,9 @@ public abstract class Control
 
     protected internal abstract void Draw();
 
-    protected internal virtual void CalculateLayout(Rectangle<int> region)
+    protected internal virtual void CalculateLayout(Rectangle<int> region, float scale)
     {
         ScreenRegion = region;
+        Scale = scale;
     }
 }

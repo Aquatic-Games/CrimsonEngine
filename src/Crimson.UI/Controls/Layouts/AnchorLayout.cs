@@ -22,7 +22,7 @@ public class AnchorLayout : Control
     {
         // Only recalculate the layout on change.
         if (_layoutDirty)
-            CalculateLayout(ScreenRegion);
+            CalculateLayout(ScreenRegion, Scale);
         
         for (int i = _controls.Count - 1; i >= 0; i--)
             _controls[i].Control.Update(dt, ref mouseCaptured, mousePos);
@@ -34,17 +34,17 @@ public class AnchorLayout : Control
             control.Control.Draw();
     }
 
-    protected internal override void CalculateLayout(Rectangle<int> region)
+    protected internal override void CalculateLayout(Rectangle<int> region, float scale)
     {
-        base.CalculateLayout(region);
+        base.CalculateLayout(region, scale);
         
         _layoutDirty = false;
         
         foreach (AnchorControl control in _controls)
         {
-            Vector2T<int> offset = control.Offset;
+            Vector2T<int> offset = (control.Offset.As<float>() * scale).As<int>();
             Size<int> layoutSize = ScreenRegion.Size;
-            Size<int> size = control.Size;
+            Size<int> size = (control.Size.As<float>() * scale).As<int>();
             
             offset += control.Anchor switch
             {
@@ -60,7 +60,7 @@ public class AnchorLayout : Control
                 _ => throw new ArgumentOutOfRangeException()
             };
             
-            control.Control.CalculateLayout(new Rectangle<int>(offset, size));
+            control.Control.CalculateLayout(new Rectangle<int>(offset, size), scale);
         }
     }
 
