@@ -16,9 +16,10 @@ public static class App
     private static string _appVersion;
     private static bool _isRunning;
     private static GlobalApp _globalApp;
-
+    
     private static Stopwatch _deltaWatch;
     private static double _targetDelta;
+    private static double _deltaTime;
     
     private static Scene _currentScene;
     private static Scene? _switchScene;
@@ -47,6 +48,11 @@ public static class App
         get => (uint) (1.0 / _targetDelta);
         set => _targetDelta = value == 0 ? 0 : 1.0 / value;
     }
+    
+    /// <summary>
+    /// The amount of time, in seconds, that has passed since the last frame. This is also known as the delta time.
+    /// </summary>
+    public static double TimeSinceLastFrame => _deltaTime;
 
     /// <summary>
     /// The global application instance.
@@ -64,7 +70,6 @@ public static class App
         _isRunning = false;
         _globalApp = null!;
         _currentScene = null!;
-        _deltaWatch = null!;
         _imGuiController = null!;
         FpsLimit = 0;
     }
@@ -136,8 +141,10 @@ public static class App
             Input.Input.Update();
             Events.ProcessEvents();
 
-            float dt = (float) _deltaWatch.Elapsed.TotalSeconds;
+            _deltaTime = _deltaWatch.Elapsed.TotalSeconds;
             _deltaWatch.Restart();
+
+            Metrics.Update(_deltaTime);
 
             if (_switchScene != null)
             {
@@ -148,6 +155,10 @@ public static class App
                 _currentScene.Initialize();
             }
             
+            float dt = (float) _deltaTime;
+            
+            Metrics.BeginPerformanceMetric();
+            
             _imGuiController?.Update(dt);
             
             _globalApp.PreUpdate(dt);
@@ -155,6 +166,10 @@ public static class App
             _currentScene.Update(dt);
             UI.UI.Update(dt);
             _globalApp.PostUpdate(dt);
+            
+            Metrics.EndPerformanceMetric(Metrics.UpdateTimeMetric);
+            
+            Metrics.BeginPerformanceMetric();
             
             Renderer.NewFrame();
             
@@ -164,6 +179,8 @@ public static class App
             _globalApp.PostDraw();
             
             Renderer.Render();
+            
+            Metrics.EndPerformanceMetric(Metrics.RenderTimeMetric);
         }
         
         Logger.Info("Cleaning up.");
