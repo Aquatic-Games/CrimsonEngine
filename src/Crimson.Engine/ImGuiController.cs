@@ -79,6 +79,7 @@ internal class ImGuiController
             MouseButton.Left => ImGuiMouseButton.Left,
             MouseButton.Middle => ImGuiMouseButton.Middle,
             MouseButton.Right => ImGuiMouseButton.Right,
+            _ => ImGuiMouseButton.Left
         };
     }
 

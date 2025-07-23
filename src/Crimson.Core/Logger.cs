@@ -16,10 +16,75 @@ public static class Logger
     
     private static StringBuilder _logBuilder;
 
+    private static bool _logToConsole;
+    private static string? _logFile;
+    private static StreamWriter? _writer;
+
+    /// <summary>
+    /// If true, the logger will output <see cref="Trace"/> logs to the log file. In release builds, this defaults to
+    /// false as the trace logs clog the output and generally aren't necessary, however may be useful for debugging.
+    /// </summary>
+    /// <remarks>Trace logs are <b>always</b> output to the console if <see cref="LogToConsole"/> is enabled.</remarks>
+    public static bool OutputTraceLogs;
+
+    /// <summary>
+    /// Enable or disable console logging. Debug messages will be output to the console.
+    /// </summary>
+    public static bool LogToConsole
+    {
+        get => _logToConsole;
+        set
+        {
+            
+            
+            // Don't attach the console if it's already attached! This will result in duplicate outputs and also a
+            // memory leak.
+            if (value && _logToConsole)
+                return;
+            _logToConsole = value;
+
+            if (value)
+                LogMessage += WriteMessageToConsole;
+            else
+                LogMessage -= WriteMessageToConsole;
+        }
+    }
+
+    /// <summary>
+    /// Get or set the current log file path. If this value is null, logging to a file is disabled. 
+    /// </summary>
+    public static string? LogFile
+    {
+        get => _logFile;
+        set
+        {
+            _writer?.Close();
+            _logFile = value;
+
+            if (value == null)
+            {
+                LogMessage -= WriteMessageToFile;
+                return;
+            }
+            
+            Directory.CreateDirectory(Path.GetDirectoryName(value));
+
+            _writer = new StreamWriter(value)
+            {
+                AutoFlush = true
+            };
+
+            LogMessage += WriteMessageToFile;
+        }
+    }
+
     static Logger()
     {
         LogMessage = delegate { };
         _logBuilder = new StringBuilder();
+#if DEBUG
+        OutputTraceLogs = true;
+#endif
     }
 
     /// <summary>
@@ -113,33 +178,33 @@ public static class Logger
     /// <param name="file">The file where this method was called.</param>
     public static void Fatal(string message, [CallerLineNumber] int line = 0, [CallerFilePath] string file = "")
         => Log(Severity.Fatal, message, line, file);
-
-    /// <summary>
-    /// Enable and console logging. Debug messages will be output to the console.
-    /// </summary>
-    public static void EnableConsole()
+    
+    private static void WriteMessageToConsole(Severity severity, string formattedMessage)
     {
-        LogMessage += (severity, message) =>
+        ConsoleColor currentColor = Console.ForegroundColor;
+
+        Console.ForegroundColor = severity switch
         {
-            ConsoleColor currentColor = Console.ForegroundColor;
-
-            Console.ForegroundColor = severity switch
-            {
-                Severity.Trace => ConsoleColor.Gray,
-                Severity.Debug => ConsoleColor.White,
-                Severity.Info => ConsoleColor.Cyan,
-                Severity.Warning => ConsoleColor.Yellow,
-                Severity.Error => ConsoleColor.Red,
-                Severity.Fatal => ConsoleColor.DarkRed,
-                _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null)
-            };
-
-            Console.WriteLine(message);
-
-            Console.ForegroundColor = currentColor;
+            Severity.Trace => ConsoleColor.Gray,
+            Severity.Debug => ConsoleColor.White,
+            Severity.Info => ConsoleColor.Cyan,
+            Severity.Warning => ConsoleColor.Yellow,
+            Severity.Error => ConsoleColor.Red,
+            Severity.Fatal => ConsoleColor.DarkRed,
+            _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null)
         };
 
-        Debug("Console logging enabled.");
+        Console.WriteLine(formattedMessage);
+
+        Console.ForegroundColor = currentColor;
+    }
+
+    private static void WriteMessageToFile(Severity severity, string formattedMessage)
+    {
+        if (severity == Severity.Trace && !OutputTraceLogs)
+            return;
+        
+        _writer!.WriteLine(formattedMessage);
     }
     
     /// <summary>
