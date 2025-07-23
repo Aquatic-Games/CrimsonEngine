@@ -121,6 +121,12 @@ public readonly struct Vector2T<T> :
 
     public static Vector2T<T> operator /(Vector2T<T> left, T right)
         => new Vector2T<T>(left.X / right, left.Y / right);
+    
+    public static explicit operator System.Numerics.Vector2(Vector2T<T> vector)
+        => new System.Numerics.Vector2(float.CreateChecked(vector.X), float.CreateChecked(vector.Y));
+    
+    public static explicit operator Vector2T<T>(System.Numerics.Vector2 vector)
+        => new Vector2T<T>(T.CreateChecked(vector.X), T.CreateChecked(vector.Y));
 
     public bool Equals(Vector2T<T> other)
         => this == other;

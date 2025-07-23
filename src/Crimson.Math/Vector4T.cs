@@ -145,6 +145,12 @@ public readonly struct Vector4T<T> :
 
     public static Vector4T<T> operator /(Vector4T<T> left, T right)
         => new Vector4T<T>(left.X / right, left.Y / right, left.Z / right, left.W / right);
+    
+    public static explicit operator System.Numerics.Vector4(Vector4T<T> vector)
+        => new System.Numerics.Vector4(float.CreateChecked(vector.X), float.CreateChecked(vector.Y), float.CreateChecked(vector.Z), float.CreateChecked(vector.W));
+    
+    public static explicit operator Vector4T<T>(System.Numerics.Vector4 vector)
+        => new Vector4T<T>(T.CreateChecked(vector.X), T.CreateChecked(vector.Y), T.CreateChecked(vector.Z), T.CreateChecked(vector.W));
 
     public bool Equals(Vector4T<T> other)
         => this == other;

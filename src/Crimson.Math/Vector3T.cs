@@ -131,6 +131,12 @@ public readonly struct Vector3T<T> :
 
     public static Vector3T<T> operator /(Vector3T<T> left, T right)
         => new Vector3T<T>(left.X / right, left.Y / right, left.Z / right);
+    
+    public static explicit operator System.Numerics.Vector3(Vector3T<T> vector)
+        => new System.Numerics.Vector3(float.CreateChecked(vector.X), float.CreateChecked(vector.Y), float.CreateChecked(vector.Z));
+    
+    public static explicit operator Vector3T<T>(System.Numerics.Vector3 vector)
+        => new Vector3T<T>(T.CreateChecked(vector.X), T.CreateChecked(vector.Y), T.CreateChecked(vector.Z));
 
     public bool Equals(Vector3T<T> other)
         => this == other;
