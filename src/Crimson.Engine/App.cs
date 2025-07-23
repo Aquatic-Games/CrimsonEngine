@@ -157,7 +157,7 @@ public static class App
             
             float dt = (float) _deltaTime;
             
-            Metrics.BeginPerformanceMetric();
+            Metrics.BeginPerformanceMetric(Metrics.UpdateTimeMetric);
             
             _imGuiController?.Update(dt);
             
@@ -169,8 +169,6 @@ public static class App
             
             Metrics.EndPerformanceMetric(Metrics.UpdateTimeMetric);
             
-            Metrics.BeginPerformanceMetric();
-            
             Renderer.NewFrame();
             
             _globalApp.PreDraw();
@@ -179,8 +177,6 @@ public static class App
             _globalApp.PostDraw();
             
             Renderer.Render();
-            
-            Metrics.EndPerformanceMetric(Metrics.RenderTimeMetric);
         }
         
         Logger.Info("Cleaning up.");
