@@ -106,8 +106,8 @@ public static class App
         Renderer.Create(_appName, in options.Renderer, Surface.Info);
         Surface.Details = $" v{Version} - {Renderer.Backend}";
         
-        Logger.Debug("Initializing audio subsystem.");
-        Audio.Audio.Create();
+        //Logger.Debug("Initializing audio subsystem.");
+        //Audio.Audio.Create();
         
         Logger.Debug("Initializing input manager.");
         Input.Input.Create();
@@ -186,7 +186,7 @@ public static class App
         UI.UI.Destroy();
         Physics.Physics.Destroy();
         Input.Input.Destroy();
-        Audio.Audio.Destroy();
+        //Audio.Audio.Destroy();
         Renderer.Destroy();
         Surface.Destroy();
         Events.Destroy();

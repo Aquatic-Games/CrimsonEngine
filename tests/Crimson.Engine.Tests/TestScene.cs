@@ -38,8 +38,8 @@ public class TestScene : Scene
 
         _texture = Content.Content.Load<Texture>("DEBUG");
 
-        StreamSound sound = new StreamSound("/home/aqua/Music/kf-battle.ogg");
-        sound.Play();
+        //StreamSound sound = new StreamSound("/home/aqua/Music/kf-battle.ogg");
+        //sound.Play();
         
         MaterialDefinition def = new(_texture)
         {

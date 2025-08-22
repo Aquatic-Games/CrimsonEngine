@@ -1,5 +1,4 @@
 ﻿using MixrSharp;
-using MixrSharp.Devices;
 
 namespace Crimson.Audio;
 
@@ -11,12 +10,12 @@ public static unsafe class Audio
     
     public static void Create()
     {
-        _device = new SdlDevice(44100);
-        Context = _device.Context;
+        //_device = new SdlDevice(44100);
+        //Context = _device.Context;
     }
 
     public static void Destroy()
     {
-        _device.Dispose();
+        //_device.Dispose();
     }
 }
