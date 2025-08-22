@@ -19,6 +19,8 @@ namespace Crimson
     public:
         static void Create(const SurfaceInfo& info);
         static void Destroy();
+
+        [[nodiscard]] static void* GetHandle();
     };
 
 }

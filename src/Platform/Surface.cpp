@@ -2,9 +2,9 @@
 
 #include "Crimson/Platform/Surface.h"
 
-#include <SDL3/SDL.h>
 #include <stdexcept>
 #include <format>
+#include <SDL3/SDL.h>
 
 namespace Crimson
 {
@@ -24,5 +24,10 @@ namespace Crimson
     {
         SDL_DestroyWindow(_window);
         SDL_Quit();
+    }
+
+    void* Surface::GetHandle()
+    {
+        return _window;
     }
 }
