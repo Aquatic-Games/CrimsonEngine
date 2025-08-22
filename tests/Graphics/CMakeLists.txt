@@ -1,0 +1,2 @@
+add_executable(CrimsonGraphicsTests main.cpp)
+target_link_libraries(CrimsonGraphicsTests PUBLIC CrimsonEngine)
