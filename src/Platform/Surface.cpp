@@ -6,16 +6,16 @@
 #include <stdexcept>
 #include <format>
 
-namespace Crimson::Platform
+namespace Crimson
 {
     static SDL_Window* _window;
 
-    void Surface::Create()
+    void Surface::Create(const SurfaceInfo& info)
     {
         if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
             throw std::runtime_error(std::format("Failed to initialize SDL: {}", SDL_GetError()));
 
-        _window = SDL_CreateWindow("Crimson Engine", 1280, 720, 0);
+        _window = SDL_CreateWindow(info.Title.c_str(), info.Size.Width, info.Size.Height, 0);
         if (!_window)
             throw std::runtime_error(std::format("Failed to create window: {}", SDL_GetError()));
     }

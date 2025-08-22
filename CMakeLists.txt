@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD 20)
 add_library(CrimsonEngine STATIC library.cpp
         src/Platform/Surface.cpp
         include/Crimson/Platform/Surface.h
+        include/Crimson/Math/Size.h
+        src/Graphics/Renderer.cpp
+        include/Crimson/Graphics/Renderer.h
 )
 
 target_include_directories(CrimsonEngine PUBLIC include)

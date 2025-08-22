@@ -2,13 +2,22 @@
 
 #pragma once
 
-namespace Crimson::Platform
+#include "Crimson/Math/Size.h"
+
+#include <string>
+
+namespace Crimson
 {
+    struct SurfaceInfo
+    {
+        Sizei Size;
+        std::string Title;
+    };
 
     class Surface
     {
     public:
-        static void Create();
+        static void Create(const SurfaceInfo& info);
         static void Destroy();
     };
 
