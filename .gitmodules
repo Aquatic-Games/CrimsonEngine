@@ -1,0 +1,4 @@
+[submodule "lib/SDL"]
+	path = lib/SDL
+	url = https://github.com/libsdl-org/SDL/
+	branch = release-3.2.x
