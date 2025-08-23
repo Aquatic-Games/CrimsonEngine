@@ -3,7 +3,7 @@
 
 namespace Crimson
 {
-    class Renderer
+    class Renderer final
     {
     public:
         static void Create();

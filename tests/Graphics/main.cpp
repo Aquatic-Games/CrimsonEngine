@@ -2,6 +2,7 @@
 
 #include <Crimson/Platform/Surface.h>
 #include <Crimson/Graphics/Renderer.h>
+#include <Crimson/Util/Logger.h>
 
 #include <SDL3/SDL.h>
 
@@ -9,6 +10,8 @@ using namespace Crimson;
 
 int main(int argc, const char* argv[])
 {
+    //CS_FATAL("Hello, {}!", "World");
+
     const SurfaceInfo info
     {
         .Size = { 1280, 720 },

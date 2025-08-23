@@ -14,7 +14,7 @@ namespace Crimson
         std::string Title;
     };
 
-    class Surface
+    class Surface final
     {
     public:
         static void Create(const SurfaceInfo& info);

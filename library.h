@@ -1,6 +1,0 @@
-#ifndef CRIMSONENGINE_LIBRARY_H
-#define CRIMSONENGINE_LIBRARY_H
-
-void hello();
-
-#endif //CRIMSONENGINE_LIBRARY_H
