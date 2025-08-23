@@ -6,18 +6,22 @@
 #include <format>
 #include <SDL3/SDL.h>
 
+#include "Crimson/Util/Logger.h"
+
 namespace Crimson
 {
     static SDL_Window* _window;
 
     void Surface::Create(const SurfaceInfo& info)
     {
+        CS_TRACE("Initializing SDL.");
         if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
-            throw std::runtime_error(std::format("Failed to initialize SDL: {}", SDL_GetError()));
+            CS_FATAL("Failed to initialize SDL: {}", SDL_GetError());
 
+        CS_TRACE("Creating window.");
         _window = SDL_CreateWindow(info.Title.c_str(), info.Size.Width, info.Size.Height, 0);
         if (!_window)
-            throw std::runtime_error(std::format("Failed to create window: {}", SDL_GetError()));
+            CS_FATAL("Failed to create window: {}", SDL_GetError());
     }
 
     void Surface::Destroy()

@@ -12,7 +12,7 @@ namespace Crimson::Util
 
     void Logger::Log(const Severity severity, const std::string& message, const std::source_location& location)
     {
-        stream.clear();
+        stream.str(std::string());
 
         auto now = std::chrono::system_clock::now();
         stream << std::format("{:%Y-%m-%d %H:%M:%OS} ", now);

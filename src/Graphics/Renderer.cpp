@@ -6,6 +6,7 @@
 #include <SDL3/SDL_gpu.h>
 
 #include "Crimson/Platform/Surface.h"
+#include "Crimson/Util/Logger.h"
 
 namespace Crimson
 {
@@ -17,6 +18,8 @@ namespace Crimson
         const SDL_PropertiesID props = SDL_CreateProperties();
         SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN, true);
 #ifndef NDEBUG
+        CS_DEBUG("Debugging enabled, enabling graphics debugging.");
+        SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, true);
         SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_PREFERLOWPOWER_BOOLEAN, true);
 #endif
 
@@ -24,9 +27,10 @@ namespace Crimson
         SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXBC_BOOLEAN, true);
 #endif
 
+        CS_TRACE("Creating GPU device.");
         _device = SDL_CreateGPUDeviceWithProperties(props);
         if (!_device)
-            throw std::runtime_error(std::format("Failed to create GPU device: {}", SDL_GetError()));
+            CS_FATAL("Failed to create GPU device: {}", SDL_GetError());
 
         _window = static_cast<SDL_Window*>(Surface::GetHandle());
         SDL_ClaimWindowForGPUDevice(_device, _window);
@@ -44,6 +48,9 @@ namespace Crimson
 
         SDL_GPUTexture* swapchainTexture;
         SDL_WaitAndAcquireGPUSwapchainTexture(cb, _window, &swapchainTexture, nullptr, nullptr);
+
+        if (!swapchainTexture)
+            return;
 
         const SDL_GPUColorTargetInfo target
         {

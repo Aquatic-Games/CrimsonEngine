@@ -6,14 +6,17 @@
 #include <format>
 #include <stdexcept>
 
-#define CS_LOG(severity, message, ...) Crimson::Util::Logger::Log(Crimson::Util::Logger::Severity::severity, std::format(message, __VA_ARGS__))
-#define CS_TRACE(message, ...) CS_LOG(Trace, message, __VA_ARGS__)
-#define CS_DEBUG(message, ...) CS_LOG(Debug, message, __VA_ARGS__)
-#define CS_INFO(message, ...) CS_LOG(Info, message, __VA_ARGS__)
-#define CS_WARN(message, ...) CS_LOG(Warning, message, __VA_ARGS__)
-#define CS_ERROR(message, ...) CS_LOG(Error, message, __VA_ARGS__)
-#define CS_FATAL_THROW(exception, message, ...) CS_LOG(Fatal, message, __VA_ARGS__);throw exception(std::format(message, __VA_ARGS__))
-#define CS_FATAL(message, ...) CS_FATAL_THROW(std::runtime_error, message, __VA_ARGS__)
+#define CS_LOG(severity, ...) Crimson::Util::Logger::Log(Crimson::Util::Logger::Severity::severity, std::format(__VA_ARGS__))
+#define CS_TRACE(...) CS_LOG(Trace, __VA_ARGS__)
+#define CS_DEBUG(...) CS_LOG(Debug, __VA_ARGS__)
+#define CS_INFO(...) CS_LOG(Info, __VA_ARGS__)
+#define CS_WARN(...) CS_LOG(Warning, __VA_ARGS__)
+#define CS_ERROR(...) CS_LOG(Error, __VA_ARGS__)
+#define CS_FATAL_THROW(exception, ...) {\
+    CS_LOG(Fatal, __VA_ARGS__);\
+    throw exception(std::format(__VA_ARGS__));\
+}
+#define CS_FATAL(...) CS_FATAL_THROW(std::runtime_error, __VA_ARGS__)
 
 namespace Crimson::Util
 {
