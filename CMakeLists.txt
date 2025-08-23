@@ -14,6 +14,7 @@ add_library(CrimsonEngine STATIC
         include/Crimson/Math/Vector4.h
         include/Crimson/Math/Math.h
         include/Crimson/Math/Defs.h
+        include/Crimson/Math/Matrix.h
 )
 
 target_include_directories(CrimsonEngine PUBLIC include)

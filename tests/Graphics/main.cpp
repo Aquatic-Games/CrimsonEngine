@@ -12,12 +12,13 @@ using namespace Crimson;
 
 int main(int argc, const char* argv[])
 {
-    Vector4f a = { 1, 1, 1, 1 };
-    Vector4f b = { 2, 2, 2, 2 };
+    Matrixf a = Matrixf::Identity();
+    Matrixf b = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
 
-    Vector4f c = b * 5;
+    Matrixf c = b * a;
     std::cout << c.ToString() << std::endl;
-    std::cout << b.Length() << std::endl;
+
+    return 0;
 
     const SurfaceInfo info
     {

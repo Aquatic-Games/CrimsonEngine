@@ -102,17 +102,47 @@ namespace Crimson
             return std::format("X: {}, Y: {}, Z: {}, W: {}", X, Y, Z, W);
         }
 
-        static T Dot(const Vector4& a, const Vector4& b)
+        [[nodiscard]] static Vector4 Zero()
+        {
+            return { 0, 0, 0, 0 };
+        }
+
+        [[nodiscard]] static Vector4 One()
+        {
+            return { 1, 1, 1, 1 };
+        }
+
+        [[nodiscard]] static Vector4 UnitX()
+        {
+            return { 1, 0, 0, 0 };
+        }
+
+        [[nodiscard]] static Vector4 UnitY()
+        {
+            return { 0, 1, 0, 0 };
+        }
+
+        [[nodiscard]] static Vector4 UnitZ()
+        {
+            return { 0, 0, 1, 0 };
+        }
+
+        [[nodiscard]] static Vector4 UnitW()
+        {
+            return { 0, 0, 0, 1 };
+        }
+
+        [[nodiscard]] static T Dot(const Vector4& a, const Vector4& b)
         {
             return a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;
         }
 
-        static T MagnitudeSquared(const Vector4& vector)
+        [[nodiscard]] static T MagnitudeSquared(const Vector4& vector)
         {
             return Dot(vector, vector);
         }
 
-        static T Magnitude(const Vector4& vector)
+        [[nodiscard]] static T Magnitude(const Vector4& vector)
         {
             return std::sqrt(MagnitudeSquared(vector));
         }
