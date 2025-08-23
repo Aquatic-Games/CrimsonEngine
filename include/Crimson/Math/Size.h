@@ -1,7 +1,7 @@
 // Copyright (c) Aquatic Games 2025. This file is licensed under the MIT license.
 #pragma once
 
-#include <cstdint>
+#include "Defs.h"
 
 namespace Crimson
 {
@@ -31,7 +31,7 @@ namespace Crimson
         }
     };
 
-    using Sizei = Size<int32_t>;
-    using Sizeu = Size<uint32_t>;
+    using Sizei = Size<int32>;
+    using Sizeu = Size<uint32>;
     using Sizef = Size<float>;
 }

@@ -11,6 +11,9 @@ add_library(CrimsonEngine STATIC
         include/Crimson/Graphics/Renderer.h
         include/Crimson/Util/Logger.cpp
         include/Crimson/Util/Logger.h
+        include/Crimson/Math/Vector4.h
+        include/Crimson/Math/Math.h
+        include/Crimson/Math/Defs.h
 )
 
 target_include_directories(CrimsonEngine PUBLIC include)

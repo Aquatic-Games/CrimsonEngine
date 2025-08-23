@@ -1,8 +1,10 @@
 // Copyright (c) Aquatic Games 2025. This file is licensed under the MIT license.
 
+#include <iostream>
 #include <Crimson/Platform/Surface.h>
 #include <Crimson/Graphics/Renderer.h>
 #include <Crimson/Util/Logger.h>
+#include <Crimson/Math/Math.h>
 
 #include <SDL3/SDL.h>
 
@@ -10,7 +12,12 @@ using namespace Crimson;
 
 int main(int argc, const char* argv[])
 {
-    //CS_FATAL("Hello, {}!", "World");
+    Vector4f a = { 1, 1, 1, 1 };
+    Vector4f b = { 2, 2, 2, 2 };
+
+    Vector4f c = b * 5;
+    std::cout << c.ToString() << std::endl;
+    std::cout << b.Length() << std::endl;
 
     const SurfaceInfo info
     {
