@@ -7,11 +7,14 @@
 
 #include "Crimson/Platform/Surface.h"
 #include "Crimson/Util/Logger.h"
+#include "Renderers/TextureBatcher.h"
 
 namespace Crimson
 {
     static SDL_GPUDevice* _device;
     static SDL_Window* _window;
+
+    static TextureBatcher* _uiBatcher;
 
     void Renderer::Create()
     {
@@ -34,10 +37,14 @@ namespace Crimson
 
         _window = static_cast<SDL_Window*>(Surface::GetHandle());
         SDL_ClaimWindowForGPUDevice(_device, _window);
+
+        CS_TRACE("Creating UI batcher.");
+        _uiBatcher = new TextureBatcher(_device, SDL_GetGPUSwapchainTextureFormat(_device, _window));
     }
 
     void Renderer::Destroy()
     {
+        delete _uiBatcher;
         SDL_ReleaseWindowFromGPUDevice(_device, _window);
         SDL_DestroyGPUDevice(_device);
     }

@@ -12,14 +12,6 @@ using namespace Crimson;
 
 int main(int argc, const char* argv[])
 {
-    Matrixf a = Matrixf::Identity();
-    Matrixf b = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-
-    Matrixf c = b * a;
-    std::cout << c.ToString() << std::endl;
-
-    return 0;
-
     const SurfaceInfo info
     {
         .Size = { 1280, 720 },

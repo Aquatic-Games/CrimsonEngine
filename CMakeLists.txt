@@ -3,19 +3,23 @@ project(CrimsonEngine)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_library(CrimsonEngine STATIC
-        src/Platform/Surface.cpp
-        include/Crimson/Platform/Surface.h
-        include/Crimson/Math/Size.h
-        src/Graphics/Renderer.cpp
-        include/Crimson/Graphics/Renderer.h
-        include/Crimson/Util/Logger.cpp
-        include/Crimson/Util/Logger.h
-        include/Crimson/Math/Vector4.h
-        include/Crimson/Math/Math.h
-        include/Crimson/Math/Defs.h
-        include/Crimson/Math/Matrix.h
+file(GLOB CRIMSON_SRC CONFIGURE_DEPENDS
+        include/Crimson/Graphics/*.h
+        include/Crimson/Math/*.h
+        include/Crimson/Platform/*.h
+        include/Crimson/Util/*.h
+
+        src/Graphics/*.h
+        src/Graphics/*.cpp
+        src/Graphics/Renderers/*.h
+        src/Graphics/Renderers/*.cpp
+        src/Platform/*.h
+        src/Platform/*.cpp
+        src/Util/*.h
+        src/Util/*.cpp
 )
+
+add_library(CrimsonEngine STATIC ${CRIMSON_SRC})
 
 target_include_directories(CrimsonEngine PUBLIC include)
 
