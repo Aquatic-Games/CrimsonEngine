@@ -82,17 +82,17 @@ public static class UI
         Theme = Theme.Light;
         // The content manager doesn't have the ability to load persistent resources yet so we have to manually do what
         // the content manager does.
-        Theme.Font = options.DefaultFont != null
+        /*Theme.Font = options.DefaultFont != null
             ? Font.LoadResource(Content.Content.GetFullyQualifiedName(options.DefaultFont), Path.HasExtension(options.DefaultFont))
             : new Font(Resources.LoadEmbeddedResource("Crimson.UI.Roboto-Regular.ttf",
-                Assembly.GetExecutingAssembly()));
+                Assembly.GetExecutingAssembly()));*/
 
         Clear();
     }
 
     public static void Destroy()
     {
-        Theme.Font.Dispose();
+        //Theme.Font.Dispose();
     }
 
     public static void Clear()

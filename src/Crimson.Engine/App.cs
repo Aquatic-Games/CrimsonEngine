@@ -103,7 +103,7 @@ public static class App
         Events.SurfaceSizeChanged += OnSurfaceSizeChanged;
         
         Logger.Debug("Initializing graphics subsystem.");
-        Renderer.Create(_appName, in options.Renderer, Surface.Info);
+        Renderer.Create(_appName, in options.Renderer, Surface.Info, Surface.Size);
         Surface.Details = $" v{Version} - {Renderer.Backend}";
         
         //Logger.Debug("Initializing audio subsystem.");
@@ -115,11 +115,11 @@ public static class App
         Logger.Debug("Initializing physics system.");
         Physics.Physics.Create();
 
-        if (Renderer.ImGuiContext is { } context)
+        /*if (Renderer.ImGuiContext is { } context)
         {
             Logger.Debug("Creating imgui controller.");
             _imGuiController = new ImGuiController(context);
-        }
+        }*/
         
         Logger.Debug("Creating UI.");
         UI.UI.Create(new Rectangle<int>(Vector2T<int>.Zero, Renderer.RenderSize), options.UI);
@@ -135,7 +135,7 @@ public static class App
         Logger.Debug("Entering main loop.");
         while (_isRunning)
         {
-            if (_deltaWatch.Elapsed.TotalSeconds < _targetDelta && !Renderer.VSync)
+            if (_deltaWatch.Elapsed.TotalSeconds < _targetDelta/* && !Renderer.VSync*/)
                 continue;
             
             Input.Input.Update();

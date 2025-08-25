@@ -1,12 +1,12 @@
 ﻿using System.Numerics;
 using Crimson.Graphics;
-using Crimson.Graphics.Materials;
+//using Crimson.Graphics.Materials;
 
 namespace Crimson.Engine.Entities.Components;
 
 public class MeshRenderer : Component
 {
-    private readonly Renderable _renderable;
+    /*private readonly Renderable _renderable;
 
     public ref Material Material => ref _renderable.Material;
     
@@ -23,5 +23,5 @@ public class MeshRenderer : Component
     public override void Dispose()
     {
         _renderable.Dispose();
-    }
+    }*/
 }

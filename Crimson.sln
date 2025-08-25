@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 
+#
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Engine", "src\Crimson.Engine\Crimson.Engine.csproj", "{E2EF81F3-894A-46C3-B4C4-2CA2A2DFA0EB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Core", "src\Crimson.Core\Crimson.Core.csproj", "{AFEB0C8E-E65C-4935-B2F1-2AFFE3DA51CB}"

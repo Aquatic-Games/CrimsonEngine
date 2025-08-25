@@ -4,7 +4,6 @@ using Crimson.Data;
 using Crimson.Engine.Entities;
 using Crimson.Engine.Entities.Components;
 using Crimson.Graphics;
-using Crimson.Graphics.Materials;
 //using Crimson.Graphics.Materials;
 using Crimson.Graphics.Primitives;
 using Crimson.Math;
@@ -16,17 +15,17 @@ using Crimson.UI.Controls;
 using Crimson.UI.Controls.Layouts;
 using Hexa.NET.ImGui;
 using SharpGLTF.Schema2;
-using Material = Crimson.Graphics.Materials.Material;
-using Mesh = Crimson.Graphics.Mesh;
+//using Material = Crimson.Graphics.Materials.Material;
+//using Mesh = Crimson.Graphics.Mesh;
 using Plane = Crimson.Graphics.Primitives.Plane;
 using Scene = Crimson.Engine.Entities.Scene;
-using Texture = Crimson.Graphics.Texture;
+//using Texture = Crimson.Graphics.Texture;
 
 namespace Crimson.Engine.Tests;
 
 public class TestScene : Scene
 {
-    private Texture _texture;
+    /*private Texture _texture;
     private Material _material;
     private Mesh _mesh;
     
@@ -81,7 +80,7 @@ public class TestScene : Scene
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/top.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/bottom.png"),
             new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/front.png"),
-            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/back.png"));*/
+            new Bitmap("/home/aqua/Pictures/skybox/spacebox/nizzine/back.png"));
         Camera.Skybox = Content.Content.Load<Skybox>("/home/aqua/Pictures/skybox/spacebox/nizzine/");
         
         AnchorLayout layout = (AnchorLayout) UI.UI.BaseControl;
@@ -127,7 +126,7 @@ public class TestScene : Scene
         }
 
         /*GetEntity("MainCube").Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitY, dt);
-        GetEntity("MainCube/Cube1").Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitX, dt);*/
+        GetEntity("MainCube/Cube1").Transform.Rotation *= Quaternion.CreateFromAxisAngle(Vector3.UnitX, dt);
     }
 
     public override void Draw()
@@ -139,5 +138,5 @@ public class TestScene : Scene
         //App.Renderer.DrawImage(_texture, new Vector2(100));
         
         //Renderer.DrawLine(new Vector2T<int>(0, 0), new Vector2T<int>(1280, 720), Color.White, 5);
-    }
+    }*/
 }

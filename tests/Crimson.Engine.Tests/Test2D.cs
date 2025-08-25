@@ -9,15 +9,15 @@ namespace Crimson.Engine.Tests;
 
 public class Test2D : Scene
 {
-    private Texture _texture = null!;
+    //private Texture _texture = null!;
     private float _f;
     
     public override void Initialize()
     {
         // TODO: Texture.Debug?
-        _texture = Content.Content.Load<Texture>("DEBUG");
+        //_texture = Content.Content.Load<Texture>("DEBUG");
         
-        Camera.Type = CameraType.Orthographic;
+        //Camera.Type = CameraType.Orthographic;
         
         /*Texture spriteTexture = Content.Content.Load<Texture>("/home/aqua/Pictures/BAGELMIP.png");
         Entity entity = new Entity("Sprite");
@@ -65,11 +65,11 @@ public class Test2D : Scene
         //uint size = (uint) (((float.Sin(_f) + 1) / 2) * 100);
         const uint size = 48;
         
-        Renderer.DrawFilledRectangle(Vector2T<int>.Zero, UI.UI.Theme.Font.MeasureText(text, size), Color.Orange);
+        /*Renderer.DrawFilledRectangle(Vector2T<int>.Zero, UI.UI.Theme.Font.MeasureText(text, size), Color.Orange);
         
         Renderer.DrawText(UI.UI.Theme.Font, new Vector2T<int>(0), size, text, Color.White);
         
-        Renderer.DrawImage(_texture, Vector2T<int>.Zero, new Rectangle<int>(128, 0, 128, 64));
+        Renderer.DrawImage(_texture, Vector2T<int>.Zero, new Rectangle<int>(128, 0, 128, 64));*/
 
         //Renderer.DrawRectangle(new Vector2T<int>(10), new Size<int>(200, 100), Color.Orange, 5, Color.White);
     }

@@ -1,7 +1,6 @@
 using System.Numerics;
 using Crimson.Engine;
 using Crimson.Graphics;
-using Crimson.Graphics.Materials;
 //using Crimson.Graphics.Materials;
 using Crimson.Math;
 using Plane = Crimson.Graphics.Primitives.Plane;
@@ -10,7 +9,7 @@ namespace Crimson.Engine.Tests;
 
 public class TestApp : GlobalApp
 {
-    private Renderable _renderable;
+    /*private Renderable _renderable;
 
     private float _rotation;
     
@@ -47,5 +46,5 @@ public class TestApp : GlobalApp
         base.Dispose();
         
         //_renderable.Dispose();
-    }
+    }*/
 }

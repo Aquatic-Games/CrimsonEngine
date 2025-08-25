@@ -5,7 +5,7 @@ namespace Crimson.UI;
 
 public struct Theme
 {
-    public Font Font = null!;
+    //public Font Font = null!;
 
     public Color TextColor;
 

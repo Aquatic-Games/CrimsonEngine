@@ -7,7 +7,7 @@ namespace Crimson.Engine.Tests;
 
 public class IntroScene : Scene
 {
-    private Texture _logo;
+    /*private Texture _logo;
     private Texture _logo2;
 
     private float _logoAlpha;
@@ -49,5 +49,5 @@ public class IntroScene : Scene
     {
         Renderer.DrawImage(_logo, Vector2T<int>.Zero, Renderer.RenderSize, tint: Color.White with { A = _logoAlpha });
         Renderer.DrawImage(_logo2, Vector2T<int>.Zero, Renderer.RenderSize, tint: Color.White with { A = _logo2Alpha });
-    }
+    }*/
 }

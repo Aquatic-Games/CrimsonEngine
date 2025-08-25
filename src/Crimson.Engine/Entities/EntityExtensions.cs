@@ -4,7 +4,7 @@ using Crimson.Graphics;
 
 namespace Crimson.Engine.Entities;
 
-public static class EntityExtensions
+/*public static class EntityExtensions
 {
     public static void AddToEntity(this Model model, Entity entity)
     {
@@ -37,4 +37,4 @@ public static class EntityExtensions
                 AddMeshToEntity(m, submesh, ref counter);
         }
     }
-}
+}*/

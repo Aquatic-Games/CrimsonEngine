@@ -13,7 +13,7 @@ public abstract class Scene : IDisposable
     
     private bool _isInitialized;
 
-    public Camera Camera => (Camera) GetEntity("Camera");
+    //public Camera Camera => (Camera) GetEntity("Camera");
 
     protected Scene()
     {
@@ -23,7 +23,7 @@ public abstract class Scene : IDisposable
 
         _entitiesToAdd = [];
         
-        AddEntity(new Camera("Camera", 75, 0.1f, 100f));
+        //AddEntity(new Camera("Camera", 75, 0.1f, 100f));
     }
     
     /// <summary>

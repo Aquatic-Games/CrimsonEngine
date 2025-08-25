@@ -1,12 +1,15 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using Crimson.Core;
-using Crimson.Graphics.Renderers;
-using Crimson.Graphics.Renderers.Structs;
-using Crimson.Graphics.Utils;
+//using Crimson.Graphics.Renderers;
+//using Crimson.Graphics.Renderers.Structs;
+//using Crimson.Graphics.Utils;
 using Crimson.Math;
+using Graphite;
+using Graphite.Core;
+using Graphite.D3D11;
+using Graphite.Vulkan;
 using Hexa.NET.ImGui;
-using SDL3;
 using Color = Crimson.Math.Color;
 
 namespace Crimson.Graphics;
@@ -16,35 +19,35 @@ namespace Crimson.Graphics;
 /// </summary>
 public static class Renderer
 {
-    private static IntPtr _window;
+    private static Instance _instance;
+    private static Surface _surface;
+    private static Swapchain _swapchain;
     
-    private static IntPtr _depthTexture;
+    //private static IntPtr _depthTexture;
 
     private static bool _vsyncEnabled;
-    private static Size<int> _swapchainSize;
     
-    private static TextureBatcher _uiBatcher;
+    /*private static TextureBatcher _uiBatcher;
     private static ImGuiRenderer? _imGuiRenderer;
     private static DeferredRenderer? _deferredRenderer;
-    private static SpriteRenderer? _spriteRenderer;
+    private static SpriteRenderer? _spriteRenderer;*/
 
-    internal static IntPtr Device;
+    internal static Device Device;
+    internal static CommandList CommandList; 
 
-    internal static SDL.GPUTextureFormat MainTargetFormat;
+    public static string Backend => _instance.BackendName;
 
-    public static string Backend => SDL.GetGPUDeviceDriver(Device) ?? "Unknown";
-
-    /// <summary>
+    /*/// <summary>
     /// The 3D <see cref="Crimson.Graphics.Camera"/> that will be used when drawing.
     /// </summary>
-    public static Camera Camera;
+    public static Camera Camera;*/
 
     /// <summary>
     /// Get the render area size in pixels.
     /// </summary>
-    public static Size<int> RenderSize => _swapchainSize;
+    public static Size<int> RenderSize => new Size<int>((int) _swapchain.Size.Width, (int) _swapchain.Size.Height);
 
-    /// <summary>
+    /*/// <summary>
     /// Enable/disable vertical sync.
     /// </summary>
     public static bool VSync
@@ -57,9 +60,9 @@ public static class Renderer
             SDL.SetGPUSwapchainParameters(Device, _window, SDL.GPUSwapchainComposition.SDR,
                 value ? SDL.GPUPresentMode.VSync : SDL.GPUPresentMode.Immediate).Check("Set swapchain parameters");
         }
-    }
+    }*/
 
-    /// <summary>
+    /*/// <summary>
     /// Gets the ImGUI context pointer.
     /// </summary>
     public static ImGuiContextPtr? ImGuiContext
@@ -69,61 +72,66 @@ public static class Renderer
             Debug.Assert(_imGuiRenderer != null, "Renderer has not been created with CreateImGuiRenderer enabled.");
             return _imGuiRenderer.Context;
         }
-    }
+    }*/
 
-    /// <summary>
+    /*/// <summary>
     /// The main renderer debug textures.
     /// </summary>
-    public static Texture[] DebugRendererTextures => _deferredRenderer!.DebugTextures;
+    public static Texture[] DebugRendererTextures => _deferredRenderer!.DebugTextures;*/
     
     /// <summary>
     /// Create the graphics subsystem.
     /// </summary>
     /// <param name="appName">The application name.</param>
     /// <param name="surface">The <see cref="SurfaceInfo"/> to use when creating the subsystem.</param>
-    public static void Create(string appName, in RendererOptions options, in SurfaceInfo surface)
+    public static void Create(string appName, in RendererOptions options, in SurfaceInfo surface, in Size<int> size)
     {
-        _swapchainSize = surface.Size;
+        if (OperatingSystem.IsWindows())
+            Instance.RegisterBackend<D3D11Backend>();
+        Instance.RegisterBackend<VulkanBackend>();
 
-        _window = surface.Handle;
-
-        SDL.SetAppMetadata(appName, null!, null!);
-
-        uint props = SDL.CreateProperties();
-        SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateShadersSPIRVBoolean, true);
-
-        if (options.Debug)
+        InstanceInfo instanceInfo = new()
         {
-            SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateDebugModeBoolean, true);
-            SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreatePreferLowPowerBoolean, true);
-        }
+            AppName = appName,
+#if DEBUG
+            Debug = true
+#endif
+        };
+        
+        Logger.Trace("Creating instance.");
+        _instance = Instance.Create(in instanceInfo);
+        Logger.Debug($"Backend: {_instance.BackendName}");
 
-        if (OperatingSystem.IsWindows() && !EnvVar.IsTrue(EnvVar.ForceVulkan))
-        {
-            SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateShadersDXILBoolean, true);
-            // Use D3D12 on windows
-            SDL.SetStringProperty(props, SDL.Props.GPUDeviceCreateNameString, "direct3d12");
-        }
-
+        Logger.Trace("Creating surface.");
+        _surface = _instance.CreateSurface(in surface);
+        
         Logger.Trace("Creating device.");
-        Device = SDL.CreateGPUDeviceWithProperties(props).Check("Create device");
-        
-        Logger.Debug($"Using SDL backend: {SDL.GetGPUDeviceDriver(Device)}");
-        
-        Logger.Trace("Claiming window for device.");
-        SDL.ClaimWindowForGPUDevice(Device, _window).Check("Claim window for device");
-        
-        VSync = true;
+        Device = _instance.CreateDevice(_surface);
 
-        _depthTexture = SdlUtils.CreateTexture2D(Device, (uint) _swapchainSize.Width, (uint) _swapchainSize.Height,
-            SDL.GPUTextureFormat.D32Float, 1, SDL.GPUTextureUsageFlags.DepthStencilTarget);
+        SwapchainInfo swapchainInfo = new()
+        {
+            Surface = _surface,
+            Size = new Size2D((uint) size.Width, (uint) size.Height),
+            Format = Format.B8G8R8A8_UNorm,
+            NumBuffers = 2,
+            PresentMode = PresentMode.Fifo
+        };
 
-        MainTargetFormat = SDL.GetGPUSwapchainTextureFormat(Device, _window);
+        Logger.Trace("Creating swapchain.");
+        _swapchain = Device.CreateSwapchain(in swapchainInfo);
+        
+        Logger.Trace("Creating main command list.");
+        CommandList = Device.CreateCommandList();
+        
+        //VSync = true;
+
+        //_depthTexture = SdlUtils.CreateTexture2D(Device, (uint) _swapchainSize.Width, (uint) _swapchainSize.Height,
+        //    SDL.GPUTextureFormat.D32Float, 1, SDL.GPUTextureUsageFlags.DepthStencilTarget);
 
         Logger.Debug($"options.Type: {options.Type}");
         Logger.Debug($"options.CreateImGuiRenderer: {options.CreateImGuiRenderer}");
         
-        Logger.Trace("Creating UI renderer.");
+        /*Logger.Trace("Creating UI renderer.");
         _uiBatcher = new TextureBatcher(Device, SDL.GetGPUSwapchainTextureFormat(Device, _window));
 
         if (options.CreateImGuiRenderer)
@@ -154,7 +162,7 @@ public static class Renderer
             ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(float.DegreesToRadians(45),
                 _swapchainSize.Width / (float)_swapchainSize.Height, 0.1f, 100f),
             ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(0, 0, 3), Vector3.Zero, Vector3.UnitY)
-        };
+        };*/
     }
 
     /// <summary>
@@ -162,7 +170,7 @@ public static class Renderer
     /// </summary>
     public static void Destroy()
     {
-        Texture.EmptyNormal.Dispose();
+        /*Texture.EmptyNormal.Dispose();
         Texture.EmptyNormal = null!;
         Texture.Black.Dispose();
         Texture.Black = null!;
@@ -171,14 +179,16 @@ public static class Renderer
         
         _deferredRenderer?.Dispose();
         _imGuiRenderer?.Dispose();
-        _uiBatcher.Dispose();
+        _uiBatcher.Dispose();*/
 
-        SDL.ReleaseGPUTexture(Device, _depthTexture);
-        SDL.ReleaseWindowFromGPUDevice(Device, _window);
-        SDL.DestroyGPUDevice(Device);
+        CommandList.Dispose();
+        _swapchain.Dispose();
+        Device.Dispose();
+        _surface.Dispose();
+        _instance.Dispose();
     }
 
-    /// <summary>
+    /*/// <summary>
     /// Draw a <see cref="Renderable"/> to the screen using the built-in renderers.
     /// </summary>
     /// <param name="renderable">The <see cref="Renderable"/> to draw.</param>
@@ -187,9 +197,9 @@ public static class Renderer
     {
         Debug.Assert(_deferredRenderer != null, "Renderer has not been created with 3D rendering enabled.");
         _deferredRenderer.AddToQueue(renderable, worldMatrix);
-    }
+    }*/
 
-    /// <summary>
+    /*/// <summary>
     /// Draw a <see cref="Sprite"/> to the screen using the built-in renderers.
     /// </summary>
     /// <param name="sprite">The sprite to draw.</param>
@@ -199,9 +209,9 @@ public static class Renderer
     {
         Debug.Assert(_spriteRenderer != null, "Renderer has not been created with 2D rendering enabled.");
         _spriteRenderer.DrawSprite(in sprite, matrix);
-    }
+    }*/
     
-    /// <summary>
+    /*/// <summary>
     /// Draw an image to the screen with the given size.
     /// </summary>
     /// <param name="texture">The texture to use as the image.</param>
@@ -333,13 +343,13 @@ public static class Renderer
     {
         DrawFilledRectangle(position, size, fillColor);
         DrawBorderRectangle(position, size, borderWidth, borderColor);
-    }
+    }*/
 
     public static void NewFrame()
     {
         Metrics.BeginPerformanceMetric(Metrics.RenderTimeMetric);
         
-        Camera = default;
+        //Camera = default;
     }
 
     /// <summary>
@@ -347,20 +357,16 @@ public static class Renderer
     /// </summary>
     public static void Render()
     {
-        IntPtr cb = SDL.AcquireGPUCommandBuffer(Device).Check("Acquire command buffer");
-
-        SDL.WaitAndAcquireGPUSwapchainTexture(cb, _window, out IntPtr swapchainTexture, out _, out _)
-            .Check("Acquire swapchain texture");
-
-        if (swapchainTexture == IntPtr.Zero)
-            return;
+        Texture swapchainTexture = _swapchain.GetNextTexture();
+        
+        CommandList.Begin();
         
         // Each Render() method returns a boolean. If true, it means the renderer has cleared the target provided as the
         // color/compositeTarget parameter. Each renderer has the ability to clear the render/depth targets (if applicable)
         // if necessary.
         // This acts as a small optimization. Each renderer will not bother rendering if there is nothing to do.
 
-        bool hasCleared = _deferredRenderer?.Render(cb, swapchainTexture, _depthTexture, Camera.Matrices) ?? false;
+        /*bool hasCleared = _deferredRenderer?.Render(cb, swapchainTexture, _depthTexture, Camera.Matrices) ?? false;
 
         if (Camera.Skybox?.Render(cb, swapchainTexture, _depthTexture, !hasCleared, Camera.Matrices) ?? false)
             hasCleared = true;
@@ -377,14 +383,13 @@ public static class Renderer
             hasCleared = true;
         }
 
-        _imGuiRenderer?.Render(cb, swapchainTexture, !hasCleared);
+        _imGuiRenderer?.Render(cb, swapchainTexture, !hasCleared);*/
         
-        // We have to end the metric before submitting the command buffer, as SDL will auto present when this method
-        // is called, which will skew the metrics (especially if VSync is enabled.)
-        // When Graphite is implemented, we'll move this to just before the present.
+        CommandList.End();
+        
+        Device.ExecuteCommandList(CommandList);
         Metrics.EndPerformanceMetric(Metrics.RenderTimeMetric);
-
-        SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
+        _swapchain.Present();
     }
 
     /// <summary>
@@ -393,14 +398,16 @@ public static class Renderer
     /// <param name="newSize">The new size to set.</param>
     public static void Resize(Size<int> newSize)
     {
-        _swapchainSize = newSize;
-        
+        throw new NotImplementedException();
+
+        /*_swapchainSize = newSize;
+
         SDL.ReleaseGPUTexture(Device, _depthTexture);
 
         _depthTexture = SdlUtils.CreateTexture2D(Device, (uint) newSize.Width, (uint) newSize.Height,
             SDL.GPUTextureFormat.D32Float, 1, SDL.GPUTextureUsageFlags.DepthStencilTarget);
-        
+
         _deferredRenderer?.Resize(newSize);
-        _imGuiRenderer?.Resize(newSize);
+        _iGuiRenderer?.Resize(newSize);*/
     }
 }

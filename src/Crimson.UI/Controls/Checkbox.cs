@@ -42,7 +42,7 @@ public class Checkbox : Control
         else
             color = theme.ButtonColor;
 
-        Renderer.DrawRectangle(ScreenRegion.Position, ScreenRegion.Size, color, theme.BorderSize,
+        /*Renderer.DrawRectangle(ScreenRegion.Position, ScreenRegion.Size, color, theme.BorderSize,
             theme.ButtonBorderColor);
 
         int halfPadding = theme.Padding / 2;
@@ -57,6 +57,6 @@ public class Checkbox : Control
         
         Renderer.DrawText(theme.Font,
             ScreenRegion.Position + new Vector2T<int>(ScreenRegion.Width + halfPadding, ScreenRegion.Height / 2 - textSize.Height / 2), theme.TextSize, Text,
-            theme.TextColor);
+            theme.TextColor);*/
     }
 }

@@ -3,7 +3,7 @@ using Crimson.Math;
 
 namespace Crimson.UI.Controls;
 
-public class Image : Control
+/*public class Image : Control
 {
     public Texture Texture;
 
@@ -19,4 +19,4 @@ public class Image : Control
     {
         Renderer.DrawImage(Texture, ScreenRegion.Position, ScreenRegion.Size, tint: Tint);
     }
-}
+}*/

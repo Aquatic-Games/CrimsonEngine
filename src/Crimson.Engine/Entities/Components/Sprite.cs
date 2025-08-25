@@ -6,7 +6,7 @@ namespace Crimson.Engine.Entities.Components;
 
 public class Sprite : Component
 {
-    public Texture Texture;
+    /*public Texture Texture;
     
     public Sprite(Texture texture)
     {
@@ -26,5 +26,5 @@ public class Sprite : Component
         );
         
         Renderer.DrawSprite(new Graphics.Sprite(Texture), matrix);
-    }
+    }*/
 }

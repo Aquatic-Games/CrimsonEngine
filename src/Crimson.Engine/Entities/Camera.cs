@@ -4,7 +4,7 @@ using Crimson.Math;
 
 namespace Crimson.Engine.Entities;
 
-public class Camera : Entity
+/*public class Camera : Entity
 {
     private float _fov;
     private float _near;
@@ -59,4 +59,4 @@ public class Camera : Entity
             _ => throw new ArgumentOutOfRangeException()
         };
     }
-}
+}*/

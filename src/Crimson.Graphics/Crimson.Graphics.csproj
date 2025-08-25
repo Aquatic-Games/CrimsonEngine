@@ -16,7 +16,6 @@
     <ItemGroup>
       <PackageReference Include="FreeTypeSharp" Version="3.0.0" />
       <PackageReference Include="Hexa.NET.ImGui" Version="2.2.7" />
-      <PackageReference Include="SDL3-CS" Version="3.2.18" />
       <PackageReference Include="SDL3-CS.Native" Version="3.2.18" />
       <PackageReference Include="SharpGLTF.Core" Version="1.0.4" />
       <PackageReference Include="StbImageSharp" Version="2.30.15" />
@@ -35,6 +34,25 @@
     <ItemGroup>
       <None Remove="DEBUG.png" />
       <EmbeddedResource Include="DEBUG.png" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <Compile Remove="Materials/**/*" />
+        <Compile Remove="Renderers/DeferredRenderer.cs" />
+        <Compile Remove="Renderers/Structs/**/*" />
+        <Compile Remove="Renderers/ImGuiRenderer.cs" />
+        <Compile Remove="Renderers/SpriteRenderer.cs" />
+        <Compile Remove="Renderers/TextureBatcher.cs" />
+        <Compile Remove="Utils/**/*" />
+        <Compile Remove="Camera.cs" />
+        <Compile Remove="Font.cs" />
+        <Compile Remove="Mesh.cs" />
+        <Compile Remove="Model.cs" />
+        <Compile Remove="ModelMesh.cs" />
+        <Compile Remove="Renderable.cs" />
+        <Compile Remove="Skybox.cs" />
+        <Compile Remove="Sprite.cs" />
+        <Compile Remove="Texture.cs" />
     </ItemGroup>
     
 </Project>
