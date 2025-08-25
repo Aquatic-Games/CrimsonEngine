@@ -1,9 +1,9 @@
-using System.Runtime.CompilerServices;
 using Crimson.Content;
 using Crimson.Core;
-using Crimson.Graphics.Utils;
 using Crimson.Math;
-using SDL3;
+using Graphite;
+using Graphite.Core;
+using Buffer = Graphite.Buffer;
 
 namespace Crimson.Graphics;
 
@@ -12,11 +12,10 @@ namespace Crimson.Graphics;
 /// </summary>
 public class Texture : IContentResource<Texture>, IDisposable
 {
-    private readonly IntPtr _device;
     private readonly uint _numMipLevels;
     private readonly bool _isOwnedByRenderer;
     
-    internal readonly IntPtr TextureHandle;
+    internal readonly GrTexture TextureHandle;
 
     /// <summary>
     /// The texture's friendly name, if any.
@@ -40,25 +39,24 @@ public class Texture : IContentResource<Texture>, IDisposable
         Name = name;
         Size = size;
 
-        _device = Renderer.Device;
-        _numMipLevels = SdlUtils.CalculateMipLevels((uint) size.Width, (uint) size.Height);
+        Device device = Renderer.Device;
+        _numMipLevels = GraphiteUtils.CalculateMipLevels((uint) size.Width, (uint) size.Height);
 
-        SDL.GPUTextureCreateInfo textureInfo = new()
+        Format fmt = format switch
         {
-            Type = SDL.GPUTextureType.Texturetype2D,
-            Format = format.ToSdl(out _),
-            Width = (uint) size.Width,
-            Height = (uint) size.Height,
-            LayerCountOrDepth = 1,
-            NumLevels = _numMipLevels,
-            Usage = SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget
+            PixelFormat.RGBA8 => Format.R8G8B8A8_UNorm,
+            _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
         };
 
+        TextureInfo info = TextureInfo.Texture2D(fmt, new Size2D((uint) size.Width, (uint) size.Height), _numMipLevels,
+            TextureUsage.ShaderResource | TextureUsage.GenerateMips);
+
         Logger.Trace("Creating texture.");
-        TextureHandle = SDL.CreateGPUTexture(_device, in textureInfo).Check("Create texture");
+        TextureHandle = device.CreateTexture(in info);
         
-        if (name != null)
-            SDL.SetGPUTextureName(_device, TextureHandle, name);
+        // TODO: Texture names in Graphite
+        /*if (name != null)
+            SDL.SetGPUTextureName(_device, TextureHandle, name);*/
         
         if (data != null)
             Update(new Rectangle<int>(Vector2T<int>.Zero, Size), data);
@@ -78,7 +76,7 @@ public class Texture : IContentResource<Texture>, IDisposable
     /// <param name="name">The texture's name used during debugging, if any. If nothing is provided, the path will be used.</param>
     public Texture(string path) : this(new Bitmap(path), path) { }
 
-    internal Texture(IntPtr textureHandle, Size<int> size, string name)
+    internal Texture(GrTexture textureHandle, Size<int> size, string name)
     {
         Name = name;
         Size = size;
@@ -86,59 +84,28 @@ public class Texture : IContentResource<Texture>, IDisposable
         _isOwnedByRenderer = true;
     }
 
-    public unsafe void Update(Rectangle<int> location, byte[] data)
+    public void Update(Rectangle<int> location, byte[] data)
     {
         // TODO: Obviously, creating/deleting transfer buffers and executing command lists etc is slow for every texture
         //       update, especially when updating often like in the case of the Font. Perhaps some way to keep the
         //       command buffer around, only submitting on use, or some way to update multiple times is needed?
+
+        Device device = Renderer.Device;
+        CommandList cl = Renderer.CommandList;
         
-        SDL.GPUTransferBufferCreateInfo transInfo = new()
-        {
-            Usage = SDL.GPUTransferBufferUsage.Upload,
-            Size = (uint) data.Length
-        };
-
-        Logger.Trace("Creating transfer buffer");
-        IntPtr transBuffer = SDL.CreateGPUTransferBuffer(_device, in transInfo);
-
-        nint mappedData = SDL.MapGPUTransferBuffer(_device, transBuffer, false);
-        fixed (byte* pData = data)
-            Unsafe.CopyBlock((void*) mappedData, pData, transInfo.Size);
-        SDL.UnmapGPUTransferBuffer(_device, transBuffer);
-
-        IntPtr cb = SDL.AcquireGPUCommandBuffer(_device).Check("Acquire command buffer");
-        IntPtr pass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
-
-        SDL.GPUTextureTransferInfo source = new()
-        {
-            TransferBuffer = transBuffer,
-            Offset = 0,
-            PixelsPerRow = (uint) location.Width
-        };
-
-        SDL.GPUTextureRegion dest = new()
-        {
-            Texture = TextureHandle,
-            X = (uint) location.X,
-            Y = (uint) location.Y,
-            W = (uint) location.Width,
-            H = (uint) location.Height,
-            D = 1,
-            MipLevel = 0
-        };
-        
-        SDL.UploadToGPUTexture(pass, in source, in dest, false);
-        
-        SDL.EndGPUCopyPass(pass);
+        Buffer buffer = device.CreateBuffer(BufferUsage.TransferBuffer, data);
+        cl.Begin();
+        cl.CopyBufferToTexture(buffer, 0, TextureHandle, new Size3D((uint) location.Width, (uint) location.Height),
+            new Offset3D(location.X, location.Y));
 
         if (_numMipLevels > 1)
         {
             Logger.Trace($"Generating mipmaps. (Level {_numMipLevels})");
-            SDL.GenerateMipmapsForGPUTexture(cb, TextureHandle);
+            cl.GenerateMipmaps(TextureHandle);
         }
-
-        SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
-        SDL.ReleaseGPUTransferBuffer(_device, transBuffer);
+        
+        cl.End();
+        device.ExecuteCommandList(cl);
     }
 
     /// <summary>
@@ -149,7 +116,7 @@ public class Texture : IContentResource<Texture>, IDisposable
         if (_isOwnedByRenderer)
             return;
         
-        SDL.ReleaseGPUTexture(_device, TextureHandle);
+        TextureHandle.Dispose();
     }
     
     public static Texture White { get; internal set; }

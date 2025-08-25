@@ -9,13 +9,13 @@ namespace Crimson.Engine.Tests;
 
 public class Test2D : Scene
 {
-    //private Texture _texture = null!;
+    private Texture _texture = null!;
     private float _f;
     
     public override void Initialize()
     {
         // TODO: Texture.Debug?
-        //_texture = Content.Content.Load<Texture>("DEBUG");
+        _texture = Content.Content.Load<Texture>("DEBUG");
         
         //Camera.Type = CameraType.Orthographic;
         

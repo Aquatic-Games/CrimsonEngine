@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿global using GrTexture = Graphite.Texture;
+using System.Diagnostics;
 using System.Numerics;
 using Crimson.Core;
 //using Crimson.Graphics.Renderers;
@@ -357,7 +358,7 @@ public static class Renderer
     /// </summary>
     public static void Render()
     {
-        Texture swapchainTexture = _swapchain.GetNextTexture();
+        GrTexture swapchainTexture = _swapchain.GetNextTexture();
         
         CommandList.Begin();
         
