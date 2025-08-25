@@ -5,7 +5,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\lib\grabs\src\grabs.ShaderCompiler\grabs.ShaderCompiler.csproj" />
+      <ProjectReference Include="..\..\lib\Graphite\src\Graphite.D3D11\Graphite.D3D11.csproj" />
+      <ProjectReference Include="..\..\lib\Graphite\src\Graphite.Vulkan\Graphite.Vulkan.csproj" />
+      <ProjectReference Include="..\..\lib\Graphite\src\Graphite\Graphite.csproj" />
       <ProjectReference Include="..\Crimson.Content\Crimson.Content.csproj" />
       <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
       <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
