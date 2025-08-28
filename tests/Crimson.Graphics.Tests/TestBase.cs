@@ -26,7 +26,7 @@ public abstract class TestBase : IDisposable
         Events.WindowClose += () => alive = false;
         
         Surface.Create(new WindowOptions(Name, new Size<int>(1280, 720), false, false));
-        Renderer.Create(Name, new RendererOptions(RendererType.CreateBoth, true, true), Surface.Info);
+        Renderer.Create(Name, new RendererOptions(RendererType.CreateBoth, true, true), Surface.Info, Surface.Size);
 
         Initialize();
         

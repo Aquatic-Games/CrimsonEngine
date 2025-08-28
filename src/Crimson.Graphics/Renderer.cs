@@ -1,5 +1,11 @@
 ﻿using System.Diagnostics;
+using Crimson.Core;
+using Crimson.Graphics.Utils;
 using Crimson.Math;
+using Graphite;
+using Graphite.Core;
+using Graphite.D3D11;
+using Graphite.Vulkan;
 using Hexa.NET.ImGui;
 
 namespace Crimson.Graphics;
@@ -9,7 +15,13 @@ namespace Crimson.Graphics;
 /// </summary>
 public static class Renderer
 {
-    //public static string Backend => SDL.GetGPUDeviceDriver(Device) ?? "Unknown";
+    private static Instance _instance;
+    private static Surface _surface;
+    private static Swapchain _swapchain;
+
+    internal static Device Device;
+
+    public static string Backend => _instance.BackendName;
 
     /// <summary>
     /// The 3D <see cref="Crimson.Graphics.Camera"/> that will be used when drawing.
@@ -58,9 +70,39 @@ public static class Renderer
     /// </summary>
     /// <param name="appName">The application name.</param>
     /// <param name="surface">The <see cref="SurfaceInfo"/> to use when creating the subsystem.</param>
-    public static void Create(string appName, in RendererOptions options, in SurfaceInfo surface)
+    public static void Create(string appName, in RendererOptions options, in SurfaceInfo surface, in Size<int> size)
     {
+        GraphiteLog.LogMessage += OnLog;
         
+        Instance.RegisterBackend<D3D11Backend>();
+        Instance.RegisterBackend<VulkanBackend>();
+
+        InstanceInfo instanceInfo = new()
+        {
+            AppName = appName,
+            Debug = options.Debug
+        };
+        
+        Logger.Trace("Creating instance.");
+        _instance = Instance.Create(in instanceInfo);
+        
+        Logger.Trace("Creating surface.");
+        _surface = _instance.CreateSurface(in surface);
+        
+        Logger.Trace("Creating device.");
+        Device = _instance.CreateDevice(_surface);
+
+        SwapchainInfo swapchainInfo = new()
+        {
+            Surface = _surface,
+            Format = Format.B8G8R8A8_UNorm,
+            Size = size.ToGraphite(),
+            NumBuffers = 2,
+            PresentMode = PresentMode.Fifo
+        };
+        
+        Logger.Trace("Creating swapchain.");
+        _swapchain = Device.CreateSwapchain(in swapchainInfo);
     }
 
     /// <summary>
@@ -68,7 +110,12 @@ public static class Renderer
     /// </summary>
     public static void Destroy()
     {
-        
+        _swapchain.Dispose();
+        Device.Dispose();
+        _surface.Dispose();
+        _instance.Dispose();
+
+        GraphiteLog.LogMessage -= OnLog;
     }
 
     /*/// <summary>
@@ -240,7 +287,11 @@ public static class Renderer
     /// </summary>
     public static void Render()
     {
+        Texture swapchainTexture = _swapchain.GetNextTexture();
         
+        
+        
+        _swapchain.Present();
     }
 
     /// <summary>
@@ -250,5 +301,19 @@ public static class Renderer
     public static void Resize(Size<int> newSize)
     {
         
+    }
+    
+    private static void OnLog(GraphiteLog.Severity severity, GraphiteLog.Type type, string message, int line, string file)
+    {
+        Logger.Severity cSeverity = severity switch
+        {
+            GraphiteLog.Severity.Verbose => Logger.Severity.Trace,
+            GraphiteLog.Severity.Info => Logger.Severity.Debug,
+            GraphiteLog.Severity.Warning => Logger.Severity.Warning,
+            GraphiteLog.Severity.Error => Logger.Severity.Error,
+            _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null)
+        };
+        
+        Logger.Log(cSeverity, $"{type}: {message}", line, file);
     }
 }
