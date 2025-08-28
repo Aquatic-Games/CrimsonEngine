@@ -52,7 +52,6 @@
         <Compile Remove="Mesh.cs" />
         <Compile Remove="Sprite.cs" />
         <Compile Remove="Font.cs" />
-        <Compile Remove="Texture.cs" />
     </ItemGroup>
     
 </Project>

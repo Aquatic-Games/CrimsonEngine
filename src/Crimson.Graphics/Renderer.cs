@@ -20,6 +20,7 @@ public static class Renderer
     private static Swapchain _swapchain;
 
     internal static Device Device;
+    internal static CommandList CommandList;
 
     public static string Backend => _instance.BackendName;
 
@@ -31,12 +32,17 @@ public static class Renderer
     /// <summary>
     /// Get the render area size in pixels.
     /// </summary>
-    //public static Size<int> RenderSize => _swapchainSize;
+    public static Size<int> RenderSize => _swapchain.Size.ToCrimson();
 
-    /*/// <summary>
+    /// <summary>
     /// Enable/disable vertical sync.
     /// </summary>
     public static bool VSync
+    {
+        get => true;
+        set => throw new NotImplementedException();
+    }
+    /*public static bool VSync
     {
         get => _vsyncEnabled;
         set
@@ -103,6 +109,9 @@ public static class Renderer
         
         Logger.Trace("Creating swapchain.");
         _swapchain = Device.CreateSwapchain(in swapchainInfo);
+
+        Logger.Trace("Creating command list.");
+        CommandList = Device.CreateCommandList();
     }
 
     /// <summary>
@@ -110,6 +119,7 @@ public static class Renderer
     /// </summary>
     public static void Destroy()
     {
+        CommandList.Dispose();
         _swapchain.Dispose();
         Device.Dispose();
         _surface.Dispose();
@@ -287,7 +297,7 @@ public static class Renderer
     /// </summary>
     public static void Render()
     {
-        Texture swapchainTexture = _swapchain.GetNextTexture();
+        GrTexture swapchainTexture = _swapchain.GetNextTexture();
         
         
         
