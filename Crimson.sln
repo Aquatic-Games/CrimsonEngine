@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 
+#
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Engine", "src\Crimson.Engine\Crimson.Engine.csproj", "{E2EF81F3-894A-46C3-B4C4-2CA2A2DFA0EB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Core", "src\Crimson.Core\Crimson.Core.csproj", "{AFEB0C8E-E65C-4935-B2F1-2AFFE3DA51CB}"
@@ -46,6 +46,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graphite.Vulkan", "lib\Graphite\src\Graphite.Vulkan\Graphite.Vulkan.csproj", "{4D701289-3E8E-4498-A776-44D009502A35}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Graphite.VulkanMemoryAllocator", "lib\Graphite\src\Graphite.VulkanMemoryAllocator\Graphite.VulkanMemoryAllocator.csproj", "{9407FA80-358C-4443-9C79-D65E2050B999}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Graphics.Tests", "tests\Crimson.Graphics.Tests\Crimson.Graphics.Tests.csproj", "{812DEB6C-9C84-4B2D-B5FB-6488E7F6B46D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -133,6 +135,10 @@ Global
 		{9407FA80-358C-4443-9C79-D65E2050B999}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9407FA80-358C-4443-9C79-D65E2050B999}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9407FA80-358C-4443-9C79-D65E2050B999}.Release|Any CPU.Build.0 = Release|Any CPU
+		{812DEB6C-9C84-4B2D-B5FB-6488E7F6B46D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{812DEB6C-9C84-4B2D-B5FB-6488E7F6B46D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{812DEB6C-9C84-4B2D-B5FB-6488E7F6B46D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{812DEB6C-9C84-4B2D-B5FB-6488E7F6B46D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A} = {4DB13778-0F69-4B82-A065-32546F54500F}
@@ -144,5 +150,6 @@ Global
 		{2FD6842B-E5A7-4F47-8B1D-E9AE58F9EB28} = {1B8A7A5F-53AE-4B9C-A537-050BE768DE3A}
 		{4D701289-3E8E-4498-A776-44D009502A35} = {1B8A7A5F-53AE-4B9C-A537-050BE768DE3A}
 		{9407FA80-358C-4443-9C79-D65E2050B999} = {1B8A7A5F-53AE-4B9C-A537-050BE768DE3A}
+		{812DEB6C-9C84-4B2D-B5FB-6488E7F6B46D} = {4DB13778-0F69-4B82-A065-32546F54500F}
 	EndGlobalSection
 EndGlobal

@@ -1,10 +1,3 @@
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using Crimson.Core;
-using grabs.Graphics;
-using grabs.ShaderCompiler;
-using SDL3;
-
 namespace Crimson.Graphics.Utils;
 
 internal static class ShaderUtils
@@ -59,7 +52,7 @@ internal static class ShaderUtils
         }
     }*/
     
-    public static unsafe IntPtr LoadGraphicsShader(IntPtr device, SDL.GPUShaderStage stage, string name, string entryPoint, uint numUniforms, uint numSamplers)
+    /*public static unsafe IntPtr LoadGraphicsShader(IntPtr device, SDL.GPUShaderStage stage, string name, string entryPoint, uint numUniforms, uint numSamplers)
     {
         Logger.Trace($"Compiling shader '{name}'.");
 
@@ -107,7 +100,7 @@ internal static class ShaderUtils
             Logger.Trace("Creating shader.");
             return SDL.CreateGPUShader(device, in shaderInfo).Check("Create GPU shader");
         }
-    }
+    }*/
 
     /*public static unsafe IntPtr LoadGraphicsShader(IntPtr device, SDL.GPUShaderStage stage, string name, string entryPoint, uint numUniforms, uint numSamplers)
     {

@@ -37,4 +37,22 @@
       <EmbeddedResource Include="DEBUG.png" />
     </ItemGroup>
     
+    <ItemGroup>
+        <Compile Remove="Materials/**/*" />
+        <Compile Remove="Renderable.cs" />
+        <Compile Remove="Renderers/Structs/WorldRenderable.cs" />
+        <Compile Remove="Renderers/Structs/MaterialProperties.cs" />
+        <Compile Remove="Renderers/ImGuiRenderer.cs" />
+        <Compile Remove="Renderers/SpriteRenderer.cs" />
+        <Compile Remove="Renderers/TextureBatcher.cs" />
+        <Compile Remove="Renderers/DeferredRenderer.cs" />
+        <Compile Remove="Skybox.cs "/>
+        <Compile Remove="ModelMesh.cs" />
+        <Compile Remove="Model.cs" />
+        <Compile Remove="Mesh.cs" />
+        <Compile Remove="Sprite.cs" />
+        <Compile Remove="Font.cs" />
+        <Compile Remove="Texture.cs" />
+    </ItemGroup>
+    
 </Project>
