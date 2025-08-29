@@ -168,6 +168,29 @@ public readonly struct Matrix<T> :
     public static bool operator !=(Matrix<T> left, Matrix<T> right)
         => left.Row0 != right.Row0 || left.Row1 != right.Row1 || left.Row2 != right.Row2 || left.Row3 != right.Row3;
 
+    public static explicit operator Matrix4x4(in Matrix<T> matrix)
+    {
+        return new Matrix4x4
+        {
+            M11 = float.CreateChecked(matrix.Row0.X),
+            M12 = float.CreateChecked(matrix.Row0.Y),
+            M13 = float.CreateChecked(matrix.Row0.Z),
+            M14 = float.CreateChecked(matrix.Row0.W),
+            M21 = float.CreateChecked(matrix.Row1.X),
+            M22 = float.CreateChecked(matrix.Row1.Y),
+            M23 = float.CreateChecked(matrix.Row1.Z),
+            M24 = float.CreateChecked(matrix.Row1.W),
+            M31 = float.CreateChecked(matrix.Row2.X),
+            M32 = float.CreateChecked(matrix.Row2.Y),
+            M33 = float.CreateChecked(matrix.Row2.Z),
+            M34 = float.CreateChecked(matrix.Row2.W),
+            M41 = float.CreateChecked(matrix.Row3.X),
+            M42 = float.CreateChecked(matrix.Row3.Y),
+            M43 = float.CreateChecked(matrix.Row3.Z),
+            M44 = float.CreateChecked(matrix.Row3.W),
+        };
+    }
+
     public string ToString(string? format, IFormatProvider? formatProvider)
     {
         FormattableString formattable =

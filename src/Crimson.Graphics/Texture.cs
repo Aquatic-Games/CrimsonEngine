@@ -1,7 +1,5 @@
 global using GrTexture = Graphite.Texture;
-using System.Runtime.CompilerServices;
 using Crimson.Content;
-using Crimson.Core;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
 using Graphite;

@@ -1,8 +1,6 @@
 #pragma vertex VSMain
 #pragma pixel PSMain
 
-#include "Crimson.hlsli"
-
 struct VSInput
 {
     float2 Position: TEXCOORD0;
@@ -22,13 +20,20 @@ struct PSOutput
     float4 Color: SV_Target0;
 };
 
-SAMPLER2D(Texture, 0)
+cbuffer CameraMatrices : register(b0, space0)
+{
+    float4x4 Projection;
+    float4x4 Transform;
+}
+
+Texture2D Texture    : register(t0, space1);
+SamplerState Sampler : register(s0, space1);
 
 VSOutput VSMain(const in VSInput input)
 {
     VSOutput output;
 
-    output.Position = mul(vCamera.Projection, mul(vCamera.View, float4(input.Position, 0.0, 1.0)));
+    output.Position = mul(Projection, mul(Transform, float4(input.Position, 0.0, 1.0)));
     output.TexCoord = input.TexCoord;
     output.Tint = input.Tint;
     
@@ -39,7 +44,7 @@ PSOutput PSMain(const in VSOutput input)
 {
     PSOutput output;
 
-    output.Color = SAMPLE(Texture, input.TexCoord) * input.Tint;
+    output.Color = Texture.Sample(Sampler, input.TexCoord) * input.Tint;
     
     return output;
 }

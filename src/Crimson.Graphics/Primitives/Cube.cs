@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using Crimson.Math;
+﻿using Crimson.Math;
 
 namespace Crimson.Graphics.Primitives;
 
@@ -25,35 +24,35 @@ public class Cube : IPrimitive
     {
         Vertices =
         [
-            new Vertex(new Vector3(-0.5f, -0.5f, 0.5f), new Vector2(0, 1), Color.White, new Vector3(0, 0, 1)),
-            new Vertex(new Vector3(0.5f, -0.5f, 0.5f), new Vector2(1, 1), Color.White, new Vector3(0, 0, 1)),
-            new Vertex(new Vector3(0.5f, 0.5f, 0.5f), new Vector2(1, 0), Color.White, new Vector3(0, 0, 1)),
-            new Vertex(new Vector3(-0.5f, 0.5f, 0.5f), new Vector2(0, 0), Color.White, new Vector3(0, 0, 1)),
+            new Vertex(new Vector3T<float>(-0.5f, -0.5f, 0.5f), new Vector2T<float>(0, 1), Color.White, new Vector3T<float>(0, 0, 1)),
+            new Vertex(new Vector3T<float>(0.5f, -0.5f, 0.5f), new Vector2T<float>(1, 1), Color.White, new Vector3T<float>(0, 0, 1)),
+            new Vertex(new Vector3T<float>(0.5f, 0.5f, 0.5f), new Vector2T<float>(1, 0), Color.White, new Vector3T<float>(0, 0, 1)),
+            new Vertex(new Vector3T<float>(-0.5f, 0.5f, 0.5f), new Vector2T<float>(0, 0), Color.White, new Vector3T<float>(0, 0, 1)),
 
-            new Vertex(new Vector3(0.5f, -0.5f, -0.5f), new Vector2(0, 1), Color.White, new Vector3(0, 0, -1)),
-            new Vertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(1, 1), Color.White, new Vector3(0, 0, -1)),
-            new Vertex(new Vector3(-0.5f, 0.5f, -0.5f), new Vector2(1, 0), Color.White, new Vector3(0, 0, -1)),
-            new Vertex(new Vector3(0.5f, 0.5f, -0.5f), new Vector2(0, 0), Color.White, new Vector3(0, 0, -1)),
+            new Vertex(new Vector3T<float>(0.5f, -0.5f, -0.5f), new Vector2T<float>(0, 1), Color.White, new Vector3T<float>(0, 0, -1)),
+            new Vertex(new Vector3T<float>(-0.5f, -0.5f, -0.5f), new Vector2T<float>(1, 1), Color.White, new Vector3T<float>(0, 0, -1)),
+            new Vertex(new Vector3T<float>(-0.5f, 0.5f, -0.5f), new Vector2T<float>(1, 0), Color.White, new Vector3T<float>(0, 0, -1)),
+            new Vertex(new Vector3T<float>(0.5f, 0.5f, -0.5f), new Vector2T<float>(0, 0), Color.White, new Vector3T<float>(0, 0, -1)),
 
-            new Vertex(new Vector3(0.5f, -0.5f, 0.5f), new Vector2(0, 1), Color.White, new Vector3(1, 0, 0)),
-            new Vertex(new Vector3(0.5f, -0.5f, -0.5f), new Vector2(1, 1), Color.White, new Vector3(1, 0, 0)),
-            new Vertex(new Vector3(0.5f, 0.5f, -0.5f), new Vector2(1, 0), Color.White, new Vector3(1, 0, 0)),
-            new Vertex(new Vector3(0.5f, 0.5f, 0.5f), new Vector2(0, 0), Color.White, new Vector3(1, 0, 0)),
+            new Vertex(new Vector3T<float>(0.5f, -0.5f, 0.5f), new Vector2T<float>(0, 1), Color.White, new Vector3T<float>(1, 0, 0)),
+            new Vertex(new Vector3T<float>(0.5f, -0.5f, -0.5f), new Vector2T<float>(1, 1), Color.White, new Vector3T<float>(1, 0, 0)),
+            new Vertex(new Vector3T<float>(0.5f, 0.5f, -0.5f), new Vector2T<float>(1, 0), Color.White, new Vector3T<float>(1, 0, 0)),
+            new Vertex(new Vector3T<float>(0.5f, 0.5f, 0.5f), new Vector2T<float>(0, 0), Color.White, new Vector3T<float>(1, 0, 0)),
 
-            new Vertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1), Color.White, new Vector3(-1, 0, 0)),
-            new Vertex(new Vector3(-0.5f, -0.5f, 0.5f), new Vector2(1, 1), Color.White, new Vector3(-1, 0, 0)),
-            new Vertex(new Vector3(-0.5f, 0.5f, 0.5f), new Vector2(1, 0), Color.White, new Vector3(-1, 0, 0)),
-            new Vertex(new Vector3(-0.5f, 0.5f, -0.5f), new Vector2(0, 0), Color.White, new Vector3(-1, 0, 0)),
+            new Vertex(new Vector3T<float>(-0.5f, -0.5f, -0.5f), new Vector2T<float>(0, 1), Color.White, new Vector3T<float>(-1, 0, 0)),
+            new Vertex(new Vector3T<float>(-0.5f, -0.5f, 0.5f), new Vector2T<float>(1, 1), Color.White, new Vector3T<float>(-1, 0, 0)),
+            new Vertex(new Vector3T<float>(-0.5f, 0.5f, 0.5f), new Vector2T<float>(1, 0), Color.White, new Vector3T<float>(-1, 0, 0)),
+            new Vertex(new Vector3T<float>(-0.5f, 0.5f, -0.5f), new Vector2T<float>(0, 0), Color.White, new Vector3T<float>(-1, 0, 0)),
 
-            new Vertex(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0, 1), Color.White, new Vector3(0, -1, 0)),
-            new Vertex(new Vector3(0.5f, -0.5f, -0.5f), new Vector2(1, 1), Color.White, new Vector3(0, -1, 0)),
-            new Vertex(new Vector3(0.5f, -0.5f, 0.5f), new Vector2(1, 0), Color.White, new Vector3(0, -1, 0)),
-            new Vertex(new Vector3(-0.5f, -0.5f, 0.5f), new Vector2(0, 0), Color.White, new Vector3(0, -1, 0)),
+            new Vertex(new Vector3T<float>(-0.5f, -0.5f, -0.5f), new Vector2T<float>(0, 1), Color.White, new Vector3T<float>(0, -1, 0)),
+            new Vertex(new Vector3T<float>(0.5f, -0.5f, -0.5f), new Vector2T<float>(1, 1), Color.White, new Vector3T<float>(0, -1, 0)),
+            new Vertex(new Vector3T<float>(0.5f, -0.5f, 0.5f), new Vector2T<float>(1, 0), Color.White, new Vector3T<float>(0, -1, 0)),
+            new Vertex(new Vector3T<float>(-0.5f, -0.5f, 0.5f), new Vector2T<float>(0, 0), Color.White, new Vector3T<float>(0, -1, 0)),
 
-            new Vertex(new Vector3(-0.5f, 0.5f, 0.5f), new Vector2(0, 1), Color.White, new Vector3(0, 1, 0)),
-            new Vertex(new Vector3(0.5f, 0.5f, 0.5f), new Vector2(1, 1), Color.White, new Vector3(0, 1, 0)),
-            new Vertex(new Vector3(0.5f, 0.5f, -0.5f), new Vector2(1, 0), Color.White, new Vector3(0, 1, 0)),
-            new Vertex(new Vector3(-0.5f, 0.5f, -0.5f), new Vector2(0, 0), Color.White, new Vector3(0, 1, 0)),
+            new Vertex(new Vector3T<float>(-0.5f, 0.5f, 0.5f), new Vector2T<float>(0, 1), Color.White, new Vector3T<float>(0, 1, 0)),
+            new Vertex(new Vector3T<float>(0.5f, 0.5f, 0.5f), new Vector2T<float>(1, 1), Color.White, new Vector3T<float>(0, 1, 0)),
+            new Vertex(new Vector3T<float>(0.5f, 0.5f, -0.5f), new Vector2T<float>(1, 0), Color.White, new Vector3T<float>(0, 1, 0)),
+            new Vertex(new Vector3T<float>(-0.5f, 0.5f, -0.5f), new Vector2T<float>(0, 0), Color.White, new Vector3T<float>(0, 1, 0)),
         ];
 
         Indices =

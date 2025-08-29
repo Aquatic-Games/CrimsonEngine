@@ -84,6 +84,14 @@ public readonly struct Vector4T<T> :
         Z = z;
         W = w;
     }
+    
+    public Vector4T(Vector3T<T> xyz, T w)
+    {
+        X = xyz.X;
+        Y = xyz.Y;
+        Z = xyz.Z;
+        W = w;
+    }
 
     /// <summary>
     /// Create a <see cref="Vector4T{T}"/> from a scalar, where the all components have the same value.

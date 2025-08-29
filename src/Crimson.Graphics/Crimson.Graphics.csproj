@@ -30,6 +30,9 @@
     <ItemGroup>
         <None Include="Shaders\**\*.hlsl" CopyToOutputDirectory="PreserveNewest" />
         <None Include="Shaders\**\*.hlsli" CopyToOutputDirectory="PreserveNewest" />
+        <None Update="Shaders\Canvas\Texture.hlsl">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     
     <ItemGroup>

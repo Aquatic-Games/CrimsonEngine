@@ -1,5 +1,5 @@
-﻿using System.Numerics;
-using Crimson.Graphics.Renderers.Structs;
+﻿using Crimson.Graphics.Renderers.Structs;
+using Crimson.Math;
 
 namespace Crimson.Graphics;
 
@@ -11,12 +11,12 @@ public struct Camera
     /// <summary>
     /// The projection matrix.
     /// </summary>
-    public Matrix4x4 ProjectionMatrix;
+    public Matrix<float> ProjectionMatrix;
 
     /// <summary>
     /// The view matrix.
     /// </summary>
-    public Matrix4x4 ViewMatrix;
+    public Matrix<float> ViewMatrix;
 
     /*/// <summary>
     /// The skybox to use, if any. If none is provided, the default background color will be used.

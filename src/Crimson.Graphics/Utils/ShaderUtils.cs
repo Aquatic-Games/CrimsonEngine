@@ -1,8 +1,12 @@
+using Crimson.Core;
+using Graphite;
+using Graphite.ShaderTools;
+
 namespace Crimson.Graphics.Utils;
 
 internal static class ShaderUtils
 {
-    /*public static void LoadGraphicsShader(Device device, string name, out ShaderModule? vertex, out ShaderModule? pixel)
+    public static void LoadGraphicsShader(Device device, string name, out ShaderModule? vertex, out ShaderModule? pixel)
     {
         Logger.Trace($"Compiling shader '{name}'.");
         
@@ -37,20 +41,25 @@ internal static class ShaderUtils
             i = j;
         }
 
+        bool hasCompiled = false;
+
         if (vertexEntryPoint != null)
         {
+            hasCompiled = true;
             Logger.Trace("    Compiling vertex...");
-            byte[] spirv = Compiler.CompileHlsl(ShaderStage.Vertex, hlsl, vertexEntryPoint);
-            vertex = device.CreateShaderModule(ShaderStage.Vertex, spirv, vertexEntryPoint);
+            vertex = device.CreateShaderModuleFromHLSL(ShaderStage.Vertex, hlsl, vertexEntryPoint);
         }
 
         if (pixelEntryPoint != null)
         {
+            hasCompiled = true;
             Logger.Trace("    Compiling pixel...");
-            byte[] spirv = Compiler.CompileHlsl(ShaderStage.Pixel, hlsl, pixelEntryPoint);
-            pixel = device.CreateShaderModule(ShaderStage.Pixel, spirv, pixelEntryPoint);
+            pixel = device.CreateShaderModuleFromHLSL(ShaderStage.Pixel, hlsl, pixelEntryPoint);
         }
-    }*/
+
+        if (!hasCompiled)
+            throw new Exception($"Cannot load \"{name}\": Shader is missing both a vertex and pixel entry point.");
+    }
     
     /*public static unsafe IntPtr LoadGraphicsShader(IntPtr device, SDL.GPUShaderStage stage, string name, string entryPoint, uint numUniforms, uint numSamplers)
     {
