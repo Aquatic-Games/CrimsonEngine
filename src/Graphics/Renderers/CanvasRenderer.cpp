@@ -1,11 +1,11 @@
 // Copyright (c) Aquatic Games 2025. This file is licensed under the MIT license.
-#include "TextureBatcher.h"
+#include "CanvasRenderer.h"
 
 #include "Crimson/Util/Logger.h"
 
 namespace Crimson
 {
-    TextureBatcher::TextureBatcher(SDL_GPUDevice* device, SDL_GPUTextureFormat outFormat)
+    CanvasRenderer::CanvasRenderer(SDL_GPUDevice* device, SDL_GPUTextureFormat outFormat)
     {
         _device = device;
 
@@ -35,7 +35,7 @@ namespace Crimson
         if (!_indexBuffer)
             CS_FATAL("Failed to create index buffer: {}", SDL_GetError());
 
-        SDL_GPUTransferBufferCreateInfo transBufferInfo
+        constexpr SDL_GPUTransferBufferCreateInfo transBufferInfo
         {
             .usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD,
             .size = vertexBufferInfo.size + indexBufferInfo.size,
@@ -44,9 +44,11 @@ namespace Crimson
         _transferBuffer = SDL_CreateGPUTransferBuffer(_device, &transBufferInfo);
         if (!_transferBuffer)
             CS_FATAL("Failed to create transfer buffer: {}", SDL_GetError());
+
+
     }
 
-    TextureBatcher::~TextureBatcher()
+    CanvasRenderer::~CanvasRenderer()
     {
         SDL_ReleaseGPUTransferBuffer(_device, _transferBuffer);
         SDL_ReleaseGPUBuffer(_device, _indexBuffer);

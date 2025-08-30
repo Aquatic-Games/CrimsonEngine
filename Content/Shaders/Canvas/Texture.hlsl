@@ -16,6 +16,9 @@ cbuffer CameraMatrices : register(b0, space1)
     float4x4 Transform;
 }
 
+Texture2D Texture    : register(t0, space0);
+SamplerState Sampler : register(s0, space0);
+
 VSOutput VSMain(const in VSInput input)
 {
     VSOutput output;
@@ -28,5 +31,5 @@ VSOutput VSMain(const in VSInput input)
 
 float4 PSMain(const in VSOutput input): SV_Target0
 {
-    return float4(0.25, 0.5, 1.0, 1.0);
+    return Texture.Sample(Sampler, input.TexCoord);
 }

@@ -4,17 +4,18 @@
 #include <format>
 #include <stdexcept>
 #include <SDL3/SDL_gpu.h>
+#include <SDL3_shadercross/SDL_shadercross.h>
 
 #include "Crimson/Platform/Surface.h"
 #include "Crimson/Util/Logger.h"
-#include "Renderers/TextureBatcher.h"
+#include "Renderers/CanvasRenderer.h"
 
 namespace Crimson
 {
     static SDL_GPUDevice* _device;
     static SDL_Window* _window;
 
-    static TextureBatcher* _uiBatcher;
+    static CanvasRenderer* _uiBatcher;
 
     void Renderer::Create()
     {
@@ -26,10 +27,6 @@ namespace Crimson
         SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_PREFERLOWPOWER_BOOLEAN, true);
 #endif
 
-#ifdef CS_WINDOWS
-        SDL_SetBooleanProperty(props, SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXBC_BOOLEAN, true);
-#endif
-
         CS_TRACE("Creating GPU device.");
         _device = SDL_CreateGPUDeviceWithProperties(props);
         if (!_device)
@@ -38,13 +35,17 @@ namespace Crimson
         _window = static_cast<SDL_Window*>(Surface::GetHandle());
         SDL_ClaimWindowForGPUDevice(_device, _window);
 
+        if (!SDL_ShaderCross_Init())
+            CS_FATAL("Failed to initialize SDL_ShaderCross: {}", SDL_GetError());
+
         CS_TRACE("Creating UI batcher.");
-        _uiBatcher = new TextureBatcher(_device, SDL_GetGPUSwapchainTextureFormat(_device, _window));
+        _uiBatcher = new CanvasRenderer(_device, SDL_GetGPUSwapchainTextureFormat(_device, _window));
     }
 
     void Renderer::Destroy()
     {
         delete _uiBatcher;
+        SDL_ShaderCross_Quit();
         SDL_ReleaseWindowFromGPUDevice(_device, _window);
         SDL_DestroyGPUDevice(_device);
     }

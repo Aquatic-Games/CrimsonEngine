@@ -32,4 +32,9 @@ endif()
 add_subdirectory(lib/SDL)
 target_link_libraries(CrimsonEngine PUBLIC SDL3::SDL3)
 
+set(SDLSHADERCROSS_VENDORED ON CACHE BOOL "")
+set(SDLSHADERCROSS_DXC OFF CACHE BOOL "")
+add_subdirectory(lib/SDL_shadercross)
+target_link_libraries(CrimsonEngine PUBLIC SDL3_shadercross::SDL3_shadercross-static)
+
 add_subdirectory(tests)

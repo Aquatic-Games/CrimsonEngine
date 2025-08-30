@@ -2,3 +2,6 @@
 	path = lib/SDL
 	url = https://github.com/libsdl-org/SDL/
 	branch = release-3.2.x
+[submodule "lib/SDL_shadercross"]
+	path = lib/SDL_shadercross
+	url = https://github.com/libsdl-org/SDL_shadercross

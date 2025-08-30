@@ -8,7 +8,7 @@
 
 namespace Crimson
 {
-    class TextureBatcher final
+    class CanvasRenderer final
     {
         using IndexType = uint32;
         struct Vertex;
@@ -25,9 +25,11 @@ namespace Crimson
         SDL_GPUBuffer* _indexBuffer;
         SDL_GPUTransferBuffer* _transferBuffer;
 
+        SDL_GPUGraphicsPipeline* _pipeline;
+
     public:
-        TextureBatcher(SDL_GPUDevice* device, SDL_GPUTextureFormat outFormat);
-        ~TextureBatcher();
+        CanvasRenderer(SDL_GPUDevice* device, SDL_GPUTextureFormat outFormat);
+        ~CanvasRenderer();
 
     private:
         struct Vertex
