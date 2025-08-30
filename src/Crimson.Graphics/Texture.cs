@@ -91,30 +91,8 @@ public class Texture : IContentResource<Texture>, IDisposable
         // TODO: Obviously, creating/deleting transfer buffers and executing command lists etc is slow for every texture
         //       update, especially when updating often like in the case of the Font. Perhaps some way to keep the
         //       command buffer around, only submitting on use, or some way to update multiple times is needed?
-        
-        SDL.GPUTransferBufferCreateInfo transInfo = new()
-        {
-            Usage = SDL.GPUTransferBufferUsage.Upload,
-            Size = (uint) data.Length
-        };
-
-        Logger.Trace("Creating transfer buffer");
-        IntPtr transBuffer = SDL.CreateGPUTransferBuffer(_device, in transInfo);
-
-        nint mappedData = SDL.MapGPUTransferBuffer(_device, transBuffer, false);
-        fixed (byte* pData = data)
-            Unsafe.CopyBlock((void*) mappedData, pData, transInfo.Size);
-        SDL.UnmapGPUTransferBuffer(_device, transBuffer);
 
         IntPtr cb = SDL.AcquireGPUCommandBuffer(_device).Check("Acquire command buffer");
-        IntPtr pass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
-
-        SDL.GPUTextureTransferInfo source = new()
-        {
-            TransferBuffer = transBuffer,
-            Offset = 0,
-            PixelsPerRow = (uint) location.Width
-        };
 
         SDL.GPUTextureRegion dest = new()
         {
@@ -127,9 +105,7 @@ public class Texture : IContentResource<Texture>, IDisposable
             MipLevel = 0
         };
         
-        SDL.UploadToGPUTexture(pass, in source, in dest, false);
-        
-        SDL.EndGPUCopyPass(pass);
+        Renderer.UpdateTexture(cb, in dest, data);
 
         if (_numMipLevels > 1)
         {
@@ -138,7 +114,6 @@ public class Texture : IContentResource<Texture>, IDisposable
         }
 
         SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
-        SDL.ReleaseGPUTransferBuffer(_device, transBuffer);
     }
 
     /// <summary>

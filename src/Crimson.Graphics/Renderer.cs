@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Crimson.Core;
 using Crimson.Graphics.Renderers;
 using Crimson.Graphics.Renderers.Structs;
@@ -16,12 +17,16 @@ namespace Crimson.Graphics;
 /// </summary>
 public static class Renderer
 {
+    private const uint TransferBufferSize = 64 * 1024 * 1024;
+    
     private static IntPtr _window;
     
     private static IntPtr _depthTexture;
 
     private static bool _vsyncEnabled;
     private static Size<int> _swapchainSize;
+
+    private static IntPtr _transferBuffer;
     
     private static TextureBatcher _uiBatcher;
     private static ImGuiRenderer? _imGuiRenderer;
@@ -120,6 +125,14 @@ public static class Renderer
 
         MainTargetFormat = SDL.GetGPUSwapchainTextureFormat(Device, _window);
 
+        // Create 64MiB transfer buffer for use in various upload operations.
+        SDL.GPUTransferBufferCreateInfo transferBufferInfo = new()
+        {
+            Usage = SDL.GPUTransferBufferUsage.Upload,
+            Size = TransferBufferSize
+        };
+        _transferBuffer = SDL.CreateGPUTransferBuffer(Device, in transferBufferInfo).Check("Create transfer buffer");
+
         Logger.Debug($"options.Type: {options.Type}");
         Logger.Debug($"options.CreateImGuiRenderer: {options.CreateImGuiRenderer}");
         
@@ -172,6 +185,8 @@ public static class Renderer
         _deferredRenderer?.Dispose();
         _imGuiRenderer?.Dispose();
         _uiBatcher.Dispose();
+
+        SDL.ReleaseGPUTransferBuffer(Device, _transferBuffer);
 
         SDL.ReleaseGPUTexture(Device, _depthTexture);
         SDL.ReleaseWindowFromGPUDevice(Device, _window);
@@ -402,5 +417,57 @@ public static class Renderer
         
         _deferredRenderer?.Resize(newSize);
         _imGuiRenderer?.Resize(newSize);
+    }
+
+    internal static unsafe void UpdateBuffer<T>(IntPtr cb, IntPtr buffer, uint offset, ReadOnlySpan<T> data) where T : unmanaged
+    {
+        if (data.Length >= TransferBufferSize)
+            throw new NotImplementedException();
+
+        void* map = (void*) SDL.MapGPUTransferBuffer(Device, _transferBuffer, true);
+        fixed (void* pData = data)
+            Unsafe.CopyBlock((byte*) map, pData, (uint) (data.Length * sizeof(T)));
+
+        IntPtr pass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
+
+        SDL.GPUTransferBufferLocation src = new()
+        {
+            TransferBuffer = _transferBuffer,
+            Offset = 0
+        };
+
+        SDL.GPUBufferRegion dest = new()
+        {
+            Buffer = buffer,
+            Offset = offset,
+            Size = (uint) (data.Length * sizeof(T))
+        };
+        
+        SDL.UploadToGPUBuffer(pass, in src, in dest, false);
+        
+        SDL.EndGPUCopyPass(pass);
+    }
+
+    internal static unsafe void UpdateTexture(IntPtr cb, in SDL.GPUTextureRegion region, byte[] data)
+    {
+        if (data.Length >= TransferBufferSize)
+            throw new NotImplementedException();
+        
+        void* map = (void*) SDL.MapGPUTransferBuffer(Device, _transferBuffer, true);
+        fixed (byte* pData = data)
+            Unsafe.CopyBlock(map, pData, (uint) data.Length);
+        SDL.UnmapGPUTransferBuffer(Device, _transferBuffer);
+
+        IntPtr pass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
+
+        SDL.GPUTextureTransferInfo transferInfo = new()
+        {
+            TransferBuffer = _transferBuffer,
+            PixelsPerRow = region.W
+        };
+        
+        SDL.UploadToGPUTexture(pass, in transferInfo, in region, false);
+        
+        SDL.EndGPUCopyPass(pass);
     }
 }

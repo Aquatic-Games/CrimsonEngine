@@ -72,35 +72,10 @@ internal static class SdlUtils
         uint size = (uint) (data.Length * sizeof(T));
         
         IntPtr buffer = CreateBuffer(device, usage, size);
-        IntPtr transferBuffer = CreateTransferBuffer(device, SDL.GPUTransferBufferUsage.Upload, size);
-
-        void* mapData = (void*) SDL.MapGPUTransferBuffer(device, transferBuffer, false).Check("Map transfer buffer");
-        fixed (void* pData = data)
-            Unsafe.CopyBlock(mapData, pData, size);
-        SDL.UnmapGPUTransferBuffer(device, transferBuffer);
 
         IntPtr cb = SDL.AcquireGPUCommandBuffer(device).Check("Acquire command buffer");
-        IntPtr pass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
-
-        SDL.GPUTransferBufferLocation source = new()
-        {
-            TransferBuffer = transferBuffer,
-            Offset = 0
-        };
-
-        SDL.GPUBufferRegion dest = new()
-        {
-            Buffer = buffer,
-            Offset = 0,
-            Size = size
-        };
-
-        SDL.UploadToGPUBuffer(pass, in source, in dest, false);
-        
-        SDL.EndGPUCopyPass(pass);
+        Renderer.UpdateBuffer(cb, buffer, 0, data);
         SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
-        
-        SDL.ReleaseGPUTransferBuffer(device, transferBuffer);
         
         return buffer;
     }
