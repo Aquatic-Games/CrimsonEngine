@@ -26,6 +26,13 @@ public class Bitmap
     /// </summary>
     public readonly PixelFormat Format;
 
+    public Bitmap(Size<int> size, byte[] data, PixelFormat format)
+    {
+        Size = size;
+        Data = data;
+        Format = format;
+    }
+
     /// <summary>
     /// Load a bitmap from the given path.
     /// </summary>
