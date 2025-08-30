@@ -37,6 +37,8 @@ public static class Renderer
 
     internal static SDL.GPUTextureFormat MainTargetFormat;
 
+    internal static HashSet<IntPtr> MipmapQueue;
+
     public static string Backend => SDL.GetGPUDeviceDriver(Device) ?? "Unknown";
 
     /// <summary>
@@ -132,6 +134,8 @@ public static class Renderer
             Size = TransferBufferSize
         };
         _transferBuffer = SDL.CreateGPUTransferBuffer(Device, in transferBufferInfo).Check("Create transfer buffer");
+
+        MipmapQueue = [];
 
         Logger.Debug($"options.Type: {options.Type}");
         Logger.Debug($"options.CreateImGuiRenderer: {options.CreateImGuiRenderer}");
@@ -363,6 +367,14 @@ public static class Renderer
     public static void Render()
     {
         IntPtr cb = SDL.AcquireGPUCommandBuffer(Device).Check("Acquire command buffer");
+
+        foreach (IntPtr texture in MipmapQueue)
+        {
+            Logger.Trace($"Generating mipmaps for texture handle {texture}.");
+            SDL.GenerateMipmapsForGPUTexture(cb, texture);
+        }
+
+        MipmapQueue.Clear();
 
         SDL.WaitAndAcquireGPUSwapchainTexture(cb, _window, out IntPtr swapchainTexture, out _, out _)
             .Check("Acquire swapchain texture");

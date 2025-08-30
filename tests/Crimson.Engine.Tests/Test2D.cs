@@ -1,3 +1,4 @@
+using System.Numerics;
 using Crimson.Engine.Entities;
 using Crimson.Graphics;
 using Crimson.Math;
@@ -19,11 +20,11 @@ public class Test2D : Scene
         
         Camera.Type = CameraType.Orthographic;
         
-        /*Texture spriteTexture = Content.Content.Load<Texture>("/home/aqua/Pictures/BAGELMIP.png");
-        Entity entity = new Entity("Sprite");
+        Texture spriteTexture = Content.Content.Load<Texture>("/home/aqua/Pictures/BAGELMIP.png");
+        Entity entity = new Entity("Sprite", new Transform() { Scale = new Vector3(0.7f, 0.7f, 1.0f) });
         entity.AddComponent(new Sprite(spriteTexture));
         entity.AddComponent(new Move2D());
-        AddEntity(entity);*/
+        AddEntity(entity);
 
         AnchorLayout layout = (AnchorLayout) UI.UI.BaseControl;
         /*layout.Add(Anchor.TopLeft, Vector2T<int>.Zero, new Size<int>(200, 100), new Button("Top Left"));

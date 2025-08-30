@@ -63,7 +63,8 @@ public sealed class Skybox : IContentResource<Skybox>, IDisposable
             MipmapMode = SDL.GPUSamplerMipmapMode.Linear,
             AddressModeU = SDL.GPUSamplerAddressMode.ClampToEdge,
             AddressModeV = SDL.GPUSamplerAddressMode.ClampToEdge,
-            AddressModeW = SDL.GPUSamplerAddressMode.ClampToEdge
+            AddressModeW = SDL.GPUSamplerAddressMode.ClampToEdge,
+            MaxLod = 1000
         };
 
         _sampler = SDL.CreateGPUSampler(_device, in samplerInfo).Check("Create sampler");
@@ -128,10 +129,9 @@ public sealed class Skybox : IContentResource<Skybox>, IDisposable
         }
 
         SDL.EndGPUCopyPass(copyPass);
-        
-        SDL.GenerateMipmapsForGPUTexture(cb, _textureHandle);
-        
         SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
+
+        Renderer.MipmapQueue.Add(_textureHandle);
         
         SDL.ReleaseGPUTransferBuffer(_device, transferBuffer);
 

@@ -107,13 +107,10 @@ public class Texture : IContentResource<Texture>, IDisposable
         
         Renderer.UpdateTexture(cb, in dest, data);
 
-        if (_numMipLevels > 1)
-        {
-            Logger.Trace($"Generating mipmaps. (Level {_numMipLevels})");
-            SDL.GenerateMipmapsForGPUTexture(cb, TextureHandle);
-        }
-
         SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
+
+        if (_numMipLevels > 1)
+            Renderer.MipmapQueue.Add(TextureHandle);
     }
 
     /// <summary>

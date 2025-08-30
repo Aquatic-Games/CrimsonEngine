@@ -123,7 +123,8 @@ internal class TextureBatcher : IDisposable
             MagFilter = SDL.GPUFilter.Linear,
             MipmapMode = SDL.GPUSamplerMipmapMode.Linear,
             AddressModeU = SDL.GPUSamplerAddressMode.Repeat,
-            AddressModeV = SDL.GPUSamplerAddressMode.Repeat
+            AddressModeV = SDL.GPUSamplerAddressMode.Repeat,
+            MaxLod = 1000
         };
 
         _sampler = SDL.CreateGPUSampler(_device, in samplerInfo).Check("Create GPU sampler");
