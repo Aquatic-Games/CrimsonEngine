@@ -45,10 +45,7 @@ internal class DeferredRenderer : IDisposable
             new Texture(_metallicRoughnessTexture, size, "Metallic-Roughness-Occlusion")
         ];
 
-        IntPtr passVtx = ShaderUtils.LoadGraphicsShader(device, SDL.GPUShaderStage.Vertex, "Deferred/DeferredPass",
-            "VSMain", 0, 0);
-        IntPtr passPxl = ShaderUtils.LoadGraphicsShader(device, SDL.GPUShaderStage.Fragment, "Deferred/DeferredPass",
-            "PSMain", 1, 4);
+        ShaderUtils.LoadGraphicsShader(device, "Deferred/DeferredPass", out IntPtr? passVtx, out IntPtr? passPxl);
 
         SDL.GPUColorTargetDescription targetDesc = new()
         {
@@ -57,8 +54,8 @@ internal class DeferredRenderer : IDisposable
 
         SDL.GPUGraphicsPipelineCreateInfo passPipelineInfo = new()
         {
-            VertexShader = passVtx,
-            FragmentShader = passPxl,
+            VertexShader = passVtx.Value,
+            FragmentShader = passPxl.Value,
             TargetInfo = new SDL.GPUGraphicsPipelineTargetInfo()
             {
                 NumColorTargets = 1,
@@ -69,8 +66,8 @@ internal class DeferredRenderer : IDisposable
 
         _passPipeline = SDL.CreateGPUGraphicsPipeline(_device, in passPipelineInfo).Check("Create graphics pipeline");
         
-        SDL.ReleaseGPUShader(_device, passPxl);
-        SDL.ReleaseGPUShader(_device, passVtx);
+        SDL.ReleaseGPUShader(_device, passPxl.Value);
+        SDL.ReleaseGPUShader(_device, passVtx.Value);
 
         SDL.GPUSamplerCreateInfo samplerInfo = new()
         {

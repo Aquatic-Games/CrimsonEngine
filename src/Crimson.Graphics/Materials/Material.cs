@@ -51,10 +51,8 @@ public class Material : IDisposable
         _device = Renderer.Device;
 
         // TODO: Probably best not to load this shader every time a material is created.
-        IntPtr vertexShader =
-            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Vertex, "Materials/Standard", "VSMain", 2, 0);
-        IntPtr pixelShader =
-            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Fragment, "Materials/Standard", "PSMain", 1, 6);
+        ShaderUtils.LoadGraphicsShader(_device, "Materials/Standard", out IntPtr? vertexShader,
+            out IntPtr? pixelShader);
 
         SDL.GPUVertexBufferDescription vertexBufferDesc = new()
         {
@@ -86,8 +84,8 @@ public class Material : IDisposable
 
         SDL.GPUGraphicsPipelineCreateInfo pipelineInfo = new()
         {
-            VertexShader = vertexShader,
-            FragmentShader = pixelShader,
+            VertexShader = vertexShader.Value,
+            FragmentShader = pixelShader.Value,
             TargetInfo = new SDL.GPUGraphicsPipelineTargetInfo()
             {
                 NumColorTargets = 4,
@@ -130,8 +128,8 @@ public class Material : IDisposable
 
         Pipeline = SDL.CreateGPUGraphicsPipeline(_device, in pipelineInfo);
         
-        SDL.ReleaseGPUShader(_device, pixelShader);
-        SDL.ReleaseGPUShader(_device, vertexShader);
+        SDL.ReleaseGPUShader(_device, pixelShader.Value);
+        SDL.ReleaseGPUShader(_device, vertexShader.Value);
     }
 
     /// <summary>

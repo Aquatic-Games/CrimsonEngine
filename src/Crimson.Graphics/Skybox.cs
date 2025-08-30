@@ -139,10 +139,8 @@ public sealed class Skybox : IContentResource<Skybox>, IDisposable
         _vertexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Vertex, cube.Vertices);
         _indexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Index, cube.Indices);
 
-        IntPtr vertexShader =
-            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Vertex, "Environment/Skybox", "VSMain", 1, 0);
-        IntPtr pixelShader = ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Fragment, "Environment/Skybox",
-            "PSMain", 0, 1);
+        ShaderUtils.LoadGraphicsShader(_device, "Environment/Skybox", out IntPtr? vertexShader,
+            out IntPtr? pixelShader);
 
         SDL.GPUColorTargetDescription colorTarget = new()
         {
@@ -167,8 +165,8 @@ public sealed class Skybox : IContentResource<Skybox>, IDisposable
         
         SDL.GPUGraphicsPipelineCreateInfo pipelineInfo = new()
         {
-            VertexShader = vertexShader,
-            FragmentShader = pixelShader,
+            VertexShader = vertexShader.Value,
+            FragmentShader = pixelShader.Value,
             TargetInfo = new SDL.GPUGraphicsPipelineTargetInfo()
             {
                 NumColorTargets = 1,
@@ -200,8 +198,8 @@ public sealed class Skybox : IContentResource<Skybox>, IDisposable
 
         _pipeline = SDL.CreateGPUGraphicsPipeline(_device, in pipelineInfo).Check("Create pipeline");
         
-        SDL.ReleaseGPUShader(_device, pixelShader);
-        SDL.ReleaseGPUShader(_device, vertexShader);
+        SDL.ReleaseGPUShader(_device, pixelShader.Value);
+        SDL.ReleaseGPUShader(_device, vertexShader.Value);
     }
 
     internal unsafe bool Render(IntPtr cb, IntPtr texture, IntPtr depthTarget, bool shouldClear, CameraMatrices matrices)

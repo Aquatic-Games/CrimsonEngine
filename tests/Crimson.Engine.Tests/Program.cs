@@ -2,6 +2,7 @@
 using Crimson.Engine;
 using Crimson.Engine.Tests;
 
+Logger.LogToConsole = true;
 Logger.OutputTraceLogs = true;
 
 AppOptions options = new AppOptions("Crimson.Engine.Tests", "1.0.0"/*, AppType.Type2D*/);

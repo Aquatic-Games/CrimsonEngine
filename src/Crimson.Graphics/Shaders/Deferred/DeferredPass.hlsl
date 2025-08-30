@@ -1,5 +1,5 @@
-#pragma vertex VSMain
-#pragma pixel PSMain
+#pragma vertex VSMain 0 0
+#pragma pixel PSMain 1 4
 
 #include "../Crimson.hlsli"
 #include "../Lighting/BRDF.hlsli"

@@ -56,10 +56,7 @@ internal class TextureBatcher : IDisposable
         _transferBuffer = SdlUtils.CreateTransferBuffer(device, SDL.GPUTransferBufferUsage.Upload,
             _vBufferSize * Vertex.SizeInBytes + _iBufferSize * sizeof(uint));
 
-        IntPtr vertexShader =
-            ShaderUtils.LoadGraphicsShader(device, SDL.GPUShaderStage.Vertex, "Texture", "VSMain", 1, 0);
-        IntPtr pixelShader =
-            ShaderUtils.LoadGraphicsShader(device, SDL.GPUShaderStage.Fragment, "Texture", "PSMain", 0, 1);
+        ShaderUtils.LoadGraphicsShader(device, "Texture", out IntPtr? vertexShader, out IntPtr? pixelShader);
 
         SDL.GPUColorTargetDescription targetDesc = new()
         {
@@ -87,8 +84,8 @@ internal class TextureBatcher : IDisposable
 
         SDL.GPUGraphicsPipelineCreateInfo pipelineInfo = new()
         {
-            VertexShader = vertexShader,
-            FragmentShader = pixelShader,
+            VertexShader = vertexShader.Value,
+            FragmentShader = pixelShader.Value,
             TargetInfo = { NumColorTargets = 1, ColorTargetDescriptions = new IntPtr(&targetDesc) },
             VertexInputState = new SDL.GPUVertexInputState()
             {
@@ -117,8 +114,8 @@ internal class TextureBatcher : IDisposable
         targetDesc.BlendState = SdlUtils.NoBlend;
         _noBlendPipeline = SDL.CreateGPUGraphicsPipeline(device, in pipelineInfo).Check("Create GPU pipeline");
         
-        SDL.ReleaseGPUShader(device, pixelShader);
-        SDL.ReleaseGPUShader(device, vertexShader);
+        SDL.ReleaseGPUShader(device, pixelShader.Value);
+        SDL.ReleaseGPUShader(device, vertexShader.Value);
 
         SDL.GPUSamplerCreateInfo samplerInfo = new()
         {

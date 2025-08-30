@@ -48,10 +48,7 @@ internal sealed class ImGuiRenderer : IDisposable
         _transferBuffer = SdlUtils.CreateTransferBuffer(_device, SDL.GPUTransferBufferUsage.Upload,
             vBufferSizeBytes + iBufferSizeBytes);
 
-        IntPtr vertexShader =
-            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Vertex, "Debug/ImGui", "VSMain", 1, 0);
-        IntPtr pixelShader =
-            ShaderUtils.LoadGraphicsShader(_device, SDL.GPUShaderStage.Fragment, "Debug/ImGui", "PSMain", 0, 1);
+        ShaderUtils.LoadGraphicsShader(_device, "Debug/ImGui", out IntPtr? vertexShader, out IntPtr? pixelShader);
 
         SDL.GPUColorTargetDescription targetDesc = new()
         {
@@ -79,8 +76,8 @@ internal sealed class ImGuiRenderer : IDisposable
 
         SDL.GPUGraphicsPipelineCreateInfo pipelineInfo = new()
         {
-            VertexShader = vertexShader,
-            FragmentShader = pixelShader,
+            VertexShader = vertexShader.Value,
+            FragmentShader = pixelShader.Value,
             TargetInfo = new SDL.GPUGraphicsPipelineTargetInfo()
             {
                 NumColorTargets = 1,
@@ -97,6 +94,9 @@ internal sealed class ImGuiRenderer : IDisposable
         };
 
         _pipeline = SDL.CreateGPUGraphicsPipeline(_device, in pipelineInfo).Check("Create pipeline");
+        
+        SDL.ReleaseGPUShader(_device, pixelShader.Value);
+        SDL.ReleaseGPUShader(_device, vertexShader.Value);
 
         SDL.GPUSamplerCreateInfo samplerInfo = new()
         {

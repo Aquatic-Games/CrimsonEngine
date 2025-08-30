@@ -59,23 +59,72 @@ internal static class ShaderUtils
         }
     }*/
     
-    public static unsafe IntPtr LoadGraphicsShader(IntPtr device, SDL.GPUShaderStage stage, string name, string entryPoint, uint numUniforms, uint numSamplers)
+    public static unsafe void LoadGraphicsShader(IntPtr device, string name, out IntPtr? vertexShader, out IntPtr? pixelShader)
     {
         Logger.Trace($"Compiling shader '{name}'.");
 
-        string fullPath = Path.GetFullPath(Path.Combine("Shaders", $"{name}.hlsl"));
-        
-        string hlsl = File.ReadAllText(fullPath);
+        vertexShader = null;
+        pixelShader = null;
 
-        ShaderStage grabsStage = stage switch
+        string fullPath = Path.GetFullPath(Path.Combine("Shaders", $"{name}.hlsl"));
+        string includeDir = Path.GetDirectoryName(fullPath);
+        string hlsl = File.ReadAllText(fullPath);
+        
+        string? vertexEntryPoint = null;
+        string? pixelEntryPoint = null;
+
+        uint vertexUniforms = 0;
+        uint pixelUniforms = 0;
+        uint vertexSamplers = 0;
+        uint pixelSamplers = 0;
+
+        int i = 0;
+        while ((i = hlsl.IndexOf("#pragma", i)) >= 0)
         {
-            SDL.GPUShaderStage.Vertex => ShaderStage.Vertex,
-            SDL.GPUShaderStage.Fragment => ShaderStage.Pixel,
-            _ => throw new ArgumentOutOfRangeException(nameof(stage), stage, null)
-        };
+            int j = hlsl.IndexOf('\n', i);
+
+            string line = hlsl[i..j];
+
+            // Yes i know this is inefficient but it works so I don't care
+            string[] splitLine = line.Split(' ');
+
+            switch (splitLine[1])
+            {
+                case "vertex":
+                    vertexEntryPoint = splitLine[2];
+                    vertexUniforms = uint.Parse(splitLine[3]);
+                    vertexSamplers = uint.Parse(splitLine[4]);
+                    break;
+                case "pixel":
+                    pixelEntryPoint = splitLine[2];
+                    pixelUniforms = uint.Parse(splitLine[3]);
+                    pixelSamplers = uint.Parse(splitLine[4]);
+                    break;
+            }
+
+            i = j;
+        }
         
         SDL.GPUShaderFormat shaderFormat = SDL.GetGPUShaderFormats(device);
 
+        if (vertexEntryPoint != null)
+        {
+            Logger.Trace("Creating vertex shader.");
+            vertexShader = CreateShader(device, ShaderStage.Vertex, shaderFormat, hlsl, vertexEntryPoint, includeDir,
+                true, vertexUniforms, vertexSamplers);
+        }
+
+        if (pixelEntryPoint != null)
+        {
+            Logger.Trace("Creating pixel shader.");
+            pixelShader = CreateShader(device, ShaderStage.Pixel, shaderFormat, hlsl, pixelEntryPoint, includeDir, true,
+                pixelUniforms, pixelSamplers);
+        }
+    }
+
+    private static unsafe IntPtr CreateShader(IntPtr device, ShaderStage stage, SDL.GPUShaderFormat shaderFormat,
+        string hlsl, string entryPoint, string? includeDir, bool debug, uint numUniforms, uint numSamplers)
+    {
         ShaderFormat grabsFormat;
 
         if (shaderFormat.HasFlag(SDL.GPUShaderFormat.SPIRV))
@@ -87,15 +136,20 @@ internal static class ShaderUtils
         else
             throw new NotSupportedException();
 
-        Logger.Trace("Compiling shader.");
-        byte[] compiled =
-            Compiler.CompileHlsl(grabsStage, grabsFormat, hlsl, entryPoint, Path.GetDirectoryName(fullPath), true);
+        SDL.GPUShaderStage sdlStage = stage switch
+        {
+            ShaderStage.Vertex => SDL.GPUShaderStage.Vertex,
+            ShaderStage.Pixel => SDL.GPUShaderStage.Fragment,
+            _ => throw new ArgumentOutOfRangeException(nameof(stage), stage, null)
+        };
         
+        byte[] compiled = Compiler.CompileHlsl(stage, grabsFormat, hlsl, entryPoint, includeDir, debug);
+            
         fixed (byte* pData = compiled)
         {
             SDL.GPUShaderCreateInfo shaderInfo = new()
             {
-                Stage = stage,
+                Stage = sdlStage,
                 Format = shaderFormat,
                 Code = (nint) pData,
                 CodeSize = (nuint) compiled.Length,

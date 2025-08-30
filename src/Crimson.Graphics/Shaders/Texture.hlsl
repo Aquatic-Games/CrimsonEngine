@@ -1,5 +1,5 @@
-#pragma vertex VSMain
-#pragma pixel PSMain
+#pragma vertex VSMain 1 0
+#pragma pixel PSMain 0 1
 
 #include "Crimson.hlsli"
 
