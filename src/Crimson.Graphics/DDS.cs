@@ -122,6 +122,12 @@ public sealed class DDS
         }
     }
 
+    public static bool IsDDSFile(string path)
+    {
+        // TODO: More robust way of handling this.
+        return Path.GetExtension(path) == ".dds";
+    }
+
     private static uint CalculateSize(Graphics.PixelFormat format, uint width, uint height)
     {
         uint bppOrBlockSize;

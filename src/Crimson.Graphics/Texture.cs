@@ -202,12 +202,27 @@ public class Texture : IContentResource<Texture>, IDisposable
     public static Texture LoadResource(string fullPath, bool hasExtension)
     {
         if (hasExtension)
+        {
+            if (DDS.IsDDSFile(fullPath))
+                return new Texture(new DDS(fullPath));
+            
             return new Texture(fullPath);
-        
-        fullPath = Path.ChangeExtension(fullPath, ".png");
-        if (File.Exists(fullPath))
+        }
+
+        string[] extensions = [".dds", ".png", ".jpg", ".bmp"];
+
+        foreach (string extension in extensions)
+        {
+            fullPath = Path.ChangeExtension(fullPath, extension);
+            if (!File.Exists(fullPath))
+                continue;
+            
+            if (DDS.IsDDSFile(fullPath))
+                return new Texture(new DDS(fullPath));
+                
             return new Texture(fullPath);
-        
+        }
+
         throw new FileNotFoundException(fullPath);
     }
 }
