@@ -59,14 +59,14 @@ internal static class ShaderUtils
         }
     }*/
     
-    public static unsafe void LoadGraphicsShader(IntPtr device, string name, out IntPtr? vertexShader, out IntPtr? pixelShader)
+    public static void LoadGraphicsShader(IntPtr device, string name, out IntPtr? vertexShader, out IntPtr? pixelShader)
     {
         Logger.Trace($"Compiling shader '{name}'.");
 
         vertexShader = null;
         pixelShader = null;
 
-        string fullPath = Path.GetFullPath(Path.Combine("Shaders", $"{name}.hlsl"));
+        string fullPath = Path.GetFullPath(Path.Combine("Content", "Shaders", $"{name}.hlsl"));
         string includeDir = Path.GetDirectoryName(fullPath);
         string hlsl = File.ReadAllText(fullPath);
         
