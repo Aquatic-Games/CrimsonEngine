@@ -3,42 +3,168 @@ using Crimson.Math;
 
 namespace Crimson.Graphics;
 
-public static class DDS
+public sealed class DDS
 {
-    public const uint Magic = 0x20534444;
+    private const uint Magic = 0x20534444;
 
-    public static unsafe Bitmap[,] Load(string path)
+    public readonly Size<int> Size;
+
+    public readonly Graphics.PixelFormat Format;
+
+    public readonly uint ArraySize;
+
+    public readonly uint MipLevels;
+    
+    public readonly Bitmap[,] Bitmaps;
+
+    public unsafe DDS(string path)
     {
         using FileStream stream = File.OpenRead(path);
         using BinaryReader reader = new BinaryReader(stream);
 
         if (reader.ReadUInt32() != Magic)
             throw new InvalidDataException("File is missing the Magic header. File is malformed or is not a DDS file.");
-
+        
         Header header = new Header();
         reader.Read(new Span<byte>(Unsafe.AsPointer(ref header), sizeof(Header)));
 
-        HeaderDX10? dx10 = null;
+        ref readonly PixelFormat format = ref header.PixelFormat;
 
-        if (header.PixelFormat.FourCC == FourCC.DX10)
+        switch (format.FourCC)
         {
-            HeaderDX10 dx10Header = new HeaderDX10();
-            reader.Read(new Span<byte>(Unsafe.AsPointer(ref dx10Header), sizeof(HeaderDX10)));
-            dx10 = dx10Header;
+            case FourCC.DX10:
+            {
+                HeaderDX10 dx10Header = new HeaderDX10();
+                reader.Read(new Span<byte>(Unsafe.AsPointer(ref dx10Header), sizeof(HeaderDX10)));
+
+                Format = dx10Header.Format switch
+                {
+                    DxgiFormat.R8G8B8A8Unorm => Graphics.PixelFormat.RGBA8,
+                    DxgiFormat.B8G8R8A8Unorm => Graphics.PixelFormat.BGRA8,
+                    DxgiFormat.Bc1Unorm => Graphics.PixelFormat.BC1,
+                    DxgiFormat.Bc1UnormSrgb => Graphics.PixelFormat.BC1Srgb,
+                    DxgiFormat.Bc2Unorm => Graphics.PixelFormat.BC2,
+                    DxgiFormat.Bc2UnormSrgb => Graphics.PixelFormat.BC2Srgb,
+                    DxgiFormat.Bc3Unorm => Graphics.PixelFormat.BC3,
+                    DxgiFormat.Bc4Unorm => Graphics.PixelFormat.BC4U,
+                    DxgiFormat.Bc5Unorm => Graphics.PixelFormat.BC5U,
+                    DxgiFormat.Bc6HUf16 => Graphics.PixelFormat.BC6U,
+                    DxgiFormat.Bc6HSf16 => Graphics.PixelFormat.BC6S,
+                    DxgiFormat.Bc7Unorm => Graphics.PixelFormat.BC7,
+                    DxgiFormat.Bc7UnormSrgb => Graphics.PixelFormat.BC7Srgb,
+                    _ => throw new NotImplementedException()
+                };
+
+                break;
+            }
+            
+            case FourCC.DXT1:
+                Format = Graphics.PixelFormat.BC1;
+                break;
+            
+            case FourCC.DXT3:
+                Format = Graphics.PixelFormat.BC2;
+                break;
+            
+            case FourCC.DXT5:
+                Format = Graphics.PixelFormat.BC3;
+                break;
+            
+            case FourCC.BC4U:
+                Format = Graphics.PixelFormat.BC4U;
+                break;
+            
+            case FourCC.BC5U:
+                Format = Graphics.PixelFormat.BC5U;
+                break;
+            
+            case FourCC.None:
+            {
+                bool IsPixelFormat(uint rgbBitCount, uint rBitMask, uint gBitMask, uint bBitMask, uint aBitMask)
+                {
+                    ref readonly PixelFormat fmt = ref header.PixelFormat;
+
+                    return fmt.RgbBitCount == rgbBitCount && fmt.RBitMask == rBitMask && fmt.GBitMask == gBitMask &&
+                           fmt.BBitMask == bBitMask && fmt.ABitMask == aBitMask;
+                }
+
+                if (IsPixelFormat(32, 0xFF, 0xFF00, 0xFF0000, 0xFF000000))
+                    Format = Graphics.PixelFormat.RGBA8;
+                else if (IsPixelFormat(32, 0xFF0000, 0xFF00, 0xFF, 0xFF000000))
+                    Format = Graphics.PixelFormat.BGRA8;
+                else
+                    throw new NotImplementedException();
+                break;
+            }
+            
+            default:
+                throw new NotImplementedException();
         }
 
+        ArraySize = 1;
+        MipLevels = header.MipmapCount;
+        
+        if (MipLevels < 1)
+            throw new NotSupportedException("DDS must have at least 1 mipmap level.");
+
+        Bitmaps = new Bitmap[ArraySize, MipLevels];
+        
         Size<int> size = new Size<int>((int) header.Width, (int) header.Height);
-        uint totalSize = header.PitchOrLinearSize * header.Height;
+        Size = size;
 
-        byte[] bytes = reader.ReadBytes((int) totalSize);
+        for (int i = 0; i < MipLevels; i++)
+        {
+            uint totalSize = CalculateSize(Format, (uint) size.Width, (uint) size.Height);
+            byte[] bytes = reader.ReadBytes((int) totalSize);
+            Bitmaps[0, i] = new Bitmap(size, bytes, Format);
 
-        Bitmap[,] bitmaps = new Bitmap[1, 1];
-        bitmaps[0, 0] = new Bitmap(size, bytes, Graphics.PixelFormat.RGBA8);
-
-        return bitmaps;
+            size = new Size<int>(size.Width >> 1, size.Height >> 1);
+        }
     }
 
-    public unsafe struct Header
+    private static uint CalculateSize(Graphics.PixelFormat format, uint width, uint height)
+    {
+        uint bppOrBlockSize;
+        bool isCompressed = false;
+        
+        switch (format)
+        {
+            case Graphics.PixelFormat.RGBA8:
+            case Graphics.PixelFormat.BGRA8:
+                bppOrBlockSize = 32;
+                break;
+
+            case Graphics.PixelFormat.BC1:
+            case Graphics.PixelFormat.BC1Srgb:
+            case Graphics.PixelFormat.BC4U:
+                bppOrBlockSize = 8;
+                isCompressed = true;
+                break;
+            
+            case Graphics.PixelFormat.BC2:
+            case Graphics.PixelFormat.BC2Srgb:
+            case Graphics.PixelFormat.BC3:
+            case Graphics.PixelFormat.BC3Srgb:
+            case Graphics.PixelFormat.BC5U:
+            case Graphics.PixelFormat.BC6U:
+            case Graphics.PixelFormat.BC6S:
+            case Graphics.PixelFormat.BC7:
+            case Graphics.PixelFormat.BC7Srgb:
+                bppOrBlockSize = 16;
+                isCompressed = true;
+                break;
+            
+            default:
+                throw new ArgumentOutOfRangeException(nameof(format), format, null);
+        }
+
+        if (isCompressed)
+            return uint.Max(1, (width + 3) >> 2) * bppOrBlockSize * (height >> 2); // TODO: Why does height need to be divided by 4?
+
+        return ((width * bppOrBlockSize + 7) >> 3) * height;
+    }
+
+    private unsafe struct Header
     {
         public uint Size;
         public Flags Flags;
@@ -56,7 +182,7 @@ public static class DDS
         public uint Reserved2;
     }
 
-    public struct HeaderDX10
+    private struct HeaderDX10
     {
         public DxgiFormat Format;
         public ResourceDimension ResourceDimension;
@@ -65,7 +191,7 @@ public static class DDS
         public AlphaMode MiscFlags2;
     }
 
-    public struct PixelFormat
+    private struct PixelFormat
     {
         public uint Size;
         public PixelFormatFlags Flags;
@@ -78,7 +204,7 @@ public static class DDS
     }
 
     [Flags]
-    public enum Flags : uint
+    private enum Flags : uint
     {
         None = 0,
         
@@ -100,7 +226,7 @@ public static class DDS
     }
 
     [Flags]
-    public enum PixelFormatFlags : uint
+    private enum PixelFormatFlags : uint
     {
         None = 0,
         
@@ -118,7 +244,7 @@ public static class DDS
     }
 
     [Flags]
-    public enum Caps : uint
+    private enum Caps : uint
     {
         None = 0,
         
@@ -130,7 +256,7 @@ public static class DDS
     }
 
     [Flags]
-    public enum Caps2 : uint
+    private enum Caps2 : uint
     {
         None = 0,
         
@@ -152,14 +278,14 @@ public static class DDS
     }
 
     [Flags]
-    public enum MiscFlags
+    private enum MiscFlags
     {
         None = 0,
         
         TextureCube = 0x4
     }
 
-    public enum AlphaMode
+    private enum AlphaMode
     {
         Unknown = 0x0,
         
@@ -172,7 +298,7 @@ public static class DDS
         Custom = 0x4
     }
 
-    public enum FourCC : uint
+    private enum FourCC : uint
     {
         None = 0,
         
@@ -186,10 +312,14 @@ public static class DDS
         
         DXT5 = 0x35545844,
         
-        DX10 = 0x30315844
+        DX10 = 0x30315844,
+        
+        BC4U = 0x55344342,
+        
+        BC5U = 0x55354342
     }
 
-    public enum ResourceDimension : uint
+    private enum ResourceDimension : uint
     {
         Unknown = 0,
         
@@ -202,7 +332,7 @@ public static class DDS
         Texture3D = 4
     }
 
-    public enum DxgiFormat : uint
+    private enum DxgiFormat : uint
     {
         Unknown = 0,
         R32G32B32A32Typeless = 1,

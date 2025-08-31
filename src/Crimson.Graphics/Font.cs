@@ -28,7 +28,7 @@ public unsafe class Font : IContentResource<Font>, IDisposable
         fixed (FT_FaceRec_** face = &_face)
             FT_New_Face(_library, pPath, 0, face).Check("New face");
 
-        _fontAtlases = [new FontAtlas(new Texture(AtlasSize, null, PixelFormat.RGBA8))];
+        _fontAtlases = [new FontAtlas(new Texture(AtlasSize, PixelFormat.RGBA8, numMipMaps: 1))];
         _characters = [];
     }
 
@@ -42,7 +42,7 @@ public unsafe class Font : IContentResource<Font>, IDisposable
                 .Check("New memory face");
         }
         
-        _fontAtlases = [new FontAtlas(new Texture(AtlasSize, null, PixelFormat.RGBA8))];
+        _fontAtlases = [new FontAtlas(new Texture(AtlasSize, PixelFormat.RGBA8, numMipMaps: 1))];
         _characters = [];
     }
 
@@ -145,7 +145,7 @@ public unsafe class Font : IContentResource<Font>, IDisposable
                 if (_currentRegionOffset.Y + glyphSize.Height >= AtlasSize.Height)
                 {
                     _currentRegionOffset = Vector2T<int>.Zero;
-                    _fontAtlases.Add(new FontAtlas(new Texture(AtlasSize, null, PixelFormat.RGBA8)));
+                    _fontAtlases.Add(new FontAtlas(new Texture(AtlasSize, PixelFormat.RGBA8, numMipMaps: 1)));
                     atlas = _fontAtlases[^1];
                 }
             }

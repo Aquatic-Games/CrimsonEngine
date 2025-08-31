@@ -10,8 +10,8 @@ public class TestDDS : Scene
     
     public override void Initialize()
     {
-        Bitmap[,] dds = DDS.Load("/home/aqua/Pictures/DDS/24bitcolor-RGBA8.dds");
-        _texture = new Texture(dds[0, 0]);
+        DDS dds = new DDS("Content/awesomeface.dds");
+        _texture = new Texture(dds);
     }
 
     public override void Draw()

@@ -162,6 +162,50 @@ internal static class SdlUtils
             case PixelFormat.RGBA8:
                 rowPitch = 4;
                 return SDL.GPUTextureFormat.R8G8B8A8Unorm;
+            case PixelFormat.BGRA8:
+                rowPitch = 4;
+                return SDL.GPUTextureFormat.B8G8R8A8Unorm;
+            case PixelFormat.BC1:
+                rowPitch = 1;
+                return SDL.GPUTextureFormat.BC1RGBAUnorm;
+            case PixelFormat.BC1Srgb:
+                rowPitch = 1;
+                return SDL.GPUTextureFormat.BC1RGBAUnormSRGB;
+            case PixelFormat.BC2:
+                rowPitch = 2;
+                return SDL.GPUTextureFormat.BC2RGBAUnorm;
+            case PixelFormat.BC2Srgb:
+                rowPitch = 2;
+                return SDL.GPUTextureFormat.BC2RGBAUnorm;
+            case PixelFormat.BC3:
+                rowPitch = 2;
+                return SDL.GPUTextureFormat.BC3RGBAUnorm;
+            case PixelFormat.BC3Srgb:
+                rowPitch = 2;
+                return SDL.GPUTextureFormat.BC3RGBAUnormSRGB;
+            case PixelFormat.BC4U:
+                rowPitch = 1;
+                return SDL.GPUTextureFormat.BC4RUnorm;
+            /*case PixelFormat.BC4S:
+                rowPitch = 1;
+                return SDL.GPUTextureFormat.BC4RSnorm;*/
+            case PixelFormat.BC5U:
+                rowPitch = 2;
+                return SDL.GPUTextureFormat.BC5RGUnorm;
+            /*case PixelFormat.BC5S:
+                break;*/
+            case PixelFormat.BC6U:
+                rowPitch = 2;
+                return SDL.GPUTextureFormat.BC6HRGBUFloat;
+            case PixelFormat.BC6S:
+                rowPitch = 2;
+                return SDL.GPUTextureFormat.BC6HRGBFloat;
+            case PixelFormat.BC7:
+                rowPitch = 2;
+                return SDL.GPUTextureFormat.BC7RGBAUnorm;
+            case PixelFormat.BC7Srgb:
+                rowPitch = 2;
+                return SDL.GPUTextureFormat.BC7RGBAUnormSRGB;
             default:
                 throw new ArgumentOutOfRangeException(nameof(format), format, null);
         }
