@@ -183,6 +183,8 @@ public static class App
         
         _currentScene.Dispose();
         _globalApp.Dispose();
+        // Make sure we destroy all resources.
+        Content.Content.CleanUpEverything();
         UI.UI.Destroy();
         Physics.Physics.Destroy();
         Input.Input.Destroy();

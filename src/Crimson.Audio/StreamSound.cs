@@ -14,6 +14,8 @@ public class StreamSound : IContentResource<StreamSound>, IDisposable
     
     private readonly uint[] _buffers;
     private uint _currentBuffer;
+    
+    public AudioType Type;
 
     /*public ulong PositionInSamples
     {
@@ -27,8 +29,10 @@ public class StreamSound : IContentResource<StreamSound>, IDisposable
         set => throw new NotImplementedException();
     }*/
     
-    public StreamSound(string path)
+    public StreamSound(string path, AudioType type = AudioType.Music)
     {
+        Type = type;
+        
         AL al = Audio.AL;
         _vorbis = Vorbis.FromMemory(File.ReadAllBytes(path));
         
@@ -53,7 +57,7 @@ public class StreamSound : IContentResource<StreamSound>, IDisposable
         _callbackTimer = new Timer(SourceOnBufferFinished, null, 0,
             (_vorbis.SongBuffer.Length * 1000) / _vorbis.Channels / _vorbis.SampleRate / 4);
         
-        al.SetSourceProperty(_source, SourceFloat.Gain, volume);
+        al.SetSourceProperty(_source, SourceFloat.Gain, volume * Audio.GetVolumeMultiplier(Type));
         al.SetSourceProperty(_source, SourceFloat.Pitch, (float) speed);
         al.SourcePlay(_source);
     }

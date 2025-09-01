@@ -7,7 +7,8 @@ public static class Content
     private static string _contentPathBase;
 
     private static Dictionary<string, IContentResourceBase> _loadedResources;
-    private static Dictionary<string, IDisposable> _disposableResources;
+    private static Dictionary<string, IDisposable> _persistentResources;
+    private static Dictionary<string, IDisposable> _perSceneResources;
 
     public static string DirectoryName
     {
@@ -18,7 +19,8 @@ public static class Content
     static Content()
     {
         _loadedResources = [];
-        _disposableResources = [];
+        _persistentResources = [];
+        _perSceneResources = [];
         DirectoryName = "Content";
     }
 
@@ -48,8 +50,13 @@ public static class Content
             
             resource = T.LoadResource(fullPath, hasExtension);
             _loadedResources.Add(fullPath, resource);
-            if (resource is IDisposable disposable && !persistent)
-                _disposableResources.Add(fullPath, disposable);
+            if (resource is IDisposable disposable)
+            {
+                if (persistent)
+                    _persistentResources.Add(fullPath, disposable);
+                else
+                    _perSceneResources.Add(fullPath, disposable);
+            }
         }
 
         return resource;
@@ -65,12 +72,26 @@ public static class Content
         Logger.Debug("Unloading all resources.");
         _loadedResources.Clear();
 
-        foreach ((string path, IDisposable resource) in _disposableResources)
+        foreach ((string path, IDisposable resource) in _perSceneResources)
         {
             Logger.Trace($"Disposing resource \"{path}\".");
             resource.Dispose();
         }
         
-        _disposableResources.Clear();
+        _perSceneResources.Clear();
+    }
+
+    public static void CleanUpEverything()
+    {
+        Logger.Debug("Cleaning up content.");
+        UnloadAllResources();
+        
+        foreach ((string path, IDisposable resource) in _persistentResources)
+        {
+            Logger.Trace($"Disposing persistent resource \"{path}\".");
+            resource.Dispose();
+        }
+        
+        _persistentResources.Clear();
     }
 }

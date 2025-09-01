@@ -7,9 +7,13 @@ public class TestAudio : Scene
 {
     public override void Initialize()
     {
+        Audio.Audio.MasterVolume = 0.5f;
+        Audio.Audio.SoundEffectsVolume = 7f;
+        Audio.Audio.MusicVolume = 0.2f;
+        
         /*StreamSound sound = new StreamSound("/home/aqua/Music/excite.ogg");
         sound.Play();*/
-        Audio.Audio.FireStream("excite", persistent: true);
+        Audio.Audio.FireStream("excite", type: AudioType.SoundEffect, persistent: true);
         App.SetScene(new TestDDS());
     }
 }
