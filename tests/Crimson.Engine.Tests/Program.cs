@@ -12,4 +12,5 @@ options.UI.DefaultFont = "NotoSansJP-Regular";
 
 //App.Run(in options, new TestScene());
 //App.Run(in options, new Test2D());
-App.Run(in options, new TestDDS());
+//App.Run(in options, new TestDDS());
+App.Run(in options, new TestAudio());

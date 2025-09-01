@@ -2,7 +2,10 @@
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+    
   <ItemGroup>
-    <ProjectReference Include="..\..\lib\MixrSharp\MixrSharp\MixrSharp.csproj" />
+    <PackageReference Include="Silk.NET.OpenAL" Version="2.22.0" />
+    <PackageReference Include="Silk.NET.OpenAL.Soft.Native" Version="1.23.1" />
+    <PackageReference Include="StbVorbisSharp" Version="1.22.4" />
   </ItemGroup>
 </Project>
