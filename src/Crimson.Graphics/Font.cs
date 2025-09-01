@@ -10,6 +10,8 @@ namespace Crimson.Graphics;
 
 public unsafe class Font : IContentResource<Font>, IDisposable
 {
+    public bool IsDisposed { get; private set;  }
+    
     private GCHandle _fontBytes;
     private readonly FT_FaceRec_* _face;
     private readonly List<FontAtlas> _fontAtlases;
@@ -99,6 +101,10 @@ public unsafe class Font : IContentResource<Font>, IDisposable
     
     public void Dispose()
     {
+        if (IsDisposed)
+            return;
+        IsDisposed = true;
+        
         FT_Done_Face(_face).Check("Done face");
         if (_fontBytes.IsAllocated)
             _fontBytes.Free();

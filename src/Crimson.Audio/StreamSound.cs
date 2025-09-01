@@ -6,6 +6,8 @@ namespace Crimson.Audio;
 
 public class StreamSound : IContentResource<StreamSound>, IDisposable
 {
+    public bool IsDisposed { get; private set; }
+    
     public event OnFinished Finished = delegate { };
     
     private readonly Vorbis _vorbis;
@@ -52,11 +54,10 @@ public class StreamSound : IContentResource<StreamSound>, IDisposable
     public void Play(float volume = 1.0f, double speed = 1.0)
     {
         AL al = Audio.AL;
-        
-        // Set the period to 1/4th the buffer size, to give ample room for regenerating buffers.
-        _callbackTimer = new Timer(SourceOnBufferFinished, null, 0,
+
+        _callbackTimer ??= new Timer(SourceOnBufferFinished, null, 0,
             (_vorbis.SongBuffer.Length * 1000) / _vorbis.Channels / _vorbis.SampleRate / 4);
-        
+
         al.SetSourceProperty(_source, SourceFloat.Gain, volume * Audio.GetVolumeMultiplier(Type));
         al.SetSourceProperty(_source, SourceFloat.Pitch, (float) speed);
         al.SourcePlay(_source);
@@ -76,6 +77,10 @@ public class StreamSound : IContentResource<StreamSound>, IDisposable
     
     public void Dispose()
     {
+        if (IsDisposed)
+            return;
+        IsDisposed = true;
+        
         AL al = Audio.AL;
         Finished = delegate { };
         al.SourceStop(_source);

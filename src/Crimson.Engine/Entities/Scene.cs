@@ -131,7 +131,7 @@ public abstract class Scene : IDisposable
         foreach (Entity entity in _entities)
             entity.Dispose();
         
-        Content.Content.UnloadAllResources();
+        Content.Content.UnloadPerSceneResources();
         
         UI.UI.Clear();
     }

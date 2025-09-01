@@ -12,6 +12,8 @@ namespace Crimson.Graphics;
 /// </summary>
 public class Texture : IContentResource<Texture>, IDisposable
 {
+    public bool IsDisposed { get; private set; }
+    
     private readonly IntPtr _device;
     private readonly bool _generateMipmaps;
     private readonly bool _isOwnedByRenderer;
@@ -187,6 +189,10 @@ public class Texture : IContentResource<Texture>, IDisposable
     /// </summary>
     public void Dispose()
     {
+        if (IsDisposed)
+            return;
+        IsDisposed = true;
+        
         if (_isOwnedByRenderer)
             return;
         

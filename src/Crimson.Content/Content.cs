@@ -6,9 +6,10 @@ public static class Content
 {
     private static string _contentPathBase;
 
-    private static Dictionary<string, IContentResourceBase> _loadedResources;
-    private static Dictionary<string, IDisposable> _persistentResources;
-    private static Dictionary<string, IDisposable> _perSceneResources;
+    private static Dictionary<string, IContentResourceBase> _persistentResources;
+    private static Dictionary<string, IContentResourceBase> _perSceneResources;
+    private static Dictionary<string, IDisposable> _persistentDisposables;
+    private static Dictionary<string, IDisposable> _perSceneDisposables;
 
     public static string DirectoryName
     {
@@ -18,9 +19,10 @@ public static class Content
 
     static Content()
     {
-        _loadedResources = [];
         _persistentResources = [];
         _perSceneResources = [];
+        _persistentDisposables = [];
+        _perSceneDisposables = [];
         DirectoryName = "Content";
     }
 
@@ -40,7 +42,8 @@ public static class Content
         bool hasExtension = Path.HasExtension(resName);
 
         T resource;
-        if (_loadedResources.TryGetValue(fullPath, out IContentResourceBase res))
+        IContentResourceBase res;
+        if (_perSceneResources.TryGetValue(fullPath, out res) || _persistentResources.TryGetValue(fullPath, out res))
             resource = (T) res;
         else
         {
@@ -49,13 +52,17 @@ public static class Content
             Logger.Trace($"  Has Extension: {hasExtension}");
             
             resource = T.LoadResource(fullPath, hasExtension);
-            _loadedResources.Add(fullPath, resource);
+            if (persistent)
+                _persistentResources.Add(fullPath, resource);
+            else
+                _perSceneResources.Add(fullPath, resource);
+            
             if (resource is IDisposable disposable)
             {
                 if (persistent)
-                    _persistentResources.Add(fullPath, disposable);
+                    _persistentDisposables.Add(fullPath, disposable);
                 else
-                    _perSceneResources.Add(fullPath, disposable);
+                    _perSceneDisposables.Add(fullPath, disposable);
             }
         }
 
@@ -67,31 +74,32 @@ public static class Content
         return Directory.GetFiles(GetFullyQualifiedName(directory), searchPattern ?? "*");
     }
 
-    public static void UnloadAllResources()
+    public static void UnloadPerSceneResources()
     {
-        Logger.Debug("Unloading all resources.");
-        _loadedResources.Clear();
+        Logger.Debug("Unloading per-scene resources.");
+        _perSceneResources.Clear();
 
-        foreach ((string path, IDisposable resource) in _perSceneResources)
+        foreach ((string path, IDisposable resource) in _perSceneDisposables)
         {
             Logger.Trace($"Disposing resource \"{path}\".");
             resource.Dispose();
         }
         
-        _perSceneResources.Clear();
+        _perSceneDisposables.Clear();
     }
 
-    public static void CleanUpEverything()
+    public static void UnloadAllResources()
     {
-        Logger.Debug("Cleaning up content.");
-        UnloadAllResources();
+        Logger.Debug("Unloading all resources.");
+        UnloadPerSceneResources();
+        _persistentResources.Clear();
         
-        foreach ((string path, IDisposable resource) in _persistentResources)
+        foreach ((string path, IDisposable resource) in _persistentDisposables)
         {
             Logger.Trace($"Disposing persistent resource \"{path}\".");
             resource.Dispose();
         }
         
-        _persistentResources.Clear();
+        _persistentDisposables.Clear();
     }
 }

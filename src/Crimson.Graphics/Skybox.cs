@@ -11,6 +11,8 @@ namespace Crimson.Graphics;
 
 public sealed class Skybox : IContentResource<Skybox>, IDisposable
 {
+    public bool IsDisposed { get; private set; }
+    
     private readonly IntPtr _device;
     
     private readonly IntPtr _textureHandle;
@@ -264,6 +266,10 @@ public sealed class Skybox : IContentResource<Skybox>, IDisposable
     
     public void Dispose()
     {
+        if (IsDisposed)
+            return;
+        IsDisposed = true;
+        
         SDL.ReleaseGPUGraphicsPipeline(_device, _pipeline);
         SDL.ReleaseGPUBuffer(_device, _indexBuffer);
         SDL.ReleaseGPUBuffer(_device, _vertexBuffer);
