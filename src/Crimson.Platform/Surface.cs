@@ -3,6 +3,7 @@ using Crimson.Core;
 using Crimson.Graphics;
 using Crimson.Math;
 using SDL3;
+using StbImageSharp;
 
 namespace Crimson.Platform;
 
@@ -159,6 +160,25 @@ public static class Surface
 
         if (Window == IntPtr.Zero)
             throw new Exception($"Failed to create window: {SDL.GetError()}");
+
+        if (File.Exists("Icon.png"))
+        {
+            ImageResult result =
+                ImageResult.FromMemory(File.ReadAllBytes("Icon.png"), ColorComponents.RedGreenBlueAlpha);
+            
+            IntPtr surface;
+
+            unsafe
+            {
+                fixed (byte* pData = result.Data)
+                {
+                    surface = SDL.CreateSurfaceFrom(result.Width, result.Height, SDL.PixelFormat.ABGR8888,
+                        (IntPtr) pData, result.Width * 4);
+                }
+            }
+
+            SDL.SetWindowIcon(Window, surface);
+        }
 
         if (EnvVar.TryGetInt(EnvVar.SurfaceDisplay, out int displayId))
         {
