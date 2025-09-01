@@ -7,7 +7,7 @@ namespace Crimson.Graphics.Materials;
 /// <summary>
 /// A material that is used during rendering.
 /// </summary>
-public class Material : IDisposable
+public abstract class Material : IDisposable
 {
     private readonly IntPtr _device;
     
@@ -35,7 +35,7 @@ public class Material : IDisposable
     /// Create a <see cref="Material"/> from the given definition.
     /// </summary>
     /// <param name="definition">The <see cref="MaterialDefinition"/> that describes how the material should be created.</param>
-    public unsafe Material(in MaterialDefinition definition)
+    protected unsafe Material(in MaterialDefinition definition, string shader)
     {
         Albedo = definition.Albedo;
         Normal = definition.Normal ?? Texture.EmptyNormal;
@@ -51,8 +51,7 @@ public class Material : IDisposable
         _device = Renderer.Device;
 
         // TODO: Probably best not to load this shader every time a material is created.
-        ShaderUtils.LoadGraphicsShader(_device, "Materials/Standard", out IntPtr? vertexShader,
-            out IntPtr? pixelShader);
+        ShaderUtils.LoadGraphicsShader(_device, shader, out IntPtr? vertexShader, out IntPtr? pixelShader);
 
         SDL.GPUVertexBufferDescription vertexBufferDesc = new()
         {

@@ -46,7 +46,7 @@ public class TestScene : Scene
             RenderFace = RenderFace.Front
         };
         
-        _material = new Material(in def);
+        _material = new StandardLit(in def);
         _mesh = Mesh.FromPrimitive(new Cube(), _material);
         
         Model model = Model.FromGltf("/home/aqua/Downloads/Fox.glb");

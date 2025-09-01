@@ -1,5 +1,6 @@
 ﻿#pragma vertex VSMain 2 0
 #pragma pixel PSMain 1 6
+#pragma renderer deferred
 
 #include "../GBuffer.hlsli"
 #include "../Crimson.hlsli"

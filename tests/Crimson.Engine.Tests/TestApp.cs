@@ -20,7 +20,7 @@ public class TestApp : GlobalApp
         
         Renderer.Camera.ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(-1, 1, 3), Vector3.Zero, Vector3.UnitY);
 
-        Material material = new Material(new MaterialDefinition(new Texture("/home/aqua/Pictures/BAGELMIP.png")));
+        Material material = new StandardLit(new MaterialDefinition(new Texture("/home/aqua/Pictures/BAGELMIP.png")));
 
         Model model = Model.FromGltf("/home/aqua/Documents/test.glb");
         

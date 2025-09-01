@@ -40,7 +40,7 @@ public class Model
                 }
             }
             
-            materialMap.Add(material, new Material(in definition));
+            materialMap.Add(material, new StandardLit(in definition));
         }
 
         List<ModelMesh> meshes = [];
