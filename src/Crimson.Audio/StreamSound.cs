@@ -1,9 +1,10 @@
+using Crimson.Content;
 using Silk.NET.OpenAL;
 using StbVorbisSharp;
 
 namespace Crimson.Audio;
 
-public class StreamSound : IDisposable
+public class StreamSound : IContentResource<StreamSound>, IDisposable
 {
     public event OnFinished Finished = delegate { };
     
@@ -73,6 +74,7 @@ public class StreamSound : IDisposable
     {
         AL al = Audio.AL;
         Finished = delegate { };
+        al.SourceStop(_source);
         _callbackTimer?.Dispose();
         al.DeleteBuffers(_buffers);
         _vorbis.Dispose();
@@ -119,4 +121,16 @@ public class StreamSound : IDisposable
     }
 
     public delegate void OnFinished();
+
+    public static StreamSound LoadResource(string fullPath, bool hasExtension)
+    {
+        if (hasExtension && Path.GetExtension(fullPath) != ".ogg")
+            throw new NotImplementedException("Only ogg vorbis files are supported for the moment.");
+
+        fullPath = Path.ChangeExtension(fullPath, ".ogg");
+        if (File.Exists(fullPath))
+            return new StreamSound(fullPath);
+
+        throw new FileNotFoundException();
+    }
 }

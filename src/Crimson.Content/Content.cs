@@ -32,7 +32,7 @@ public static class Content
         return Path.Combine(_contentPathBase, name);
     }
 
-    public static T Load<T>(string resName) where T : IContentResource<T>
+    public static T Load<T>(string resName, bool persistent = false) where T : IContentResource<T>
     {
         string fullPath = Path.IsPathRooted(resName) ? resName : Path.Combine(_contentPathBase, resName);
         bool hasExtension = Path.HasExtension(resName);
@@ -48,7 +48,7 @@ public static class Content
             
             resource = T.LoadResource(fullPath, hasExtension);
             _loadedResources.Add(fullPath, resource);
-            if (resource is IDisposable disposable)
+            if (resource is IDisposable disposable && !persistent)
                 _disposableResources.Add(fullPath, disposable);
         }
 

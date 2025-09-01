@@ -9,6 +9,7 @@ public class TestAudio : Scene
     {
         /*StreamSound sound = new StreamSound("/home/aqua/Music/excite.ogg");
         sound.Play();*/
-        Audio.Audio.FireStream("/home/aqua/Music/excite.ogg", speed: 2);
+        Audio.Audio.FireStream("excite", persistent: true);
+        App.SetScene(new TestDDS());
     }
 }
