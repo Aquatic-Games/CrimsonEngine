@@ -43,5 +43,8 @@ public class Button : Control
         Vector2T<int> textPos = ScreenRegion.Position + new Vector2T<int>(ScreenRegion.Width / 2 - textSize.Width / 2, ScreenRegion.Height / 2 - textSize.Height / 2);
         
         Renderer.DrawText(theme.Font, textPos, theme.TextSize, Text, theme.TextColor);
+        
+        if (Disabled)
+            Renderer.DrawFilledRectangle(ScreenRegion.Position, ScreenRegion.Size, new Color(0, 0, 0, 0.5f));
     }
 }

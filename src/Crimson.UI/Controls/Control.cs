@@ -13,6 +13,8 @@ public abstract class Control
     protected bool IsClicked;
 
     public Theme Theme = UI.Theme;
+
+    public bool Disabled;
     
     protected internal virtual void Initialize() { }
 
@@ -20,7 +22,7 @@ public abstract class Control
     {
         IsClicked = false;
         
-        if (!mouseCaptured && ScreenRegion.Contains(mousePos))
+        if (!mouseCaptured && !Disabled && ScreenRegion.Contains(mousePos))
         {
             mouseCaptured = true;
             IsHovered = true;
