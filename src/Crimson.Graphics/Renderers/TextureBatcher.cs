@@ -35,7 +35,7 @@ internal class TextureBatcher : IDisposable
 
     private DescriptorLayout _textureLayout;
 
-    //private readonly IntPtr _blendPipeline;
+    private readonly Pipeline _blendPipeline;
     private readonly Pipeline _noBlendPipeline;
 
     private readonly Sampler _sampler;
@@ -43,7 +43,7 @@ internal class TextureBatcher : IDisposable
     private readonly List<Draw> _drawQueue;
     private readonly List<DrawList> _drawList;
     
-    public unsafe TextureBatcher(Device device, Format format)
+    public TextureBatcher(Device device, Format format)
     {
         _device = device;
 
@@ -81,7 +81,7 @@ internal class TextureBatcher : IDisposable
         {
             VertexShader = vertexShader,
             PixelShader = pixelShader,
-            ColorTargets = [new ColorTargetInfo(format)],
+            ColorTargets = [new ColorTargetInfo(format, BlendStateDescription.NonPremultipliedAlpha)],
             InputLayout =
             [
                 new InputElementDescription(Format.R32G32_Float, 0, 0, 0),
@@ -91,8 +91,8 @@ internal class TextureBatcher : IDisposable
             Descriptors = [_cameraBufferLayout, _textureLayout]
         };
 
-        //_blendPipeline = SDL.CreateGPUGraphicsPipeline(device, in pipelineInfo).Check("Create GPU pipeline");
-        //targetDesc.BlendState = SdlUtils.NoBlend;
+        _blendPipeline = _device.CreateGraphicsPipeline(in pipelineInfo);
+        pipelineInfo.ColorTargets = [new ColorTargetInfo(format, BlendStateDescription.NoBlend)];
         _noBlendPipeline = _device.CreateGraphicsPipeline(in pipelineInfo);
         
         pixelShader.Dispose();
@@ -219,7 +219,7 @@ internal class TextureBatcher : IDisposable
         return true;
     }
 
-    private unsafe void Flush(CommandList cl, ref readonly DrawList drawList)
+    private void Flush(CommandList cl, ref readonly DrawList drawList)
     {
         Debug.Assert(drawList.NumDraws != 0);
         Debug.Assert(drawList.Texture != null);
@@ -227,7 +227,7 @@ internal class TextureBatcher : IDisposable
         Pipeline pipeline = drawList.Blend switch
         {
             BlendMode.None => _noBlendPipeline,
-            BlendMode.Blend => _noBlendPipeline,
+            BlendMode.Blend => _blendPipeline,
             _ => throw new ArgumentOutOfRangeException()
         };
         
@@ -246,6 +246,7 @@ internal class TextureBatcher : IDisposable
         _cameraBufferSet.Dispose();
         _cameraBufferLayout.Dispose();
         _noBlendPipeline.Dispose();
+        _blendPipeline.Dispose();
         _cameraBuffer.Dispose();
         _indexBuffer.Dispose();
         _vertexBuffer.Dispose();

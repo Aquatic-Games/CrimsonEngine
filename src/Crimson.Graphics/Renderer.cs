@@ -382,6 +382,8 @@ public static class Renderer
             Logger.Trace($"Generating mipmaps for texture {texture}.");
             CommandList.GenerateMipmaps(texture);
         }
+        
+        MipmapQueue.Clear();
 
         Size<int> swapchainSize = _swapchain.Size.ToCrimson();
         Matrix4x4 projection =

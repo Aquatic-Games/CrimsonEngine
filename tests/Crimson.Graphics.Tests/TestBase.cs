@@ -17,6 +17,8 @@ public abstract class TestBase(string title) : IDisposable
         Surface.Create(new WindowOptions(title, new Size<int>(1280, 720), false, false));
         Renderer.Create(title, new RendererOptions(RendererType.CreateBoth, true, true), Surface.Info);
 
+        Surface.Details = $" - {Renderer.Backend}";
+        
         bool alive = true;
         Events.WindowClose += () => alive = false; 
         

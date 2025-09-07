@@ -9,8 +9,8 @@ public sealed class BasicTest() : TestBase("Basic Test")
 
     protected override void Initialize()
     {
-        _texture = new Texture("/home/aqua/Pictures/awesomeface.png");
-        _font = new Font("/home/aqua/Documents/Roboto-Regular.ttf");
+        _texture = new Texture("Content/awesomeface.png");
+        _font = new Font("Content/NotoSansJP-Regular.ttf");
     }
 
     protected override void Draw()

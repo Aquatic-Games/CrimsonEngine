@@ -10,6 +10,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\Crimson.Graphics\Crimson.Graphics.csproj" />
       <ProjectReference Include="..\..\src\Crimson.Platform\Crimson.Platform.csproj" />
+      <ProjectReference Include="..\Crimson.Tests.Common\Crimson.Tests.Common.csproj" />
     </ItemGroup>
 
 </Project>
