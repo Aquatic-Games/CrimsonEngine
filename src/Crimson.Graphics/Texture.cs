@@ -1,9 +1,10 @@
-using System.Runtime.CompilerServices;
+global using GrTexture = Graphite.Texture;
 using Crimson.Content;
 using Crimson.Core;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
-using SDL3;
+using Graphite;
+using Graphite.Core;
 
 namespace Crimson.Graphics;
 
@@ -14,11 +15,11 @@ public class Texture : IContentResource<Texture>, IDisposable
 {
     public bool IsDisposed { get; private set; }
     
-    private readonly IntPtr _device;
+    private readonly Device _device;
     private readonly bool _generateMipmaps;
     private readonly bool _isOwnedByRenderer;
     
-    internal readonly IntPtr TextureHandle;
+    internal readonly GrTexture GrTexture;
 
     /// <summary>
     /// The texture's friendly name, if any.
@@ -45,37 +46,37 @@ public class Texture : IContentResource<Texture>, IDisposable
         Size = size;
 
         _device = Renderer.Device;
-        SDL.GPUTextureUsageFlags flags = SDL.GPUTextureUsageFlags.Sampler;
+        TextureUsage usage = TextureUsage.ShaderResource;
 
         // Don't generate mipmaps if the format doesn't allow (i.e. compressed formats, etc.)
         if (numMipMaps == 0 && !format.IsCompressed())
         {
-            numMipMaps = SdlUtils.CalculateMipLevels((uint) size.Width, (uint) size.Height);
+            numMipMaps = GraphiteUtils.CalculateMipLevels((uint) size.Width, (uint) size.Height);
 
             // Only enable mipmap generation if the calculated number of mipmaps is > 1, otherwise it is pointless.
             if (numMipMaps > 1)
             {
                 _generateMipmaps = true;
-                flags |= SDL.GPUTextureUsageFlags.ColorTarget;
+                usage |= TextureUsage.GenerateMips;
             }
         }
 
-        SDL.GPUTextureCreateInfo textureInfo = new()
+        TextureInfo info = new()
         {
-            Type = SDL.GPUTextureType.Texturetype2D,
-            Format = format.ToSdl(out _),
-            Width = (uint) size.Width,
-            Height = (uint) size.Height,
-            LayerCountOrDepth = 1,
-            NumLevels = numMipMaps,
-            Usage = flags
+            Type = TextureType.Texture2D,
+            Format = format.ToGraphite(),
+            Size = new Size3D(size.ToGraphite()),
+            ArraySize = 1,
+            MipLevels = numMipMaps,
+            Usage = usage
         };
 
         Logger.Trace("Creating texture.");
-        TextureHandle = SDL.CreateGPUTexture(_device, in textureInfo).Check("Create texture");
+        GrTexture = _device.CreateTexture(in info);
         
-        if (name != null)
-            SDL.SetGPUTextureName(_device, TextureHandle, name);
+        // TODO: Graphite.Texture.Name
+        /*if (name != null)
+            SDL.SetGPUTextureName(_device, GrTexture, name);*/
     }
     
     /// <summary>
@@ -117,27 +118,16 @@ public class Texture : IContentResource<Texture>, IDisposable
     /// </remarks>
     public Texture(DDS dds, string? name = null) : this(dds.Size, dds.Format, name, dds.MipLevels)
     {
-        IntPtr cb = SDL.AcquireGPUCommandBuffer(_device).Check("Acquire command buffer");
-        
         for (uint i = 0; i < dds.MipLevels; i++)
         {
             Bitmap bitmap = dds.Bitmaps[0, i];
+
+            if (i > 1)
+                throw new NotImplementedException();
             
-            SDL.GPUTextureRegion dest = new()
-            {
-                Texture = TextureHandle,
-                X = 0,
-                Y = 0,
-                W = (uint) bitmap.Size.Width,
-                H = (uint) bitmap.Size.Height,
-                D = 1,
-                MipLevel = i
-            };
-        
-            Renderer.UpdateTexture(cb, in dest, bitmap.Data);
+            _device.UpdateTexture(GrTexture,
+                new Region3D(0, 0, 0, (uint) bitmap.Size.Width, (uint) bitmap.Size.Height, 1), bitmap.Data);
         }
-        
-        SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
     }
 
     /// <summary>
@@ -147,11 +137,11 @@ public class Texture : IContentResource<Texture>, IDisposable
     ///// <param name="name">The texture's name used during debugging, if any. If nothing is provided, the path will be used.</param>
     public Texture(string path) : this(new Bitmap(path), path) { }
 
-    internal Texture(IntPtr textureHandle, Size<int> size, string name)
+    internal Texture(GrTexture grTexture, Size<int> size, string name)
     {
         Name = name;
         Size = size;
-        TextureHandle = textureHandle;
+        GrTexture = grTexture;
         _isOwnedByRenderer = true;
     }
 
@@ -163,25 +153,22 @@ public class Texture : IContentResource<Texture>, IDisposable
     /// <param name="mipLevel">The mipmap level, if applicable.</param>
     public void Update(Rectangle<int> region, byte[] data, uint mipLevel = 0)
     {
-        IntPtr cb = SDL.AcquireGPUCommandBuffer(_device).Check("Acquire command buffer");
-
-        SDL.GPUTextureRegion dest = new()
+        Region3D region3D = new()
         {
-            Texture = TextureHandle,
-            X = (uint) region.X,
-            Y = (uint) region.Y,
-            W = (uint) region.Width,
-            H = (uint) region.Height,
-            D = 1,
-            MipLevel = mipLevel
+            X = region.X,
+            Y = region.Y,
+            Width = (uint) region.Width,
+            Height = (uint) region.Height,
+            Depth = 1
         };
+
+        if (mipLevel > 0)
+            throw new NotImplementedException();
         
-        Renderer.UpdateTexture(cb, in dest, data);
+        _device.UpdateTexture(GrTexture, in region3D, data);
 
-        SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
-
-        if (_generateMipmaps)
-            Renderer.MipmapQueue.Add(TextureHandle);
+        //if (_generateMipmaps)
+        //    Renderer.MipmapQueue.Add(GrTexture);
     }
 
     /// <summary>
@@ -196,7 +183,7 @@ public class Texture : IContentResource<Texture>, IDisposable
         if (_isOwnedByRenderer)
             return;
         
-        SDL.ReleaseGPUTexture(_device, TextureHandle);
+        GrTexture.Dispose();
     }
     
     public static Texture White { get; internal set; }

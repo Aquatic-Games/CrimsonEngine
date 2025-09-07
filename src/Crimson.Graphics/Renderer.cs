@@ -32,6 +32,7 @@ public static class Renderer
     private static SpriteRenderer? _spriteRenderer;*/
 
     internal static Device Device;
+    internal static CommandList CommandList;
 
     //internal static SDL.GPUTextureFormat MainTargetFormat;
 
@@ -121,6 +122,9 @@ public static class Renderer
         Logger.Trace("Creating swapchain.");
         _swapchain = Device.CreateSwapchain(in swapchainInfo);
 
+        Logger.Trace("Creating main command list.");
+        CommandList = Device.CreateCommandList();
+
         /*VSync = true;
 
         _depthTexture = SdlUtils.CreateTexture2D(Device, (uint) _swapchainSize.Width, (uint) _swapchainSize.Height,
@@ -191,6 +195,7 @@ public static class Renderer
         _imGuiRenderer?.Dispose();
         _uiBatcher.Dispose();*/
         
+        CommandList.Dispose();
         _swapchain.Dispose();
         Device.Dispose();
         _surface.Dispose();
@@ -367,7 +372,14 @@ public static class Renderer
     /// </summary>
     public static void Render()
     {
-        Texture swapchainTexture = _swapchain.GetNextTexture();
+        GrTexture swapchainTexture = _swapchain.GetNextTexture();
+        CommandList.Begin();
+        
+        CommandList.BeginRenderPass(new ColorAttachmentInfo(swapchainTexture, new ColorF(1.0f, 0.5f, 0.25f)));
+        CommandList.EndRenderPass();
+        
+        CommandList.End();
+        Device.ExecuteCommandList(CommandList);
         
         _swapchain.Present();
 

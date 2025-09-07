@@ -50,7 +50,6 @@
         <Compile Remove="Renderable.cs"/>
         <Compile Remove="Skybox.cs"/>
         <Compile Remove="Sprite.cs"/>
-        <Compile Remove="Texture.cs"/>
     </ItemGroup>
     
 </Project>
