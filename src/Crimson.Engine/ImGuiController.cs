@@ -1,16 +1,21 @@
+using System.Diagnostics;
 using System.Numerics;
+using Crimson.Graphics;
 using Crimson.Platform;
 using Hexa.NET.ImGui;
 
 namespace Crimson.Engine;
 
-internal class ImGuiController
+internal static class ImGuiController
 {
-    private readonly ImGuiContextPtr _context;
+    private static ImGuiContextPtr _context;
+
+    public static bool HasBeenCreated;
     
-    public ImGuiController(ImGuiContextPtr context)
+    public static void Create()
     {
-        _context = context;
+        Debug.Assert(Renderer.ImGuiContext != null);
+        _context = Renderer.ImGuiContext.Value;
         Events.KeyDown += OnKeyDown;
         Events.KeyUp += OnKeyUp;
         Events.MouseButtonDown += OnMouseButtonDown;
@@ -18,9 +23,11 @@ internal class ImGuiController
         Events.MouseMove += OnMouseMove;
         Events.MouseScroll += OnMouseScroll;
         Events.TextInput += OnTextInput;
+
+        HasBeenCreated = true;
     }
 
-    public void Update(float dt)
+    public static void Update(float dt)
     {
         ImGui.SetCurrentContext(_context);
 
@@ -30,43 +37,43 @@ internal class ImGuiController
         Surface.AllowTextInput = io.WantTextInput;
     }
 
-    private void OnKeyDown(Key key)
+    private static void OnKeyDown(Key key)
     {
         ImGui.SetCurrentContext(_context);
         ImGui.GetIO().AddKeyEvent(KeyToImGui(key), true);
     }
     
-    private void OnKeyUp(Key key)
+    private static void OnKeyUp(Key key)
     {
         ImGui.SetCurrentContext(_context);
         ImGui.GetIO().AddKeyEvent(KeyToImGui(key), false);
     }
     
-    private void OnMouseButtonDown(MouseButton button)
+    private static void OnMouseButtonDown(MouseButton button)
     {
         ImGui.SetCurrentContext(_context);
         ImGui.GetIO().AddMouseButtonEvent((int) MouseButtonToImGui(button), true);
     }
     
-    private void OnMouseButtonUp(MouseButton button)
+    private static void OnMouseButtonUp(MouseButton button)
     {
         ImGui.SetCurrentContext(_context);
         ImGui.GetIO().AddMouseButtonEvent((int) MouseButtonToImGui(button), false);
     }
     
-    private void OnMouseMove(Vector2 position, Vector2 delta)
+    private static void OnMouseMove(Vector2 position, Vector2 delta)
     {
         ImGui.SetCurrentContext(_context);
         ImGui.GetIO().AddMousePosEvent(position.X, position.Y);
     }
     
-    private void OnMouseScroll(Vector2 scroll)
+    private static void OnMouseScroll(Vector2 scroll)
     {
         ImGui.SetCurrentContext(_context);
         ImGui.GetIO().AddMouseWheelEvent(scroll.X, scroll.Y);
     }
     
-    private void OnTextInput(char c)
+    private static void OnTextInput(char c)
     {
         ImGui.SetCurrentContext(_context);
         ImGui.GetIO().AddInputCharacter(c);

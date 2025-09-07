@@ -40,7 +40,6 @@
         <Compile Remove="Primitives/**/*"/>
         <!--<Compile Remove="Renderers/**/*"/>-->
         <Compile Remove="Renderers/DeferredRenderer.cs"/>
-        <Compile Remove="Renderers/ImGuiRenderer.cs"/>
         <Compile Remove="Renderers/Structs/MaterialProperties.cs"/>
         <Compile Remove="Renderers/Structs/WorldRenderable.cs"/>
         <Compile Remove="Utils/SdlUtils.cs"/>

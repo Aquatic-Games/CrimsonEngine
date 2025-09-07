@@ -23,8 +23,6 @@ public static class App
     
     private static Scene _currentScene;
     private static Scene? _switchScene;
-
-    private static ImGuiController? _imGuiController;
     
     /// <summary>
     /// The app name.
@@ -70,7 +68,6 @@ public static class App
         _isRunning = false;
         _globalApp = null!;
         _currentScene = null!;
-        _imGuiController = null!;
         FpsLimit = 0;
     }
     
@@ -115,10 +112,10 @@ public static class App
         Logger.Debug("Initializing physics system.");
         Physics.Physics.Create();
 
-        if (Renderer.ImGuiContext is { } context)
+        if (Renderer.ImGuiContext != null)
         {
             Logger.Debug("Creating imgui controller.");
-            _imGuiController = new ImGuiController(context);
+            ImGuiController.Create();
         }
         
         Logger.Debug("Creating UI.");
@@ -159,7 +156,8 @@ public static class App
             
             Metrics.BeginPerformanceMetric(Metrics.UpdateTimeMetric);
             
-            _imGuiController?.Update(dt);
+            if (ImGuiController.HasBeenCreated)
+                ImGuiController.Update(dt);
             
             _globalApp.PreUpdate(dt);
             Physics.Physics.Step(1 / 60.0f);

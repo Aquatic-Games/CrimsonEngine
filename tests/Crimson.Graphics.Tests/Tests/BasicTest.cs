@@ -1,4 +1,5 @@
 using Crimson.Math;
+using Hexa.NET.ImGui;
 
 namespace Crimson.Graphics.Tests.Tests;
 
@@ -11,6 +12,13 @@ public sealed class BasicTest() : TestBase("Basic Test")
     {
         _texture = new Texture("Content/awesomeface.png");
         _font = new Font("Content/NotoSansJP-Regular.ttf");
+    }
+
+    protected override void Update(float dt)
+    {
+        base.Update(dt);
+
+        ImGui.ShowDemoWindow();
     }
 
     protected override void Draw()

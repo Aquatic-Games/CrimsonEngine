@@ -1,7 +1,7 @@
-#pragma vertex VSMain 1 0
-#pragma pixel PSMain 0 1
+#pragma vertex VSMain
+#pragma pixel PSMain
 
-#include "../Common.hlsli"
+//#include "../Common.hlsli"
 
 struct VSInput
 {
@@ -22,9 +22,13 @@ struct PSOutput
     float4 Color: SV_Target0;
 };
 
-CBUFFER_VTX(Projection, 0, float4x4)
+cbuffer ProjectionMatrix : register(b0, space0)
+{
+    float4x4 Projection;
+}
 
-SAMPLER2D(Texture, 0)
+Texture2D Texture : register(t0, space1);
+SamplerState Sampler : register(s0, space1);
 
 VSOutput VSMain(const in VSInput input)
 {
@@ -41,7 +45,7 @@ PSOutput PSMain(const in VSOutput input)
 {
     PSOutput output;
 
-    output.Color = SAMPLE(Texture, input.TexCoord) * input.Color;
+    output.Color = Texture.Sample(Sampler, input.TexCoord) * input.Color;
     
     return output;
 }

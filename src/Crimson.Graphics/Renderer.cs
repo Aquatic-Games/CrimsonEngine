@@ -29,8 +29,8 @@ public static class Renderer
     private static bool _vsyncEnabled;
     
     private static TextureBatcher _uiBatcher;
-    /*private static ImGuiRenderer? _imGuiRenderer;
-    private static DeferredRenderer? _deferredRenderer;*/
+    private static ImGuiRenderer? _imGuiRenderer;
+    //private static DeferredRenderer? _deferredRenderer;
     private static SpriteRenderer? _spriteRenderer;
 
     internal static Device Device;
@@ -65,7 +65,7 @@ public static class Renderer
             SDL.SetGPUSwapchainParameters(Device, _window, SDL.GPUSwapchainComposition.SDR,
                 value ? SDL.GPUPresentMode.VSync : SDL.GPUPresentMode.Immediate).Check("Set swapchain parameters");
         }
-    }
+    }*/
 
     /// <summary>
     /// Gets the ImGUI context pointer.
@@ -79,7 +79,7 @@ public static class Renderer
         }
     }
 
-    /// <summary>
+    /*/// <summary>
     /// The main renderer debug textures.
     /// </summary>
     public static Texture[] DebugRendererTextures => _deferredRenderer!.DebugTextures;*/
@@ -150,13 +150,13 @@ public static class Renderer
         Logger.Trace("Creating UI renderer.");
         _uiBatcher = new TextureBatcher(Device, _swapchain.Format);
 
-        /*if (options.CreateImGuiRenderer)
+        if (options.CreateImGuiRenderer)
         {
             Logger.Trace("Creating ImGUI renderer.");
-            _imGuiRenderer = new ImGuiRenderer(Device, RenderSize, MainTargetFormat);
+            _imGuiRenderer = new ImGuiRenderer(Device, RenderSize, _swapchain.Format);
         }
 
-        if ((options.Type & RendererType.Create3D) != 0)
+        /*if ((options.Type & RendererType.Create3D) != 0)
         {
             Logger.Trace("Creating deferred 3D renderer.");
             _deferredRenderer = new DeferredRenderer(Device, _swapchainSize, MainTargetFormat);
@@ -194,8 +194,8 @@ public static class Renderer
         Texture.White = null!;
         
         _spriteRenderer?.Dispose();
-        /*_deferredRenderer?.Dispose();
-        _imGuiRenderer?.Dispose();*/
+        //_deferredRenderer?.Dispose();
+        _imGuiRenderer?.Dispose();
         _uiBatcher.Dispose();
         
         CommandList.Dispose();
@@ -401,6 +401,8 @@ public static class Renderer
         {
             hasCleared = true;
         }
+        
+        _imGuiRenderer?.Render(CommandList, swapchainTexture, !hasCleared);
         
         CommandList.End();
         Device.ExecuteCommandList(CommandList);
