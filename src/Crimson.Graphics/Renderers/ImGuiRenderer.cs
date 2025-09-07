@@ -153,8 +153,8 @@ internal sealed class ImGuiRenderer : IDisposable
             indexOffset += indexSize;
         }
 
-        _device.MapBuffer(_indexBuffer);
-        _device.MapBuffer(_vertexBuffer);
+        _device.UnmapBuffer(_indexBuffer);
+        _device.UnmapBuffer(_vertexBuffer);
         
         //SdlUtils.PopDebugGroup(cb);
 
@@ -176,16 +176,16 @@ internal sealed class ImGuiRenderer : IDisposable
         
         cl.SetGraphicsPipeline(_pipeline);
 
-        /*TODO: SDL.GPUViewport viewport = new()
+        Viewport viewport = new()
         {
             X = drawData.DisplayPos.X,
             Y = drawData.DisplayPos.Y,
-            W = drawData.DisplaySize.X,
-            H = drawData.DisplaySize.Y,
+            Width = drawData.DisplaySize.X,
+            Height = drawData.DisplaySize.Y,
             MinDepth = 0,
             MaxDepth = 1
         };
-        SDL.SetGPUViewport(renderPass, in viewport);*/
+        cl.SetViewport(in viewport);
 
         cl.SetVertexBuffer(0, _vertexBuffer, (uint) sizeof(ImDrawVert));
         cl.SetIndexBuffer(_indexBuffer, Format.R16_UInt);
@@ -216,15 +216,14 @@ internal sealed class ImGuiRenderer : IDisposable
                 if (clipMax.X <= clipMin.X || clipMax.Y <= clipMin.Y)
                     continue;
 
-                /*TODO: SDL.Rect scissorRect = new()
+                Rect2D scissorRect = new()
                 {
                     X = (int) clipMin.X,
                     Y = (int) clipMin.Y,
-                    W = (int) clipMax.X - (int) clipMin.X,
-                    H = (int) clipMax.Y - (int) clipMin.Y
+                    Width = (uint) (clipMax.X - clipMin.X),
+                    Height = (uint) (clipMax.Y - (int) clipMin.Y)
                 };
-
-                SDL.SetGPUScissor(renderPass, in scissorRect);*/
+                cl.SetScissor(in scissorRect);
 
                 cl.PushDescriptors(1, _pipeline,
                     new Descriptor(0, DescriptorType.Texture, texture: _texture, sampler: _sampler));

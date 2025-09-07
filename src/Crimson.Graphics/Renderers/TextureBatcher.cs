@@ -190,18 +190,13 @@ internal class TextureBatcher : IDisposable
         
         //SdlUtils.PushDebugGroup(cb, "TextureBatcher Pass");
 
-        ColorAttachmentInfo colorAttachment = new()
+        cl.BeginRenderPass(new ColorAttachmentInfo
         {
             Texture = colorTarget,
             ClearColor = new ColorF(0, 0, 0),
             LoadOp = shouldClear ? LoadOp.Clear : LoadOp.Load,
             StoreOp = StoreOp.Store
-        };
-
-        cl.BeginRenderPass(in colorAttachment);
-
-        /*TODO: SDL.SetGPUViewport(renderPass,
-            new SDL.GPUViewport { X = 0, Y = 0, W = size.Width, H = size.Height, MinDepth = 0, MaxDepth = 1 });*/
+        });
         
         cl.SetVertexBuffer(0, _vertexBuffer, Vertex.SizeInBytes);
         cl.SetIndexBuffer(_indexBuffer, Format.R32_UInt);

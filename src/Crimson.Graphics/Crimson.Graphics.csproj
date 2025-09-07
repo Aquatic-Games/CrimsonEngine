@@ -42,7 +42,6 @@
         <Compile Remove="Renderers/DeferredRenderer.cs"/>
         <Compile Remove="Renderers/Structs/MaterialProperties.cs"/>
         <Compile Remove="Renderers/Structs/WorldRenderable.cs"/>
-        <Compile Remove="Utils/SdlUtils.cs"/>
         <Compile Remove="Mesh.cs"/>
         <Compile Remove="Model.cs"/>
         <Compile Remove="ModelMesh.cs"/>
