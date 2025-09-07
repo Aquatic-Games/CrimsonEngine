@@ -6,6 +6,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\lib\grabs\src\grabs.ShaderCompiler\grabs.ShaderCompiler.csproj" />
+      <ProjectReference Include="..\..\lib\Graphite\src\Graphite.D3D11\Graphite.D3D11.csproj" />
+      <ProjectReference Include="..\..\lib\Graphite\src\Graphite.ShaderTools\Graphite.ShaderTools.csproj" />
+      <ProjectReference Include="..\..\lib\Graphite\src\Graphite.Vulkan\Graphite.Vulkan.csproj" />
+      <ProjectReference Include="..\..\lib\Graphite\src\Graphite\Graphite.csproj" />
       <ProjectReference Include="..\Crimson.Content\Crimson.Content.csproj" />
       <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
       <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
@@ -14,8 +18,6 @@
     <ItemGroup>
       <PackageReference Include="FreeTypeSharp" Version="3.0.0" />
       <PackageReference Include="Hexa.NET.ImGui" Version="2.2.7" />
-      <PackageReference Include="SDL3-CS" Version="3.2.18" />
-      <PackageReference Include="SDL3-CS.Native" Version="3.2.18" />
       <PackageReference Include="SharpGLTF.Core" Version="1.0.4" />
       <PackageReference Include="StbImageSharp" Version="2.30.15" />
     </ItemGroup>
@@ -31,8 +33,23 @@
     </ItemGroup>
     
     <ItemGroup>
-      <None Remove="DEBUG.png" />
       <EmbeddedResource Include="DEBUG.png" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <Compile Remove="Materials/**/*"/>
+        <Compile Remove="Primitives/**/*"/>
+        <Compile Remove="Renderers/**/*"/>
+        <Compile Remove="Utils/**/*"/>
+        <Compile Remove="Camera.cs"/>
+        <Compile Remove="Font.cs"/>
+        <Compile Remove="Mesh.cs"/>
+        <Compile Remove="Model.cs"/>
+        <Compile Remove="ModelMesh.cs"/>
+        <Compile Remove="Renderable.cs"/>
+        <Compile Remove="Skybox.cs"/>
+        <Compile Remove="Sprite.cs"/>
+        <Compile Remove="Texture.cs"/>
     </ItemGroup>
     
 </Project>

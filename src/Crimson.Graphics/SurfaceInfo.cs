@@ -8,18 +8,18 @@ namespace Crimson.Graphics;
 public readonly struct SurfaceInfo
 {
     /// <summary>
-    /// The native handle to the surface.
+    /// The underlying surface info provided to Graphite.
     /// </summary>
-    public readonly nint Handle;
+    public readonly Graphite.SurfaceInfo Info;
 
     /// <summary>
     /// The surface's size.
     /// </summary>
     public readonly Size<int> Size;
 
-    public SurfaceInfo(IntPtr handle, Size<int> size)
+    public SurfaceInfo(Graphite.SurfaceInfo info, Size<int> size)
     {
-        Handle = handle;
+        Info = info;
         Size = size;
     }
 }
