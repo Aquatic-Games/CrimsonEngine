@@ -1,7 +1,7 @@
 #pragma vertex VSMain
 #pragma pixel PSMain
 
-#include "Crimson.hlsli"
+//#include "Crimson.hlsli"
 
 struct VSInput
 {

@@ -5,7 +5,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\lib\grabs\src\grabs.ShaderCompiler\grabs.ShaderCompiler.csproj" />
       <ProjectReference Include="..\..\lib\Graphite\src\Graphite.D3D11\Graphite.D3D11.csproj" />
       <ProjectReference Include="..\..\lib\Graphite\src\Graphite.ShaderTools\Graphite.ShaderTools.csproj" />
       <ProjectReference Include="..\..\lib\Graphite\src\Graphite.Vulkan\Graphite.Vulkan.csproj" />

@@ -184,6 +184,7 @@ internal class TextureBatcher : IDisposable
         void* iMap = (void*) _device.MapBuffer(_indexBuffer);
         fixed (uint* pIndices = _indices)
             Unsafe.CopyBlock(iMap, pIndices, numIndexBytes);
+        _device.UnmapBuffer(_indexBuffer);
 
         _device.UpdateBuffer(_cameraBuffer, 0, matrices);
         

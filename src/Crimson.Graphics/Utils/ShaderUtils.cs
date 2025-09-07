@@ -56,7 +56,8 @@ internal static class ShaderUtils
         }
     }*/
 
-    public static void LoadGraphicsShader(Device device, string name, out ShaderModule? vertexShader, out ShaderModule? pixelShader)
+    public static void LoadGraphicsShader(Device device, string name, out ShaderModule? vertexShader,
+        out ShaderModule? pixelShader)
     {
         Logger.Trace($"Compiling shader '{name}'.");
 
@@ -83,10 +84,10 @@ internal static class ShaderUtils
             switch (splitLine[1])
             {
                 case "vertex":
-                    vertexEntryPoint = splitLine[2];
+                    vertexEntryPoint = splitLine[2].TrimEnd();
                     break;
                 case "pixel":
-                    pixelEntryPoint = splitLine[2];
+                    pixelEntryPoint = splitLine[2].TrimEnd();
                     break;
             }
 
