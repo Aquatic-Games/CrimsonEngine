@@ -2,12 +2,13 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Crimson.Core;
-using Crimson.Graphics.Renderers;
-using Crimson.Graphics.Renderers.Structs;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
+using Graphite;
+using Graphite.Core;
+using Graphite.D3D11;
+using Graphite.Vulkan;
 using Hexa.NET.ImGui;
-using SDL3;
 using Color = Crimson.Math.Color;
 
 namespace Crimson.Graphics;
@@ -17,31 +18,28 @@ namespace Crimson.Graphics;
 /// </summary>
 public static class Renderer
 {
-    private const uint TransferBufferSize = 64 * 1024 * 1024;
+    private static Instance _instance;
+    private static Surface _surface;
+    private static Swapchain _swapchain;
     
-    private static IntPtr _window;
-    
-    private static IntPtr _depthTexture;
+    //private static IntPtr _depthTexture;
 
     private static bool _vsyncEnabled;
-    private static Size<int> _swapchainSize;
-
-    private static IntPtr _transferBuffer;
     
-    private static TextureBatcher _uiBatcher;
+    /*private static TextureBatcher _uiBatcher;
     private static ImGuiRenderer? _imGuiRenderer;
     private static DeferredRenderer? _deferredRenderer;
-    private static SpriteRenderer? _spriteRenderer;
+    private static SpriteRenderer? _spriteRenderer;*/
 
-    internal static IntPtr Device;
+    internal static Device Device;
 
-    internal static SDL.GPUTextureFormat MainTargetFormat;
+    //internal static SDL.GPUTextureFormat MainTargetFormat;
 
-    internal static HashSet<IntPtr> MipmapQueue;
+    //internal static HashSet<IntPtr> MipmapQueue;
 
-    public static string Backend => SDL.GetGPUDeviceDriver(Device) ?? "Unknown";
+    public static string Backend => _instance.BackendName;
 
-    /// <summary>
+    /*/// <summary>
     /// The 3D <see cref="Crimson.Graphics.Camera"/> that will be used when drawing.
     /// </summary>
     public static Camera Camera;
@@ -81,7 +79,7 @@ public static class Renderer
     /// <summary>
     /// The main renderer debug textures.
     /// </summary>
-    public static Texture[] DebugRendererTextures => _deferredRenderer!.DebugTextures;
+    public static Texture[] DebugRendererTextures => _deferredRenderer!.DebugTextures;*/
     
     /// <summary>
     /// Create the graphics subsystem.
@@ -90,37 +88,40 @@ public static class Renderer
     /// <param name="surface">The <see cref="SurfaceInfo"/> to use when creating the subsystem.</param>
     public static void Create(string appName, in RendererOptions options, in SurfaceInfo surface)
     {
-        _swapchainSize = surface.Size;
+        GraphiteLog.LogMessage += GraphiteLogMessage;
+        
+        if (OperatingSystem.IsWindows())
+            Instance.RegisterBackend<D3D11Backend>();
+        Instance.RegisterBackend<VulkanBackend>();
 
-        _window = surface.Handle;
-
-        SDL.SetAppMetadata(appName, null!, null!);
-
-        uint props = SDL.CreateProperties();
-        SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateShadersSPIRVBoolean, true);
-
-        if (options.Debug)
+        InstanceInfo instanceInfo = new()
         {
-            SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateDebugModeBoolean, true);
-            SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreatePreferLowPowerBoolean, true);
-        }
+            AppName = appName,
+            Debug = true
+        };
+        
+        Logger.Trace("Creating instance.");
+        _instance = Instance.Create(in instanceInfo);
 
-        if (OperatingSystem.IsWindows() && !EnvVar.IsTrue(EnvVar.ForceVulkan))
-        {
-            SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateShadersDXILBoolean, true);
-            // Use D3D12 on windows
-            SDL.SetStringProperty(props, SDL.Props.GPUDeviceCreateNameString, "direct3d12");
-        }
+        Logger.Trace("Creating surface.");
+        _surface = _instance.CreateSurface(in surface.Info);
 
         Logger.Trace("Creating device.");
-        Device = SDL.CreateGPUDeviceWithProperties(props).Check("Create device");
+        Device = _instance.CreateDevice(_surface);
+
+        SwapchainInfo swapchainInfo = new()
+        {
+            Surface = _surface,
+            Format = Format.B8G8R8A8_UNorm,
+            Size = surface.Size.ToGraphite(),
+            PresentMode = PresentMode.Fifo,
+            NumBuffers = 2
+        };
         
-        Logger.Debug($"Using SDL backend: {SDL.GetGPUDeviceDriver(Device)}");
-        
-        Logger.Trace("Claiming window for device.");
-        SDL.ClaimWindowForGPUDevice(Device, _window).Check("Claim window for device");
-        
-        VSync = true;
+        Logger.Trace("Creating swapchain.");
+        _swapchain = Device.CreateSwapchain(in swapchainInfo);
+
+        /*VSync = true;
 
         _depthTexture = SdlUtils.CreateTexture2D(Device, (uint) _swapchainSize.Width, (uint) _swapchainSize.Height,
             SDL.GPUTextureFormat.D32Float, 1, SDL.GPUTextureUsageFlags.DepthStencilTarget);
@@ -139,7 +140,7 @@ public static class Renderer
 
         Logger.Debug($"options.Type: {options.Type}");
         Logger.Debug($"options.CreateImGuiRenderer: {options.CreateImGuiRenderer}");
-        
+
         Logger.Trace("Creating UI renderer.");
         _uiBatcher = new TextureBatcher(Device, SDL.GetGPUSwapchainTextureFormat(Device, _window));
 
@@ -171,7 +172,7 @@ public static class Renderer
             ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(float.DegreesToRadians(45),
                 _swapchainSize.Width / (float)_swapchainSize.Height, 0.1f, 100f),
             ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(0, 0, 3), Vector3.Zero, Vector3.UnitY)
-        };
+        };*/
     }
 
     /// <summary>
@@ -179,7 +180,7 @@ public static class Renderer
     /// </summary>
     public static void Destroy()
     {
-        Texture.EmptyNormal.Dispose();
+        /*Texture.EmptyNormal.Dispose();
         Texture.EmptyNormal = null!;
         Texture.Black.Dispose();
         Texture.Black = null!;
@@ -188,16 +189,16 @@ public static class Renderer
         
         _deferredRenderer?.Dispose();
         _imGuiRenderer?.Dispose();
-        _uiBatcher.Dispose();
-
-        SDL.ReleaseGPUTransferBuffer(Device, _transferBuffer);
-
-        SDL.ReleaseGPUTexture(Device, _depthTexture);
-        SDL.ReleaseWindowFromGPUDevice(Device, _window);
-        SDL.DestroyGPUDevice(Device);
+        _uiBatcher.Dispose();*/
+        
+        _swapchain.Dispose();
+        Device.Dispose();
+        _surface.Dispose();
+        _instance.Dispose();
+        GraphiteLog.LogMessage -= GraphiteLogMessage;
     }
 
-    /// <summary>
+    /*/// <summary>
     /// Draw a <see cref="Renderable"/> to the screen using the built-in renderers.
     /// </summary>
     /// <param name="renderable">The <see cref="Renderable"/> to draw.</param>
@@ -352,13 +353,13 @@ public static class Renderer
     {
         DrawFilledRectangle(position, size, fillColor);
         DrawBorderRectangle(position, size, borderWidth, borderColor);
-    }
+    }*/
 
     public static void NewFrame()
     {
         Metrics.BeginPerformanceMetric(Metrics.RenderTimeMetric);
         
-        Camera = default;
+        //Camera = default;
     }
 
     /// <summary>
@@ -366,7 +367,11 @@ public static class Renderer
     /// </summary>
     public static void Render()
     {
-        IntPtr cb = SDL.AcquireGPUCommandBuffer(Device).Check("Acquire command buffer");
+        Texture swapchainTexture = _swapchain.GetNextTexture();
+        
+        _swapchain.Present();
+
+        /*IntPtr cb = SDL.AcquireGPUCommandBuffer(Device).Check("Acquire command buffer");
 
         foreach (IntPtr texture in MipmapQueue)
         {
@@ -381,7 +386,7 @@ public static class Renderer
 
         if (swapchainTexture == IntPtr.Zero)
             return;
-        
+
         // Each Render() method returns a boolean. If true, it means the renderer has cleared the target provided as the
         // color/compositeTarget parameter. Each renderer has the ability to clear the render/depth targets (if applicable)
         // if necessary.
@@ -405,16 +410,16 @@ public static class Renderer
         }
 
         _imGuiRenderer?.Render(cb, swapchainTexture, !hasCleared);
-        
+
         // We have to end the metric before submitting the command buffer, as SDL will auto present when this method
         // is called, which will skew the metrics (especially if VSync is enabled.)
         // When Graphite is implemented, we'll move this to just before the present.
         Metrics.EndPerformanceMetric(Metrics.RenderTimeMetric);
 
-        SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
+        SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");*/
     }
 
-    /// <summary>
+    /*/// <summary>
     /// Resize the renderer.
     /// </summary>
     /// <param name="newSize">The new size to set.</param>
@@ -429,57 +434,19 @@ public static class Renderer
         
         _deferredRenderer?.Resize(newSize);
         _imGuiRenderer?.Resize(newSize);
-    }
-
-    internal static unsafe void UpdateBuffer<T>(IntPtr cb, IntPtr buffer, uint offset, ReadOnlySpan<T> data) where T : unmanaged
+    }*/
+    
+    private static void GraphiteLogMessage(GraphiteLog.Severity severity, GraphiteLog.Type type, string message, int line, string file)
     {
-        if (data.Length >= TransferBufferSize)
-            throw new NotImplementedException();
-
-        void* map = (void*) SDL.MapGPUTransferBuffer(Device, _transferBuffer, true);
-        fixed (void* pData = data)
-            Unsafe.CopyBlock((byte*) map, pData, (uint) (data.Length * sizeof(T)));
-
-        IntPtr pass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
-
-        SDL.GPUTransferBufferLocation src = new()
+        Logger.Severity cSeverity = severity switch
         {
-            TransferBuffer = _transferBuffer,
-            Offset = 0
-        };
-
-        SDL.GPUBufferRegion dest = new()
-        {
-            Buffer = buffer,
-            Offset = offset,
-            Size = (uint) (data.Length * sizeof(T))
+            GraphiteLog.Severity.Verbose => Logger.Severity.Trace,
+            GraphiteLog.Severity.Info => Logger.Severity.Trace,
+            GraphiteLog.Severity.Warning => Logger.Severity.Warning,
+            GraphiteLog.Severity.Error => Logger.Severity.Error,
+            _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null)
         };
         
-        SDL.UploadToGPUBuffer(pass, in src, in dest, false);
-        
-        SDL.EndGPUCopyPass(pass);
-    }
-
-    internal static unsafe void UpdateTexture(IntPtr cb, in SDL.GPUTextureRegion region, byte[] data)
-    {
-        if (data.Length >= TransferBufferSize)
-            throw new NotImplementedException();
-        
-        void* map = (void*) SDL.MapGPUTransferBuffer(Device, _transferBuffer, true);
-        fixed (byte* pData = data)
-            Unsafe.CopyBlock(map, pData, (uint) data.Length);
-        SDL.UnmapGPUTransferBuffer(Device, _transferBuffer);
-
-        IntPtr pass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
-
-        SDL.GPUTextureTransferInfo transferInfo = new()
-        {
-            TransferBuffer = _transferBuffer,
-            PixelsPerRow = region.W
-        };
-        
-        SDL.UploadToGPUTexture(pass, in transferInfo, in region, false);
-        
-        SDL.EndGPUCopyPass(pass);
+        Logger.Log(cSeverity, $"{type}: {message}", line, file);
     }
 }

@@ -40,7 +40,8 @@
         <Compile Remove="Materials/**/*"/>
         <Compile Remove="Primitives/**/*"/>
         <Compile Remove="Renderers/**/*"/>
-        <Compile Remove="Utils/**/*"/>
+        <Compile Remove="Utils/SdlUtils.cs"/>
+        <Compile Remove="Utils/ShaderUtils.cs"/>
         <Compile Remove="Camera.cs"/>
         <Compile Remove="Font.cs"/>
         <Compile Remove="Mesh.cs"/>

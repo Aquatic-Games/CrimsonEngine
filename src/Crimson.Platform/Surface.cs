@@ -91,34 +91,33 @@ public static class Surface
     {
         get
         {
-            /*SurfaceInfo info;
-            SDL_PropertiesID props = SDL_GetWindowProperties(_window);
+            Graphite.SurfaceInfo info;
+            uint props = SDL.GetWindowProperties(Window);
             
             if (OperatingSystem.IsWindows())
             {
-                nint hinstance = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_INSTANCE_POINTER, 0);
-                nint hwnd = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WIN32_HWND_POINTER, 0);
+                nint hinstance = SDL.GetPointerProperty(props, SDL.Props.WindowWin32InstancePointer, 0);
+                nint hwnd = SDL.GetPointerProperty(props, SDL.Props.WindowWin32HWNDPointer, 0);
 
-                //info = SurfaceInfo.Windows(hinstance, hwnd);
-                info = new SurfaceInfo(hwnd);
+                info = Graphite.SurfaceInfo.Windows(hinstance, hwnd);
             }
             else if (OperatingSystem.IsLinux())
             {
-                string driver = SDL_GetCurrentVideoDriver()!;
+                string driver = SDL.GetCurrentVideoDriver()!;
 
                 if (driver == "wayland")
                 {
-                    nint display = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER, 0);
-                    nint surface = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, 0);
+                    nint display = SDL.GetPointerProperty(props, SDL.Props.WindowWaylandDisplayPointer, 0);
+                    nint surface = SDL.GetPointerProperty(props, SDL.Props.WindowWaylandSurfacePointer, 0);
 
-                    info = SurfaceInfo.Wayland(display, surface);
+                    info = Graphite.SurfaceInfo.Wayland(display, surface);
                 }
                 else if (driver == "x11")
                 {
-                    nint display = SDL_GetPointerProperty(props, SDL_PROP_WINDOW_X11_DISPLAY_POINTER, 0);
-                    nint window = (nint) SDL_GetNumberProperty(props, SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
+                    nint display = SDL.GetPointerProperty(props, SDL.Props.WindowX11DisplayPointer, 0);
+                    nint window = (nint) SDL.GetNumberProperty(props, SDL.Props.WindowX11WindowNumber, 0);
 
-                    info = SurfaceInfo.Xlib(display, window);
+                    info = Graphite.SurfaceInfo.Xlib(display, window);
                 }
                 else
                     throw new PlatformNotSupportedException();
@@ -126,9 +125,7 @@ public static class Surface
             else
                 throw new PlatformNotSupportedException();
 
-            return info;*/
-
-            return new SurfaceInfo(Window, Size);
+            return new SurfaceInfo(info, Size);
         }
     }
 

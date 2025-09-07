@@ -1,3 +1,8 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using Crimson.Core;
+using Crimson.Graphics.Tests;
+using Crimson.Graphics.Tests.Tests;
 
-Console.WriteLine("Hello, World!");
+Logger.LogToConsole = true;
+
+using TestBase test = new BasicTest();
+test.Run();
