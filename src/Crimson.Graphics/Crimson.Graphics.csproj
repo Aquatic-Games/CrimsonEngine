@@ -39,11 +39,14 @@
     <ItemGroup>
         <Compile Remove="Materials/**/*"/>
         <Compile Remove="Primitives/**/*"/>
-        <Compile Remove="Renderers/**/*"/>
+        <!--<Compile Remove="Renderers/**/*"/>-->
+        <Compile Remove="Renderers/DeferredRenderer.cs"/>
+        <Compile Remove="Renderers/ImGuiRenderer.cs"/>
+        <Compile Remove="Renderers/SpriteRenderer.cs"/>
+        <Compile Remove="Renderers/Structs/MaterialProperties.cs"/>
+        <Compile Remove="Renderers/Structs/WorldRenderable.cs"/>
         <Compile Remove="Utils/SdlUtils.cs"/>
-        <Compile Remove="Utils/ShaderUtils.cs"/>
         <Compile Remove="Camera.cs"/>
-        <Compile Remove="Font.cs"/>
         <Compile Remove="Mesh.cs"/>
         <Compile Remove="Model.cs"/>
         <Compile Remove="ModelMesh.cs"/>

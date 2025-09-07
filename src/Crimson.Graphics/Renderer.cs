@@ -2,6 +2,8 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Crimson.Core;
+using Crimson.Graphics.Renderers;
+using Crimson.Graphics.Renderers.Structs;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
 using Graphite;
@@ -26,8 +28,8 @@ public static class Renderer
 
     private static bool _vsyncEnabled;
     
-    /*private static TextureBatcher _uiBatcher;
-    private static ImGuiRenderer? _imGuiRenderer;
+    private static TextureBatcher _uiBatcher;
+    /*private static ImGuiRenderer? _imGuiRenderer;
     private static DeferredRenderer? _deferredRenderer;
     private static SpriteRenderer? _spriteRenderer;*/
 
@@ -36,7 +38,7 @@ public static class Renderer
 
     //internal static SDL.GPUTextureFormat MainTargetFormat;
 
-    //internal static HashSet<IntPtr> MipmapQueue;
+    internal static HashSet<GrTexture> MipmapQueue;
 
     public static string Backend => _instance.BackendName;
 
@@ -138,7 +140,7 @@ public static class Renderer
             Usage = SDL.GPUTransferBufferUsage.Upload,
             Size = TransferBufferSize
         };
-        _transferBuffer = SDL.CreateGPUTransferBuffer(Device, in transferBufferInfo).Check("Create transfer buffer");
+        _transferBuffer = SDL.CreateGPUTransferBuffer(Device, in transferBufferInfo).Check("Create transfer buffer");*/
 
         MipmapQueue = [];
 
@@ -146,9 +148,9 @@ public static class Renderer
         Logger.Debug($"options.CreateImGuiRenderer: {options.CreateImGuiRenderer}");
 
         Logger.Trace("Creating UI renderer.");
-        _uiBatcher = new TextureBatcher(Device, SDL.GetGPUSwapchainTextureFormat(Device, _window));
+        _uiBatcher = new TextureBatcher(Device, _swapchain.Format);
 
-        if (options.CreateImGuiRenderer)
+        /*if (options.CreateImGuiRenderer)
         {
             Logger.Trace("Creating ImGUI renderer.");
             _imGuiRenderer = new ImGuiRenderer(Device, RenderSize, MainTargetFormat);
@@ -192,8 +194,8 @@ public static class Renderer
         Texture.White = null!;
         
         _deferredRenderer?.Dispose();
-        _imGuiRenderer?.Dispose();
-        _uiBatcher.Dispose();*/
+        _imGuiRenderer?.Dispose();*/
+        _uiBatcher.Dispose();
         
         CommandList.Dispose();
         _swapchain.Dispose();
@@ -224,7 +226,7 @@ public static class Renderer
     {
         Debug.Assert(_spriteRenderer != null, "Renderer has not been created with 2D rendering enabled.");
         _spriteRenderer.DrawSprite(in sprite, matrix);
-    }
+    }*/
     
     /// <summary>
     /// Draw an image to the screen with the given size.
@@ -358,7 +360,7 @@ public static class Renderer
     {
         DrawFilledRectangle(position, size, fillColor);
         DrawBorderRectangle(position, size, borderWidth, borderColor);
-    }*/
+    }
 
     public static void NewFrame()
     {
@@ -375,8 +377,21 @@ public static class Renderer
         GrTexture swapchainTexture = _swapchain.GetNextTexture();
         CommandList.Begin();
         
-        CommandList.BeginRenderPass(new ColorAttachmentInfo(swapchainTexture, new ColorF(1.0f, 0.5f, 0.25f)));
-        CommandList.EndRenderPass();
+        foreach (GrTexture texture in MipmapQueue)
+        {
+            Logger.Trace($"Generating mipmaps for texture {texture}.");
+            CommandList.GenerateMipmaps(texture);
+        }
+
+        Size<int> swapchainSize = _swapchain.Size.ToCrimson();
+        Matrix4x4 projection =
+            Matrix4x4.CreateOrthographicOffCenter(0, swapchainSize.Width, swapchainSize.Height, 0, -1, 1);
+        
+        if (_uiBatcher.Render(CommandList, swapchainTexture, /*!hasCleared*/true, swapchainSize,
+                new CameraMatrices(projection, Matrix4x4.Identity)))
+        {
+            //hasCleared = true;
+        }
         
         CommandList.End();
         Device.ExecuteCommandList(CommandList);

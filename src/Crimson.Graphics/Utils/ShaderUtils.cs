@@ -1,9 +1,6 @@
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using Crimson.Core;
-using grabs.Graphics;
-using grabs.ShaderCompiler;
-using SDL3;
+using Graphite;
+using Graphite.ShaderTools;
 
 namespace Crimson.Graphics.Utils;
 
@@ -58,8 +55,8 @@ internal static class ShaderUtils
             pixel = device.CreateShaderModule(ShaderStage.Pixel, spirv, pixelEntryPoint);
         }
     }*/
-    
-    public static void LoadGraphicsShader(IntPtr device, string name, out IntPtr? vertexShader, out IntPtr? pixelShader)
+
+    public static void LoadGraphicsShader(Device device, string name, out ShaderModule? vertexShader, out ShaderModule? pixelShader)
     {
         Logger.Trace($"Compiling shader '{name}'.");
 
@@ -69,14 +66,9 @@ internal static class ShaderUtils
         string fullPath = Path.GetFullPath(Path.Combine("Content", "Shaders", $"{name}.hlsl"));
         string includeDir = Path.GetDirectoryName(fullPath);
         string hlsl = File.ReadAllText(fullPath);
-        
+
         string? vertexEntryPoint = null;
         string? pixelEntryPoint = null;
-
-        uint vertexUniforms = 0;
-        uint pixelUniforms = 0;
-        uint vertexSamplers = 0;
-        uint pixelSamplers = 0;
 
         int i = 0;
         while ((i = hlsl.IndexOf("#pragma", i)) >= 0)
@@ -92,74 +84,26 @@ internal static class ShaderUtils
             {
                 case "vertex":
                     vertexEntryPoint = splitLine[2];
-                    vertexUniforms = uint.Parse(splitLine[3]);
-                    vertexSamplers = uint.Parse(splitLine[4]);
                     break;
                 case "pixel":
                     pixelEntryPoint = splitLine[2];
-                    pixelUniforms = uint.Parse(splitLine[3]);
-                    pixelSamplers = uint.Parse(splitLine[4]);
                     break;
             }
 
             i = j;
         }
-        
-        SDL.GPUShaderFormat shaderFormat = SDL.GetGPUShaderFormats(device);
 
         if (vertexEntryPoint != null)
         {
             Logger.Trace("Creating vertex shader.");
-            vertexShader = CreateShader(device, ShaderStage.Vertex, shaderFormat, hlsl, vertexEntryPoint, includeDir,
-                true, vertexUniforms, vertexSamplers);
+            vertexShader =
+                device.CreateShaderModuleFromHLSL(ShaderStage.Vertex, hlsl, vertexEntryPoint, includeDir, true);
         }
 
         if (pixelEntryPoint != null)
         {
             Logger.Trace("Creating pixel shader.");
-            pixelShader = CreateShader(device, ShaderStage.Pixel, shaderFormat, hlsl, pixelEntryPoint, includeDir, true,
-                pixelUniforms, pixelSamplers);
-        }
-    }
-
-    private static unsafe IntPtr CreateShader(IntPtr device, ShaderStage stage, SDL.GPUShaderFormat shaderFormat,
-        string hlsl, string entryPoint, string? includeDir, bool debug, uint numUniforms, uint numSamplers)
-    {
-        ShaderFormat grabsFormat;
-
-        if (shaderFormat.HasFlag(SDL.GPUShaderFormat.SPIRV))
-            grabsFormat = ShaderFormat.Spirv;
-        else if (shaderFormat.HasFlag(SDL.GPUShaderFormat.DXIL))
-            grabsFormat = ShaderFormat.Dxil;
-        else if (shaderFormat.HasFlag(SDL.GPUShaderFormat.DXBC))
-            grabsFormat = ShaderFormat.Dxbc;
-        else
-            throw new NotSupportedException();
-
-        SDL.GPUShaderStage sdlStage = stage switch
-        {
-            ShaderStage.Vertex => SDL.GPUShaderStage.Vertex,
-            ShaderStage.Pixel => SDL.GPUShaderStage.Fragment,
-            _ => throw new ArgumentOutOfRangeException(nameof(stage), stage, null)
-        };
-        
-        byte[] compiled = Compiler.CompileHlsl(stage, grabsFormat, hlsl, entryPoint, includeDir, debug);
-            
-        fixed (byte* pData = compiled)
-        {
-            SDL.GPUShaderCreateInfo shaderInfo = new()
-            {
-                Stage = sdlStage,
-                Format = shaderFormat,
-                Code = (nint) pData,
-                CodeSize = (nuint) compiled.Length,
-                NumUniformBuffers = numUniforms,
-                NumSamplers = numSamplers,
-                Entrypoint = Marshal.StringToCoTaskMemAnsi(entryPoint)
-            };
-
-            Logger.Trace("Creating shader.");
-            return SDL.CreateGPUShader(device, in shaderInfo).Check("Create GPU shader");
+            pixelShader = device.CreateShaderModuleFromHLSL(ShaderStage.Pixel, hlsl, pixelEntryPoint, includeDir, true);
         }
     }
 
@@ -182,7 +126,7 @@ internal static class ShaderUtils
             path += ".spv";
         else
             throw new NotSupportedException(shaderFormat.ToString());
-        
+
         byte[] data = File.ReadAllBytes(path);
 
         fixed (byte* pData = data)

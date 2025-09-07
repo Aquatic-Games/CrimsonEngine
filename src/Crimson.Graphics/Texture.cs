@@ -167,8 +167,8 @@ public class Texture : IContentResource<Texture>, IDisposable
         
         _device.UpdateTexture(GrTexture, in region3D, data);
 
-        //if (_generateMipmaps)
-        //    Renderer.MipmapQueue.Add(GrTexture);
+        if (_generateMipmaps)
+            Renderer.MipmapQueue.Add(GrTexture);
     }
 
     /// <summary>
