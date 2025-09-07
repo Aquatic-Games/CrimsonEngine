@@ -30,8 +30,8 @@ public static class Renderer
     
     private static TextureBatcher _uiBatcher;
     /*private static ImGuiRenderer? _imGuiRenderer;
-    private static DeferredRenderer? _deferredRenderer;
-    private static SpriteRenderer? _spriteRenderer;*/
+    private static DeferredRenderer? _deferredRenderer;*/
+    private static SpriteRenderer? _spriteRenderer;
 
     internal static Device Device;
     internal static CommandList CommandList;
@@ -42,7 +42,7 @@ public static class Renderer
 
     public static string Backend => _instance.BackendName;
 
-    /*/// <summary>
+    /// <summary>
     /// The 3D <see cref="Crimson.Graphics.Camera"/> that will be used when drawing.
     /// </summary>
     public static Camera Camera;
@@ -50,9 +50,9 @@ public static class Renderer
     /// <summary>
     /// Get the render area size in pixels.
     /// </summary>
-    public static Size<int> RenderSize => _swapchainSize;
+    public static Size<int> RenderSize => _swapchain.Size.ToCrimson();
 
-    /// <summary>
+    /*/// <summary>
     /// Enable/disable vertical sync.
     /// </summary>
     public static bool VSync
@@ -160,12 +160,12 @@ public static class Renderer
         {
             Logger.Trace("Creating deferred 3D renderer.");
             _deferredRenderer = new DeferredRenderer(Device, _swapchainSize, MainTargetFormat);
-        }
+        }*/
 
         if ((options.Type & RendererType.Create2D) != 0)
         {
             Logger.Trace("Creating sprite renderer.");
-            _spriteRenderer = new SpriteRenderer(Device, MainTargetFormat);
+            _spriteRenderer = new SpriteRenderer(Device, _swapchain.Format);
         }
 
         Logger.Trace("Creating default textures.");
@@ -176,9 +176,9 @@ public static class Renderer
         Camera = new Camera()
         {
             ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(float.DegreesToRadians(45),
-                _swapchainSize.Width / (float)_swapchainSize.Height, 0.1f, 100f),
+                RenderSize.Width / (float) RenderSize.Height, 0.1f, 100f),
             ViewMatrix = Matrix4x4.CreateLookAt(new Vector3(0, 0, 3), Vector3.Zero, Vector3.UnitY)
-        };*/
+        };
     }
 
     /// <summary>
@@ -186,14 +186,15 @@ public static class Renderer
     /// </summary>
     public static void Destroy()
     {
-        /*Texture.EmptyNormal.Dispose();
+        Texture.EmptyNormal.Dispose();
         Texture.EmptyNormal = null!;
         Texture.Black.Dispose();
         Texture.Black = null!;
         Texture.White.Dispose();
         Texture.White = null!;
         
-        _deferredRenderer?.Dispose();
+        _spriteRenderer?.Dispose();
+        /*_deferredRenderer?.Dispose();
         _imGuiRenderer?.Dispose();*/
         _uiBatcher.Dispose();
         
@@ -214,7 +215,7 @@ public static class Renderer
     {
         Debug.Assert(_deferredRenderer != null, "Renderer has not been created with 3D rendering enabled.");
         _deferredRenderer.AddToQueue(renderable, worldMatrix);
-    }
+    }*/
 
     /// <summary>
     /// Draw a <see cref="Sprite"/> to the screen using the built-in renderers.
@@ -226,7 +227,7 @@ public static class Renderer
     {
         Debug.Assert(_spriteRenderer != null, "Renderer has not been created with 2D rendering enabled.");
         _spriteRenderer.DrawSprite(in sprite, matrix);
-    }*/
+    }
     
     /// <summary>
     /// Draw an image to the screen with the given size.
@@ -364,9 +365,9 @@ public static class Renderer
 
     public static void NewFrame()
     {
-        Metrics.BeginPerformanceMetric(Metrics.RenderTimeMetric);
+        //Metrics.BeginPerformanceMetric(Metrics.RenderTimeMetric);
         
-        //Camera = default;
+        Camera = default;
     }
 
     /// <summary>
@@ -384,15 +385,21 @@ public static class Renderer
         }
         
         MipmapQueue.Clear();
-
+        
         Size<int> swapchainSize = _swapchain.Size.ToCrimson();
+
+        bool hasCleared = false;
+        
+        if (_spriteRenderer?.Render(CommandList, swapchainTexture, !hasCleared, swapchainSize, Camera.Matrices) ?? false)
+            hasCleared = true;
+        
         Matrix4x4 projection =
             Matrix4x4.CreateOrthographicOffCenter(0, swapchainSize.Width, swapchainSize.Height, 0, -1, 1);
         
-        if (_uiBatcher.Render(CommandList, swapchainTexture, /*!hasCleared*/true, swapchainSize,
+        if (_uiBatcher.Render(CommandList, swapchainTexture, !hasCleared, swapchainSize,
                 new CameraMatrices(projection, Matrix4x4.Identity)))
         {
-            //hasCleared = true;
+            hasCleared = true;
         }
         
         CommandList.End();
@@ -400,23 +407,7 @@ public static class Renderer
         
         _swapchain.Present();
 
-        /*IntPtr cb = SDL.AcquireGPUCommandBuffer(Device).Check("Acquire command buffer");
-
-        foreach (IntPtr texture in MipmapQueue)
-        {
-            Logger.Trace($"Generating mipmaps for texture handle {texture}.");
-            SDL.GenerateMipmapsForGPUTexture(cb, texture);
-        }
-
-        MipmapQueue.Clear();
-
-        SDL.WaitAndAcquireGPUSwapchainTexture(cb, _window, out IntPtr swapchainTexture, out _, out _)
-            .Check("Acquire swapchain texture");
-
-        if (swapchainTexture == IntPtr.Zero)
-            return;
-
-        // Each Render() method returns a boolean. If true, it means the renderer has cleared the target provided as the
+        /*// Each Render() method returns a boolean. If true, it means the renderer has cleared the target provided as the
         // color/compositeTarget parameter. Each renderer has the ability to clear the render/depth targets (if applicable)
         // if necessary.
         // This acts as a small optimization. Each renderer will not bother rendering if there is nothing to do.
