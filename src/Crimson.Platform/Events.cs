@@ -46,6 +46,16 @@ public static class Events
     /// </summary>
     public static void Destroy()
     {
+        TextInput = delegate { };
+        MouseScroll = delegate { };
+        MouseMove = delegate { };
+        MouseButtonUp = delegate { };
+        MouseButtonDown = delegate { };
+        KeyUp = delegate { };
+        KeyRepeat = delegate { };
+        KeyDown = delegate { };
+        SurfaceSizeChanged = delegate { };
+        WindowClose = delegate { };
         SDL.Quit();
     }
 
@@ -95,7 +105,7 @@ public static class Events
                 }
                 case SDL.EventType.MouseMotion:
                 {
-                    MouseMove(new Vector2(sdlEvent.Motion.X, sdlEvent.Motion.Y) * Surface.DisplayScale,
+                    MouseMove(new Vector2(sdlEvent.Motion.X, sdlEvent.Motion.Y),
                         new Vector2(sdlEvent.Motion.XRel, sdlEvent.Motion.YRel));
                     break;
                 }
