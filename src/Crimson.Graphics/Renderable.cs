@@ -1,6 +1,6 @@
 using Crimson.Graphics.Materials;
-using Crimson.Graphics.Utils;
-using SDL3;
+using Graphite;
+using Buffer = Graphite.Buffer;
 
 namespace Crimson.Graphics;
 
@@ -10,11 +10,9 @@ namespace Crimson.Graphics;
 /// </summary>
 public class Renderable : IDisposable
 {
-    private readonly IntPtr _device;
+    internal readonly Buffer VertexBuffer;
     
-    internal readonly IntPtr VertexBuffer;
-    
-    internal readonly IntPtr IndexBuffer;
+    internal readonly Buffer IndexBuffer;
 
     internal readonly uint NumIndices;
 
@@ -29,10 +27,12 @@ public class Renderable : IDisposable
     /// <param name="mesh">The mesh to use.</param>
     public Renderable(Mesh mesh)
     {
-        _device = Renderer.Device;
+        // TODO: Look into replacing renderables with just the mesh class, so the Mesh class will contain the vertex and index buffers.
+        
+        Device device = Renderer.Device;
 
-        VertexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Vertex, mesh.Vertices);
-        IndexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Index, mesh.Indices);
+        VertexBuffer = device.CreateBuffer(BufferUsage.VertexBuffer, mesh.Vertices);
+        IndexBuffer = device.CreateBuffer(BufferUsage.IndexBuffer, mesh.Indices);
         
         NumIndices = (uint) mesh.Indices.Length;
 
@@ -41,10 +41,10 @@ public class Renderable : IDisposable
 
     public Renderable(ReadOnlySpan<Vertex> vertices, ReadOnlySpan<uint> indices, Material material)
     {
-        _device = Renderer.Device;
-        
-        VertexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Vertex, vertices);
-        IndexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Index, indices);
+        Device device = Renderer.Device;
+
+        VertexBuffer = device.CreateBuffer(BufferUsage.VertexBuffer, vertices);
+        IndexBuffer = device.CreateBuffer(BufferUsage.IndexBuffer, indices);
 
         NumIndices = (uint) indices.Length;
         Material = material;
@@ -55,7 +55,7 @@ public class Renderable : IDisposable
     /// </summary>
     public void Dispose()
     {
-        SDL.ReleaseGPUBuffer(_device, IndexBuffer);
-        SDL.ReleaseGPUBuffer(_device, VertexBuffer);
+        IndexBuffer.Dispose();
+        VertexBuffer.Dispose();
     }
 }

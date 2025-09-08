@@ -36,16 +36,7 @@
     </ItemGroup>
     
     <ItemGroup>
-        <Compile Remove="Materials/**/*"/>
-        <Compile Remove="Primitives/**/*"/>
-        <!--<Compile Remove="Renderers/**/*"/>-->
         <Compile Remove="Renderers/DeferredRenderer.cs"/>
-        <Compile Remove="Renderers/Structs/MaterialProperties.cs"/>
-        <Compile Remove="Renderers/Structs/WorldRenderable.cs"/>
-        <Compile Remove="Mesh.cs"/>
-        <Compile Remove="Model.cs"/>
-        <Compile Remove="ModelMesh.cs"/>
-        <Compile Remove="Renderable.cs"/>
         <Compile Remove="Skybox.cs"/>
     </ItemGroup>
     
