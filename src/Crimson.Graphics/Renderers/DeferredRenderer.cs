@@ -2,40 +2,46 @@ using System.Numerics;
 using Crimson.Graphics.Renderers.Structs;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
-using SDL3;
+using Graphite;
 
 namespace Crimson.Graphics.Renderers;
 
 internal class DeferredRenderer : IDisposable
 {
-    private const SDL.GPUTextureFormat GBufferFormat = SDL.GPUTextureFormat.R32G32B32A32Float;
+    private const Format GBufferFormat = Format.R32G32B32A32_Float;
     
-    private readonly IntPtr _device;
+    private readonly Device _device;
     
-    private IntPtr _albedoTexture;
-    private IntPtr _positionTexture;
-    private IntPtr _normalTexture;
-    private IntPtr _metallicRoughnessTexture;
+    private GrTexture _albedoTexture;
+    private GrTexture _positionTexture;
+    private GrTexture _normalTexture;
+    private GrTexture _metallicRoughnessTexture;
 
-    private readonly IntPtr _passPipeline;
-    private readonly IntPtr _passSampler;
+    private readonly Pipeline _passPipeline;
+    private readonly Sampler _passSampler;
+
+    private readonly DescriptorLayout _cameraLayout; // The camera. Set at the start of the frame and left.
+    private readonly DescriptorLayout _materialLayout; // The material. Each material contains its own set, which is set on draw.
+    private readonly DescriptorLayout _perDrawLayout; // The per-draw properties, such as a world matrix and tint color.
+    
+    private readonly DescriptorLayout _cameraSet;
 
     private readonly List<WorldRenderable> _drawQueue;
 
     public Texture[] DebugTextures;
     
-    public unsafe DeferredRenderer(IntPtr device, Size<int> size, SDL.GPUTextureFormat outFormat)
+    public DeferredRenderer(Device device, Size<int> size, Format outFormat)
     {
         _device = device;
 
-        _albedoTexture = CreateGBufferTexture(_device, size, GBufferFormat);
-        SDL.SetGPUTextureName(_device, _albedoTexture, "Albedo GBuffer");
-        _positionTexture = CreateGBufferTexture(_device, size, GBufferFormat);
-        SDL.SetGPUTextureName(_device, _positionTexture, "Position GBuffer");
-        _normalTexture = CreateGBufferTexture(_device, size, GBufferFormat);
-        SDL.SetGPUTextureName(_device, _normalTexture, "Normal GBuffer");
-        _metallicRoughnessTexture = CreateGBufferTexture(_device, size, GBufferFormat);
-        SDL.SetGPUTextureName(_device, _metallicRoughnessTexture, "Metallic-Roughness-Occlusion GBuffer");
+        _albedoTexture = CreateGBufferTexture(size);
+        // TODO: SDL.SetGPUTextureName(_device, _albedoTexture, "Albedo GBuffer");
+        _positionTexture = CreateGBufferTexture(size);
+        // TODO: SDL.SetGPUTextureName(_device, _positionTexture, "Position GBuffer");
+        _normalTexture = CreateGBufferTexture(size);
+        // TODO: SDL.SetGPUTextureName(_device, _normalTexture, "Normal GBuffer");
+        _metallicRoughnessTexture = CreateGBufferTexture(size);
+        // TODO: SDL.SetGPUTextureName(_device, _metallicRoughnessTexture, "Metallic-Roughness-Occlusion GBuffer");
 
         DebugTextures =
         [
@@ -45,43 +51,50 @@ internal class DeferredRenderer : IDisposable
             new Texture(_metallicRoughnessTexture, size, "Metallic-Roughness-Occlusion")
         ];
 
-        ShaderUtils.LoadGraphicsShader(device, "Deferred/DeferredPass", out IntPtr? passVtx, out IntPtr? passPxl);
+        ShaderUtils.LoadGraphicsShader(device, "Deferred/DeferredPass", out ShaderModule? passVtx,
+            out ShaderModule? passPxl);
 
-        SDL.GPUColorTargetDescription targetDesc = new()
+        GraphicsPipelineInfo passPipelineInfo = new()
         {
-            Format = outFormat
+            VertexShader = passVtx,
+            PixelShader = passPxl,
+            ColorTargets = [new ColorTargetInfo(outFormat)]
         };
 
-        SDL.GPUGraphicsPipelineCreateInfo passPipelineInfo = new()
-        {
-            VertexShader = passVtx.Value,
-            FragmentShader = passPxl.Value,
-            TargetInfo = new SDL.GPUGraphicsPipelineTargetInfo()
-            {
-                NumColorTargets = 1,
-                ColorTargetDescriptions = new IntPtr(&targetDesc)
-            },
-            PrimitiveType = SDL.GPUPrimitiveType.TriangleList
-        };
-
-        _passPipeline = SDL.CreateGPUGraphicsPipeline(_device, in passPipelineInfo).Check("Create graphics pipeline");
+        _passPipeline = _device.CreateGraphicsPipeline(in passPipelineInfo);
         
-        SDL.ReleaseGPUShader(_device, passPxl.Value);
-        SDL.ReleaseGPUShader(_device, passVtx.Value);
+        passPxl.Dispose();
+        passVtx.Dispose();
 
-        SDL.GPUSamplerCreateInfo samplerInfo = new()
-        {
-            MinFilter = SDL.GPUFilter.Linear,
-            MagFilter = SDL.GPUFilter.Linear,
-            MipmapMode = SDL.GPUSamplerMipmapMode.Linear,
-            AddressModeU = SDL.GPUSamplerAddressMode.Repeat,
-            AddressModeV = SDL.GPUSamplerAddressMode.Repeat,
-            MaxLod = 1000
-        };
-
-        _passSampler = SDL.CreateGPUSampler(_device, in samplerInfo).Check("Create sampler");
+        _passSampler = _device.CreateSampler(SamplerInfo.LinearWrap);
 
         _drawQueue = [];
+
+        _cameraLayout = _device.CreateDescriptorLayout(new DescriptorLayoutInfo
+        {
+            Bindings = [new DescriptorBinding(0, DescriptorType.ConstantBuffer, ShaderStage.Vertex)]
+        });
+
+        _materialLayout = _device.CreateDescriptorLayout(new DescriptorLayoutInfo
+        {
+            Bindings =
+            [
+                new DescriptorBinding(0, DescriptorType.ConstantBuffer, ShaderStage.VertexPixel), // gMaterial
+                new DescriptorBinding(1, DescriptorType.Texture, ShaderStage.Pixel), // Texture0/Albedo
+                new DescriptorBinding(2, DescriptorType.Texture, ShaderStage.Pixel), // Texture1/Normal
+                new DescriptorBinding(3, DescriptorType.Texture, ShaderStage.Pixel), // Texture2/Metallic
+                new DescriptorBinding(4, DescriptorType.Texture, ShaderStage.Pixel), // Texture3/Roughness
+                new DescriptorBinding(5, DescriptorType.Texture, ShaderStage.Pixel), // Texture4/Occlusion
+                new DescriptorBinding(6, DescriptorType.Texture, ShaderStage.Pixel), // Texture5/Emission
+            ]
+        });
+
+        _perDrawLayout = _device.CreateDescriptorLayout(new DescriptorLayoutInfo
+        {
+            Bindings = [new DescriptorBinding(0, DescriptorType.ConstantBuffer, ShaderStage.Vertex)],
+            // TODO: Buffer offset in SetDescriptorSet
+            PushDescriptor = true
+        });
     }
 
     public void AddToQueue(Renderable renderable, Matrix4x4 worldMatrix)
@@ -89,7 +102,7 @@ internal class DeferredRenderer : IDisposable
         _drawQueue.Add(new WorldRenderable(renderable, worldMatrix));
     }
 
-    public unsafe bool Render(IntPtr cb, IntPtr compositeTarget, IntPtr depthTexture, CameraMatrices camera)
+    public unsafe bool Render(IntPtr cb, GrTexture compositeTarget, GrTexture depthTexture, CameraMatrices camera)
     {
         // Don't bother rendering if there is nothing to draw.
         if (_drawQueue.Count == 0)
@@ -305,9 +318,9 @@ internal class DeferredRenderer : IDisposable
         SDL.ReleaseGPUTexture(_device, _albedoTexture);
     }
 
-    private static IntPtr CreateGBufferTexture(IntPtr device, Size<int> size, SDL.GPUTextureFormat format)
+    private GrTexture CreateGBufferTexture(Size<int> size)
     {
-        return SdlUtils.CreateTexture2D(device, (uint) size.Width, (uint) size.Height, format, 1,
-            SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget);
+        return _device.CreateTexture(TextureInfo.Texture2D(GBufferFormat, size.ToGraphite(), 1,
+            TextureUsage.ShaderResource | TextureUsage.ColorTarget));
     }
 }
