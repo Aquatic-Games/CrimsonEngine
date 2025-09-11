@@ -73,16 +73,16 @@ PSOutput PSMain(const in VSOutput input)
     const float3 l = normalize(-TEMP_lightDir);
     const float3 h = normalize(v + l);
 
-    const float d = SpecularD(roughness, n, h);
+    const float3 d = SpecularD(roughness, n, h);
     const float3 f = SpecularF(v, h, lerp((float3) 0.04, albedo, metallic));
-    const float g = SpecularG(n, v, l, roughness);
+    const float3 g = SpecularG(n, v, l, roughness);
 
     const float3 brdf = BRDF(d * f * g, n, v, l);
     
     const float3 kD = ((float3) 1.0 - f) * (1.0 - metallic);
-    const float nDotL = max(dot(n, l), 0.0);
+    const float3 nDotL = max(dot(n, l), 0.0);
     
-    const float light = (kD * albedo / M_PI + brdf) * 1.0 * nDotL;
+    const float3 light = (kD * albedo / M_PI + brdf) * 1.0 * nDotL;
     const float3 ambient = (float3) 0.03 * albedo * occlusion;
     
     float3 color = (float3) light + ambient;
