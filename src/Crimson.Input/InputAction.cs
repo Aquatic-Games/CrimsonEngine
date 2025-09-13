@@ -25,7 +25,7 @@ public sealed class InputAction
 
     public InputSource Source => _source;
 
-    public bool IsPressed
+    public bool IsDown
     {
         get
         {
