@@ -8,6 +8,7 @@ using Crimson.Graphics.Materials;
 //using Crimson.Graphics.Materials;
 using Crimson.Graphics.Primitives;
 using Crimson.Input;
+using Crimson.Input.Bindings;
 using Crimson.Math;
 using Crimson.Physics;
 using Crimson.Physics.Shapes;
@@ -37,9 +38,16 @@ public class TestScene : Scene
         //App.Renderer.VSync = false;
         //App.Surface.CursorVisible = false;
 
-        ActionSet set = new ActionSet("Main");
-        set.AddAction(new InputAction("Move"));
+        ActionSet set = new ActionSet("Main", false);
+        set.AddAction(new InputAction("Move", new DualAxisBinding(new KeyBinding(Key.W), new KeyBinding(Key.S), new KeyBinding(Key.D), new KeyBinding(Key.A))));
+        set.AddAction(new InputAction("Look", new MouseMoveBinding(), new DualAxisBinding(new KeyBinding(Key.Up), new KeyBinding(Key.Down), new KeyBinding(Key.Right), new KeyBinding(Key.Left))));
 
+        ActionSet otherSet = new ActionSet("UI", true);
+
+        Input.Input.AddActionSet(set);
+        Input.Input.AddActionSet(otherSet);
+        Input.Input.SetCurrentActionSet(set.Name);
+        
         _texture = Content.Content.Load<Texture>("DEBUG");
 
         //StreamSound sound = new StreamSound("/home/aqua/Music/kf-battle.ogg");
@@ -112,6 +120,11 @@ public class TestScene : Scene
         
         if (Input.Input.IsKeyPressed(Key.Escape))
             App.Close();
+        
+        if (Input.Input.IsKeyPressed(Key.P))
+            Input.Input.SetCurrentActionSet("UI");
+        if (Input.Input.IsKeyPressed(Key.O))
+            Input.Input.SetCurrentActionSet("Main");
 
         if (Physics.Physics.Raycast(Camera.Transform.Position, Camera.Transform.Forward, 100, out RaycastHit hit))
         {

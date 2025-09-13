@@ -95,13 +95,13 @@ public static class Events
                 }
                 case SDL.EventType.MouseMotion:
                 {
-                    MouseMove(new Vector2(sdlEvent.Motion.X, sdlEvent.Motion.Y) * Surface.DisplayScale,
-                        new Vector2(sdlEvent.Motion.XRel, sdlEvent.Motion.YRel));
+                    MouseMove(new Vector2T<float>(sdlEvent.Motion.X, sdlEvent.Motion.Y) * Surface.DisplayScale,
+                        new Vector2T<float>(sdlEvent.Motion.XRel, sdlEvent.Motion.YRel));
                     break;
                 }
                 case SDL.EventType.MouseWheel:
                 {
-                    MouseScroll(new Vector2(sdlEvent.Wheel.X, sdlEvent.Wheel.Y));
+                    MouseScroll(new Vector2T<float>(sdlEvent.Wheel.X, sdlEvent.Wheel.Y));
                     break;
                 }
 
@@ -134,9 +134,9 @@ public static class Events
 
     public delegate void OnMouseButtonUp(MouseButton button);
     
-    public delegate void OnMouseMove(Vector2 position, Vector2 delta);
+    public delegate void OnMouseMove(Vector2T<float> position, Vector2T<float> delta);
 
-    public delegate void OnMouseScroll(Vector2 scroll);
+    public delegate void OnMouseScroll(Vector2T<float> scroll);
 
     public delegate void OnTextInput(char c);
 }

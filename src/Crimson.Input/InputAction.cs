@@ -6,6 +6,7 @@ namespace Crimson.Input;
 public sealed class InputAction
 {
     private bool _enabled;
+    private InputSource _source;
     
     public readonly string Name;
     
@@ -21,18 +22,55 @@ public sealed class InputAction
                 binding.Enabled = value;
         }
     }
-    
-    public bool IsPressed => Bindings.Any(binding => binding.Pressed);
 
-    public float Value => Bindings.Sum(binding => binding.Value);
+    public InputSource Source => _source;
+
+    public bool IsPressed
+    {
+        get
+        {
+            foreach (IInputBinding binding in Bindings)
+            {
+                if (!binding.Active)
+                    continue;
+                _source = binding.Source;
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    public float Value
+    {
+        get
+        {
+            float value = 0;
+
+            foreach (IInputBinding binding in Bindings)
+            {
+                value += binding.Value;
+                if (binding.Active)
+                    _source = binding.Source;
+            }
+            
+            return value;
+        }
+    }
 
     public Vector2T<float> Value2D
     {
         get
         {
             Vector2T<float> value = Vector2T<float>.Zero;
+            
             foreach (IInputBinding binding in Bindings)
+            {
                 value += binding.Value2D;
+                if (binding.Active)
+                    _source = binding.Source;
+            }
+
             return value;
         }
     }

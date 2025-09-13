@@ -103,7 +103,7 @@ public static class UI
 
     public static void Update(float dt)
     {
-        Vector2 mPos = Input.Input.MousePosition;
+        Vector2T<float> mPos = Input.Input.MousePosition;
         Vector2T<int> mousePos = new Vector2T<int>((int) mPos.X, (int) mPos.Y);
         bool mouseCaptured = false;
         BaseControl.Update(dt, ref mouseCaptured, mousePos);

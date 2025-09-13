@@ -1,4 +1,4 @@
-using System.Numerics;
+using Crimson.Math;
 using Crimson.Platform;
 using Hexa.NET.ImGui;
 
@@ -54,13 +54,13 @@ internal class ImGuiController
         ImGui.GetIO().AddMouseButtonEvent((int) MouseButtonToImGui(button), false);
     }
     
-    private void OnMouseMove(Vector2 position, Vector2 delta)
+    private void OnMouseMove(Vector2T<float> position, Vector2T<float> delta)
     {
         ImGui.SetCurrentContext(_context);
         ImGui.GetIO().AddMousePosEvent(position.X, position.Y);
     }
     
-    private void OnMouseScroll(Vector2 scroll)
+    private void OnMouseScroll(Vector2T<float> scroll)
     {
         ImGui.SetCurrentContext(_context);
         ImGui.GetIO().AddMouseWheelEvent(scroll.X, scroll.Y);

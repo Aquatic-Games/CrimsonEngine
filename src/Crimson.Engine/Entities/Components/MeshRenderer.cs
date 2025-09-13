@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using Crimson.Graphics;
+﻿using Crimson.Graphics;
 using Crimson.Graphics.Materials;
 
 namespace Crimson.Engine.Entities.Components;

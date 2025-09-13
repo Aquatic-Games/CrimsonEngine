@@ -6,7 +6,9 @@ public interface IInputBinding
 {
     public bool Enabled { get; internal set; }
     
-    public bool Pressed { get; }
+    public InputSource Source { get; }
+    
+    public bool Active { get; }
     
     public float Value { get; }
     

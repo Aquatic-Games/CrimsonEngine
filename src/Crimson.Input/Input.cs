@@ -1,4 +1,5 @@
 using System.Numerics;
+using Crimson.Math;
 using Crimson.Platform;
 
 namespace Crimson.Input;
@@ -13,15 +14,15 @@ public static class Input
     private static readonly HashSet<MouseButton> _buttonsDown;
     private static readonly HashSet<MouseButton> _buttonsPressed;
 
-    private static Vector2 _mousePosition;
-    private static Vector2 _mouseDelta;
-    private static Vector2 _scrollDelta;
+    private static Vector2T<float> _mousePosition;
+    private static Vector2T<float> _mouseDelta;
+    private static Vector2T<float> _scrollDelta;
 
-    public static Vector2 MousePosition => _mousePosition;
+    public static Vector2T<float> MousePosition => _mousePosition;
 
-    public static Vector2 MouseDelta => _mouseDelta;
+    public static Vector2T<float> MouseDelta => _mouseDelta;
 
-    public static Vector2 ScrollDelta => _scrollDelta;
+    public static Vector2T<float> ScrollDelta => _scrollDelta;
 
     static Input()
     {
@@ -72,7 +73,9 @@ public static class Input
         foreach ((_, ActionSet set) in _actionSets)
             set.Enabled = false;
 
-        _actionSets[name].Enabled = true;
+        ActionSet s = _actionSets[name];
+        s.Enabled = true;
+        Surface.CursorVisible = s.CursorVisible;
     }
 
     public static bool IsKeyDown(Key key)
@@ -121,8 +124,8 @@ public static class Input
     {
         _keysPressed.Clear();
         _buttonsPressed.Clear();
-        _mouseDelta = Vector2.Zero;
-        _scrollDelta = Vector2.Zero;
+        _mouseDelta = Vector2T<float>.Zero;
+        _scrollDelta = Vector2T<float>.Zero;
     }
     
     private static void OnKeyDown(Key key)
@@ -149,13 +152,13 @@ public static class Input
         _buttonsPressed.Remove(button);
     }
     
-    private static void OnMouseMove(Vector2 position, Vector2 delta)
+    private static void OnMouseMove(Vector2T<float> position, Vector2T<float> delta)
     {
         _mousePosition = position;
         _mouseDelta += delta;
     }
     
-    private static void OnMouseScroll(Vector2 scroll)
+    private static void OnMouseScroll(Vector2T<float> scroll)
     {
         _scrollDelta += scroll;
     }

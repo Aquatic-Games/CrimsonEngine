@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Crimson.Engine.Entities.Components;
 
 namespace Crimson.Engine.Entities;
 

@@ -8,6 +8,8 @@ public sealed class ActionSet
     
     public readonly Dictionary<string, InputAction> Actions;
 
+    public bool CursorVisible;
+
     public bool Enabled
     {
         get => _enabled;
@@ -19,9 +21,10 @@ public sealed class ActionSet
         }
     }
 
-    public ActionSet(string name)
+    public ActionSet(string name, bool cursorVisible = true)
     {
         Name = name;
+        CursorVisible = cursorVisible;
         Actions = [];
     }
 
