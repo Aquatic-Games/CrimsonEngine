@@ -5,6 +5,8 @@ namespace Crimson.Input;
 
 public static class Input
 {
+    private static Dictionary<string, ActionSet> _actionSets;
+    
     private static readonly HashSet<Key> _keysDown;
     private static readonly HashSet<Key> _keysPressed;
 
@@ -23,6 +25,7 @@ public static class Input
 
     static Input()
     {
+        _actionSets = [];
         _keysDown = [];
         _keysPressed = [];
         _buttonsDown = [];
@@ -52,6 +55,24 @@ public static class Input
         Events.MouseButtonUp -= OnMouseButtonUp;
         Events.MouseMove -= OnMouseMove;
         Events.MouseScroll -= OnMouseScroll;
+    }
+
+    public static void AddActionSet(ActionSet set)
+    {
+        _actionSets.Add(set.Name, set);
+    }
+
+    public static ActionSet GetActionSet(string name)
+    {
+        return _actionSets[name];
+    }
+
+    public static void SetCurrentActionSet(string name)
+    {
+        foreach ((_, ActionSet set) in _actionSets)
+            set.Enabled = false;
+
+        _actionSets[name].Enabled = true;
     }
 
     public static bool IsKeyDown(Key key)

@@ -7,6 +7,7 @@ using Crimson.Graphics;
 using Crimson.Graphics.Materials;
 //using Crimson.Graphics.Materials;
 using Crimson.Graphics.Primitives;
+using Crimson.Input;
 using Crimson.Math;
 using Crimson.Physics;
 using Crimson.Physics.Shapes;
@@ -35,6 +36,9 @@ public class TestScene : Scene
         //App.FpsLimit = 240;
         //App.Renderer.VSync = false;
         //App.Surface.CursorVisible = false;
+
+        ActionSet set = new ActionSet("Main");
+        set.AddAction(new InputAction("Move"));
 
         _texture = Content.Content.Load<Texture>("DEBUG");
 
