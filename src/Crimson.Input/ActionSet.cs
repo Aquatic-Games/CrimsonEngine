@@ -1,6 +1,6 @@
 ﻿namespace Crimson.Input;
 
-public sealed class ActionSet
+public class ActionSet
 {
     private bool _enabled;
     

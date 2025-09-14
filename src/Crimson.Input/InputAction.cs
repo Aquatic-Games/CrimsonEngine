@@ -14,7 +14,7 @@ public sealed class InputAction
     
     public readonly string Name;
     
-    public readonly IInputBinding[] Bindings;
+    public IInputBinding[] Bindings;
 
     public bool Enabled
     {
@@ -58,7 +58,7 @@ public sealed class InputAction
             if (binding.IsActive)
             {
                 _isDown = true;
-                _source = Bindings[0].Source;
+                _source = binding.Source;
             }
 
             if (binding.BecameActive)

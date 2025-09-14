@@ -11,9 +11,9 @@ public struct AxisBinding : IInputBinding
     private float _value;
     private Vector2T<float> _value2D;
     
-    public IInputBinding Up;
+    public IInputBinding Positive;
 
-    public IInputBinding Down;
+    public IInputBinding Negative;
 
     public bool Enabled
     {
@@ -21,8 +21,8 @@ public struct AxisBinding : IInputBinding
         set
         {
             _enabled = value;
-            Up.Enabled = value;
-            Down.Enabled = value;
+            Positive.Enabled = value;
+            Negative.Enabled = value;
         }
     }
 
@@ -36,10 +36,10 @@ public struct AxisBinding : IInputBinding
 
     public Vector2T<float> Value2D => _value2D;
 
-    public AxisBinding(IInputBinding up, IInputBinding down)
+    public AxisBinding(IInputBinding positive, IInputBinding negative)
     {
-        Up = up;
-        Down = down;
+        Positive = positive;
+        Negative = negative;
     }
     
     public void Update()
@@ -53,14 +53,14 @@ public struct AxisBinding : IInputBinding
             return;
         }
         
-        Up.Update();
-        Down.Update();
+        Positive.Update();
+        Negative.Update();
         // Cache the results here so that the results aren't calculated multiple times per frame.
         // TODO: Not Ideal.
-        _source = Up.Source;
-        _isActive = Up.IsActive || Down.IsActive;
-        _becameActive = Up.BecameActive || Down.BecameActive;
-        _value = Up.Value - Down.Value;
+        _source = Positive.Source;
+        _isActive = Positive.IsActive || Negative.IsActive;
+        _becameActive = Positive.BecameActive || Negative.BecameActive;
+        _value = Positive.Value - Negative.Value;
         _value2D = new Vector2T<float>(_value);
     }
 }
