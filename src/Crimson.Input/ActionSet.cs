@@ -37,4 +37,10 @@ public sealed class ActionSet
     {
         return Actions[name];
     }
+
+    public void Update()
+    {
+        foreach ((_, InputAction action) in Actions)
+            action.Update();
+    }
 }

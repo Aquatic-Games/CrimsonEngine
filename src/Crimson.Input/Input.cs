@@ -7,6 +7,7 @@ namespace Crimson.Input;
 public static class Input
 {
     private static Dictionary<string, ActionSet> _actionSets;
+    private static ActionSet? _currentActionSet;
     
     private static readonly HashSet<Key> _keysDown;
     private static readonly HashSet<Key> _keysPressed;
@@ -68,14 +69,21 @@ public static class Input
         return _actionSets[name];
     }
 
-    public static void SetCurrentActionSet(string name)
+    public static void SetCurrentActionSet(string? name)
     {
-        foreach ((_, ActionSet set) in _actionSets)
-            set.Enabled = false;
+        if (_currentActionSet != null)
+        {
+            _currentActionSet.Enabled = false;
+            // Calling update will make sure everything is reset when disabled.
+            _currentActionSet.Update();
+        }
 
-        ActionSet s = _actionSets[name];
-        s.Enabled = true;
-        Surface.CursorVisible = s.CursorVisible;
+        if (name == null)
+            return;
+
+        _currentActionSet = _actionSets[name];
+        _currentActionSet.Enabled = true;
+        Surface.CursorVisible = _currentActionSet.CursorVisible;
     }
 
     public static bool IsKeyDown(Key key)
@@ -120,12 +128,17 @@ public static class Input
     public static bool IsMouseButtonPressed(MouseButton button)
         => _buttonsPressed.Contains(button);
 
-    public static void Update()
+    public static void PreUpdate()
     {
         _keysPressed.Clear();
         _buttonsPressed.Clear();
         _mouseDelta = Vector2T<float>.Zero;
         _scrollDelta = Vector2T<float>.Zero;
+    }
+
+    public static void Update()
+    {
+        _currentActionSet?.Update();
     }
     
     private static void OnKeyDown(Key key)

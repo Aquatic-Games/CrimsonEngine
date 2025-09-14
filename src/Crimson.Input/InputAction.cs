@@ -7,6 +7,10 @@ public sealed class InputAction
 {
     private bool _enabled;
     private InputSource _source;
+    private bool _isDown;
+    private bool _isPressed;
+    private float _value;
+    private Vector2T<float> _value2D;
     
     public readonly string Name;
     
@@ -25,59 +29,43 @@ public sealed class InputAction
 
     public InputSource Source => _source;
 
-    public bool IsDown
-    {
-        get
-        {
-            foreach (IInputBinding binding in Bindings)
-            {
-                if (!binding.Active)
-                    continue;
-                _source = binding.Source;
-                return true;
-            }
+    public bool IsDown => _isDown;
+    
+    public bool IsPressed => _isPressed;
 
-            return false;
-        }
-    }
+    public float Value => _value;
 
-    public float Value
-    {
-        get
-        {
-            float value = 0;
-
-            foreach (IInputBinding binding in Bindings)
-            {
-                value += binding.Value;
-                if (binding.Active)
-                    _source = binding.Source;
-            }
-            
-            return value;
-        }
-    }
-
-    public Vector2T<float> Value2D
-    {
-        get
-        {
-            Vector2T<float> value = Vector2T<float>.Zero;
-            
-            foreach (IInputBinding binding in Bindings)
-            {
-                value += binding.Value2D;
-                if (binding.Active)
-                    _source = binding.Source;
-            }
-
-            return value;
-        }
-    }
+    public Vector2T<float> Value2D => _value2D;
     
     public InputAction(string name, params IInputBinding[] bindings)
     {
         Name = name;
         Bindings = bindings;
+    }
+
+    public void Update()
+    {
+        foreach (IInputBinding binding in Bindings)
+            binding.Update();
+
+        _isDown = false;
+        _isPressed = false;
+        _value = 0;
+        _value2D = Vector2T<float>.Zero;
+        
+        foreach (IInputBinding binding in Bindings)
+        {
+            if (binding.IsActive)
+            {
+                _isDown = true;
+                _source = Bindings[0].Source;
+            }
+
+            if (binding.BecameActive)
+                _isPressed = true;
+            
+            _value += binding.Value;
+            _value2D += binding.Value2D;
+        }
     }
 }

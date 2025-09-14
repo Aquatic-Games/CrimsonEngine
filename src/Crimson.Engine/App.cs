@@ -138,8 +138,9 @@ public static class App
             if (_deltaWatch.Elapsed.TotalSeconds < _targetDelta && !Renderer.VSync)
                 continue;
             
-            Input.Input.Update();
+            Input.Input.PreUpdate();
             Events.ProcessEvents();
+            Input.Input.Update();
 
             _deltaTime = _deltaWatch.Elapsed.TotalSeconds;
             _deltaWatch.Restart();
