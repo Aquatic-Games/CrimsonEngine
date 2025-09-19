@@ -61,8 +61,8 @@ public record struct Color
     /// Create a <see cref="Color"/> from a packed 32-bit RGBA value.
     /// </summary>
     /// <param name="packedRgba">The 32-bit RGBA value.</param>
-    public Color(uint packedRgba) : this((byte) (packedRgba >> 24) & 0xFF, (byte) (packedRgba >> 16) & 0xFF,
-        (byte) (packedRgba >> 8) & 0xFF, (byte) (packedRgba & 0xFF)) { }
+    public Color(uint packedRgba) : this((byte) ((packedRgba >> 24) & 0xFF), (byte) ((packedRgba >> 16) & 0xFF),
+        (byte) ((packedRgba >> 8) & 0xFF), (byte) (packedRgba & 0xFF)) { }
     
     /// <summary>
     /// AliceBlue has an RGB value of 240, 248, 255 (0xF0F8FF)

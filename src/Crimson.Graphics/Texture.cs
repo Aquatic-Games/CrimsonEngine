@@ -31,6 +31,11 @@ public class Texture : IContentResource<Texture>, IDisposable
     public readonly Size<int> Size;
 
     /// <summary>
+    /// The Texture's ID.
+    /// </summary>
+    public ulong ID => (ulong) TextureHandle;
+
+    /// <summary>
     /// Create an empty <see cref="Texture"/>.
     /// </summary>
     /// <param name="size">The size, in pixels. If <see langword="null"/> is provided, a blank texture will be created.</param>

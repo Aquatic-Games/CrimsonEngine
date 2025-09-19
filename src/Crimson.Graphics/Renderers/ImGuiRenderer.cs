@@ -291,8 +291,10 @@ internal sealed class ImGuiRenderer : IDisposable
                 if (drawCmd.UserCallback != null)
                     continue;
 
+                IntPtr texture = _texture!.Value;
+
                 if (drawCmd.TextureId != ImTextureID.Null)
-                    throw new NotImplementedException();
+                    texture = (IntPtr) drawCmd.TextureId.Handle;
                 
                 Vector2 clipMin = new Vector2(drawCmd.ClipRect.X - clipOff.X, drawCmd.ClipRect.Y - clipOff.Y);
                 Vector2 clipMax = new Vector2(drawCmd.ClipRect.Z - clipOff.X, drawCmd.ClipRect.W - clipOff.Y);
@@ -312,7 +314,7 @@ internal sealed class ImGuiRenderer : IDisposable
 
                 SDL.GPUTextureSamplerBinding samplerBinding = new()
                 {
-                    Texture = _texture!.Value,
+                    Texture = texture,
                     Sampler = _sampler
                 };
 
