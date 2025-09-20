@@ -138,15 +138,15 @@ public static class Renderer
         MipmapQueue = [];
 
         Logger.Debug($"options.Type: {options.Type}");
-        Logger.Debug($"options.CreateImGuiRenderer: {options.CreateImGuiRenderer}");
+        Logger.Debug($"options.ImGui.CreateRenderer: {options.ImGui.CreateRenderer}");
         
         Logger.Trace("Creating UI renderer.");
         _uiBatcher = new TextureBatcher(Device, SDL.GetGPUSwapchainTextureFormat(Device, _window));
 
-        if (options.CreateImGuiRenderer)
+        if (options.ImGui.CreateRenderer)
         {
             Logger.Trace("Creating ImGUI renderer.");
-            _imGuiRenderer = new ImGuiRenderer(Device, RenderSize, MainTargetFormat);
+            _imGuiRenderer = new ImGuiRenderer(Device, RenderSize, MainTargetFormat, options.ImGui);
         }
 
         if ((options.Type & RendererType.Create3D) != 0)

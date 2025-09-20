@@ -64,7 +64,7 @@ public record struct AppOptions
 #if DEBUG
             Debug = true,
 #endif
-            CreateImGuiRenderer = true
+            ImGui = new RendererOptions.ImGuiInfo()
         };
 
         UI = new UIOptions();

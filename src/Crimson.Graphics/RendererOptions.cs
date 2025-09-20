@@ -6,12 +6,35 @@ public record struct RendererOptions
 
     public bool Debug;
 
-    public bool CreateImGuiRenderer;
+    public ImGuiInfo ImGui;
 
-    public RendererOptions(RendererType type, bool debug, bool createImGuiRenderer)
+    public RendererOptions(RendererType type, bool debug, ImGuiInfo imgui)
     {
         Type = type;
         Debug = debug;
-        CreateImGuiRenderer = createImGuiRenderer;
+        ImGui = imgui;
+    }
+
+    public struct ImGuiInfo
+    {
+        public bool CreateRenderer;
+
+        public string? Font;
+
+        public uint? FontSize;
+
+        public ImGuiInfo()
+        {
+            CreateRenderer = true;
+            Font = null;
+            FontSize = null;
+        }
+        
+        public ImGuiInfo(bool createRenderer, string? font = null, uint? fontSize = null)
+        {
+            CreateRenderer = createRenderer;
+            Font = font;
+            FontSize = fontSize;
+        }
     }
 }

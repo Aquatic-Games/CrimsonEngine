@@ -29,7 +29,7 @@ internal sealed class ImGuiRenderer : IDisposable
 
     public ImGuiContextPtr Context => _imguiContext;
     
-    public unsafe ImGuiRenderer(IntPtr device, Size<int> size, SDL.GPUTextureFormat outFormat)
+    public unsafe ImGuiRenderer(IntPtr device, Size<int> size, SDL.GPUTextureFormat outFormat, RendererOptions.ImGuiInfo info)
     {
         _device = device;
 
@@ -104,7 +104,8 @@ internal sealed class ImGuiRenderer : IDisposable
             MagFilter = SDL.GPUFilter.Linear,
             MipmapMode = SDL.GPUSamplerMipmapMode.Linear,
             AddressModeU = SDL.GPUSamplerAddressMode.Repeat,
-            AddressModeV = SDL.GPUSamplerAddressMode.Repeat
+            AddressModeV = SDL.GPUSamplerAddressMode.Repeat,
+            MaxLod = 1000
         };
 
         _sampler = SDL.CreateGPUSampler(_device, in samplerInfo).Check("Create sampler");
@@ -115,7 +116,15 @@ internal sealed class ImGuiRenderer : IDisposable
         io.IniFilename = null;
         io.LogFilename = null;
         
-        io.Fonts.AddFontDefault();
+        if (info.Font != null)
+        {
+            Debug.Assert(info.FontSize != null);
+            string path = Content.Content.GetFullyQualifiedName(info.Font);
+            io.Fonts.AddFontFromFileTTF(path, info.FontSize.Value);
+        }
+        else
+            io.Fonts.AddFontDefault();
+
         RecreateFontTexture();
         
         ImGui.NewFrame();
