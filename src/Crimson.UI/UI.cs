@@ -16,6 +16,9 @@ public static class UI
     private static Size<int> _referenceSize;
     private static bool _scaleDirty;
     private static float _calculatedSize;
+
+    private static List<Window> _windows;
+    private static List<Window> _windowsToClose;
     
     public static Control BaseControl = null!;
 
@@ -78,6 +81,9 @@ public static class UI
         ScaleMultiplier = 1.0f;
         ScaleMethod = ScaleMethod.Manual;
         ReferenceSize = new Size<int>(1280, 720);
+
+        _windows = [];
+        _windowsToClose = [];
         
         Theme = Theme.Light;
         // The content manager doesn't have the ability to load persistent resources yet so we have to manually do what
@@ -97,6 +103,11 @@ public static class UI
 
     public static void Clear()
     {
+        foreach (Window window in _windows)
+            window.Close();
+        
+        _windows.Clear();
+        
         BaseControl = new AnchorLayout();
         BaseControl.CalculateLayout(_screenRegion, Scale);
     }
@@ -107,11 +118,24 @@ public static class UI
         Vector2T<int> mousePos = new Vector2T<int>((int) mPos.X, (int) mPos.Y);
         bool mouseCaptured = false;
         BaseControl.Update(dt, ref mouseCaptured, mousePos);
+        
+        foreach (Window window in _windows)
+            window.Update(dt);
+
+        foreach (Window window in _windowsToClose)
+        {
+            window.Close();
+            _windows.Remove(window);
+        }
+        _windowsToClose.Clear();
     }
 
     public static void Draw()
     {
         BaseControl.Draw();
+        
+        foreach (Window window in _windows)
+            window.Draw();
     }
 
     public static void Resize(Rectangle<int> screenRegion)
@@ -119,5 +143,16 @@ public static class UI
         _screenRegion = screenRegion;
         _scaleDirty = true;
         BaseControl.CalculateLayout(_screenRegion, Scale);
+    }
+
+    public static void OpenWindow(Window window)
+    {
+        _windows.Add(window);
+        window.Initialize();
+    }
+
+    public static void CloseWindow(Window window)
+    {
+        _windowsToClose.Add(window);
     }
 }
