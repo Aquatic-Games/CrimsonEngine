@@ -62,21 +62,26 @@ public struct MaterialDefinition
     /// </summary>
     public WindingOrder WindingOrder;
 
+    public MaterialDefinition()
+    {
+        Albedo = Texture.White;
+        AlbedoTint = Color.White;
+        MetallicMultiplier = 1;
+        RoughnessMultiplier = 1;
+        RenderFace = RenderFace.Front;
+        WindingOrder = WindingOrder.CounterClockwise;
+    }
+
     /// <summary>
     /// Define a material with an albedo texture and the default values.
     /// </summary>
     /// <param name="albedo">The albedo texture.</param>
-    public MaterialDefinition(Texture albedo)
+    public MaterialDefinition(Texture albedo) : this()
     {
         Albedo = albedo;
         Normal = null;
         Metallic = null;
         Roughness = null;
         Occlusion = null;
-        AlbedoTint = Color.White;
-        MetallicMultiplier = 1;
-        RoughnessMultiplier = 1;
-        RenderFace = RenderFace.Front;
-        WindingOrder = WindingOrder.CounterClockwise;
     }
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Crimson.Core;
 
 namespace Crimson.Content;
@@ -36,6 +37,11 @@ public static class Content
         return Path.Combine(_contentPathBase, name);
     }
 
+    public static bool FileExists(string name)
+    {
+        return Path.Exists(GetFullyQualifiedName(name));
+    }
+
     public static T Load<T>(string resName, bool persistent = false) where T : IContentResource<T>
     {
         string fullPath = Path.IsPathRooted(resName) ? resName : Path.Combine(_contentPathBase, resName);
@@ -67,6 +73,20 @@ public static class Content
         }
 
         return resource;
+    }
+
+    public static bool TryLoad<T>(string resName, [NotNullWhen(true)] out T? resource, bool persistent = false) where T : IContentResource<T>
+    {
+        try
+        {
+            resource = Load<T>(resName, persistent);
+            return true;
+        }
+        catch (Exception)
+        {
+            resource = default;
+            return false;
+        }
     }
 
     public static string[] GetContentFiles(string directory, string? searchPattern = null)
