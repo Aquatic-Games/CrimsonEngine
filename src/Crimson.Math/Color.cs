@@ -63,6 +63,24 @@ public record struct Color
     /// <param name="packedRgba">The 32-bit RGBA value.</param>
     public Color(uint packedRgba) : this((byte) ((packedRgba >> 24) & 0xFF), (byte) ((packedRgba >> 16) & 0xFF),
         (byte) ((packedRgba >> 8) & 0xFF), (byte) (packedRgba & 0xFF)) { }
+
+    /// <summary>
+    /// Linearly interpolate between two colors.
+    /// </summary>
+    /// <param name="a">The first color.</param>
+    /// <param name="b">The second color.</param>
+    /// <param name="amount">The amount to interpolate between them.</param>
+    /// <returns></returns>
+    public static Color Lerp(Color a, Color b, float amount)
+    {
+        return new Color
+        {
+            R = float.Lerp(a.R, b.R, amount),
+            G = float.Lerp(a.G, b.G, amount),
+            B = float.Lerp(a.B, b.B, amount),
+            A = float.Lerp(a.A, b.A, amount),
+        };
+    }
     
     /// <summary>
     /// AliceBlue has an RGB value of 240, 248, 255 (0xF0F8FF)
