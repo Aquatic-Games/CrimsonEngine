@@ -20,7 +20,7 @@ internal class DeferredRenderer : IDisposable
     private readonly IntPtr _passPipeline;
     private readonly IntPtr _passSampler;
 
-    private readonly List<WorldRenderable> _drawQueue;
+    private readonly List<DrawCall> _drawQueue;
 
     public Texture[] DebugTextures;
     
@@ -86,7 +86,7 @@ internal class DeferredRenderer : IDisposable
 
     public void AddToQueue(Renderable renderable, Matrix4x4 worldMatrix)
     {
-        _drawQueue.Add(new WorldRenderable(renderable, worldMatrix));
+        _drawQueue.Add(new DrawCall(renderable, worldMatrix));
     }
 
     public unsafe bool Render(IntPtr cb, IntPtr compositeTarget, IntPtr depthTexture, CameraMatrices camera)
@@ -141,17 +141,20 @@ internal class DeferredRenderer : IDisposable
             invView = Matrix4x4.Identity;
         Vector3 cameraPosition = invView.Translation;
         
-        IOrderedEnumerable<WorldRenderable> frontToBack = _drawQueue.OrderBy(renderable =>
+        IOrderedEnumerable<DrawCall> frontToBack = _drawQueue.OrderBy(renderable =>
             Vector3.Distance(cameraPosition, renderable.WorldMatrix.Translation));
 
         const int numSamplerBindings = 6;
         SDL.GPUTextureSamplerBinding* bindings = stackalloc SDL.GPUTextureSamplerBinding[numSamplerBindings];
         
-        foreach ((Renderable renderable, Matrix4x4 world) in frontToBack)
+        foreach (DrawCall draw in frontToBack)
         {
-            SDL.PushGPUVertexUniformData(cb, 1, new IntPtr(&world), 64);
+            Renderable renderable = draw.Renderable;
             
-            MaterialProperties matProps = MaterialProperties.FromMaterial(renderable.Material);
+            Matrix4x4 world = draw.WorldMatrix;
+            SDL.PushGPUVertexUniformData(cb, 1, new IntPtr(&world), 64);
+
+            MaterialProperties matProps = draw.MaterialProperties;
             SDL.PushGPUFragmentUniformData(cb, 0, new IntPtr(&matProps), (uint) sizeof(MaterialProperties));
 
             // TODO: Have a sampler per material.
