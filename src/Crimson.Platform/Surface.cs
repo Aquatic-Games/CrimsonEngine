@@ -147,7 +147,7 @@ public static class Surface
         if (!SDL.Init(SDL.InitFlags.Video))
             throw new Exception($"Failed to initialize SDL: {SDL.GetError()}");
         
-        SDL.WindowFlags flags = SDL.WindowFlags.InputFocus | SDL.WindowFlags.MouseFocus | SDL.WindowFlags.HighPixelDensity;
+        SDL.WindowFlags flags = SDL.WindowFlags.InputFocus | SDL.WindowFlags.MouseFocus;
 
         if (options.Resizable)
             flags |= SDL.WindowFlags.Resizable;
