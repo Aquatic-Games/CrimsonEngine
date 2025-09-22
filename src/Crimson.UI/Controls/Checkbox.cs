@@ -5,11 +5,17 @@ namespace Crimson.UI.Controls;
 
 public class Checkbox : Control
 {
-    public bool Checked;
+    private string _text;
     
-    public string Text;
+    public bool Checked;
 
     public Action<bool>? OnChecked;
+    
+    public string Text
+    {
+        get => _text;
+        set => _text = Locale.GetLocalizedString(value);
+    }
 
     public Checkbox(string text, Action<bool>? onChecked = null)
     {
@@ -53,10 +59,10 @@ public class Checkbox : Control
                 ScreenRegion.Size - new Size<int>(halfPadding * 2), theme.CheckboxSelectedColor);
         }
 
-        Size<int> textSize = theme.Font.MeasureText(Text, theme.TextSize);
-        
+        Size<int> textSize = theme.Font.MeasureText(_text, theme.TextSize);
+
         Renderer.DrawText(theme.Font,
-            ScreenRegion.Position + new Vector2T<int>(ScreenRegion.Width + halfPadding, ScreenRegion.Height / 2 - textSize.Height / 2), theme.TextSize, Text,
-            theme.TextColor);
+            ScreenRegion.Position + new Vector2T<int>(ScreenRegion.Width + halfPadding,
+                ScreenRegion.Height / 2 - textSize.Height / 2), theme.TextSize, _text, theme.TextColor);
     }
 }

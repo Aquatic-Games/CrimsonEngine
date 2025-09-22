@@ -5,9 +5,15 @@ namespace Crimson.UI.Controls;
 
 public class Button : Control
 {
-    public string Text;
+    private string _text;
 
     public Action? OnClicked;
+    
+    public string Text
+    {
+        get => _text;
+        set => _text = Locale.GetLocalizedString(value);
+    }
 
     public Button(string text, Action? onClicked = null)
     {
@@ -39,10 +45,11 @@ public class Button : Control
         Renderer.DrawRectangle(ScreenRegion.Position, ScreenRegion.Size, color, theme.BorderSize,
             theme.ButtonBorderColor);
 
-        Size<int> textSize = theme.Font.MeasureText(Text, theme.TextSize);
-        Vector2T<int> textPos = ScreenRegion.Position + new Vector2T<int>(ScreenRegion.Width / 2 - textSize.Width / 2, ScreenRegion.Height / 2 - textSize.Height / 2);
+        Size<int> textSize = theme.Font.MeasureText(_text, theme.TextSize);
+        Vector2T<int> textPos = ScreenRegion.Position + new Vector2T<int>(ScreenRegion.Width / 2 - textSize.Width / 2,
+            ScreenRegion.Height / 2 - textSize.Height / 2);
         
-        Renderer.DrawText(theme.Font, textPos, theme.TextSize, Text, theme.TextColor);
+        Renderer.DrawText(theme.Font, textPos, theme.TextSize, _text, theme.TextColor);
         
         if (Disabled)
             Renderer.DrawFilledRectangle(ScreenRegion.Position, ScreenRegion.Size, new Color(0, 0, 0, 0.5f));
