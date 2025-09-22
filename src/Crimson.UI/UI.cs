@@ -79,8 +79,8 @@ public static class UI
         _screenRegion = screenRegion;
         _scaleDirty = true;
         ScaleMultiplier = 1.0f;
-        ScaleMethod = ScaleMethod.Manual;
-        ReferenceSize = new Size<int>(1280, 720);
+        ScaleMethod = options.ScaleMethod;
+        ReferenceSize = options.ReferenceSize;
 
         _windows = [];
         _windowsToClose = [];
