@@ -89,9 +89,10 @@ public static class Content
         }
     }
 
-    public static string[] GetContentFiles(string directory, string? searchPattern = null)
+    public static string[] GetContentFiles(string directory, string? searchPattern = null, bool subdirs = false)
     {
-        return Directory.GetFiles(GetFullyQualifiedName(directory), searchPattern ?? "*");
+        return Directory.GetFiles(GetFullyQualifiedName(directory), searchPattern ?? "*",
+            subdirs ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
     }
 
     public static void UnloadPerSceneResources()
