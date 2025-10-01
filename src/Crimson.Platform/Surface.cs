@@ -146,8 +146,9 @@ public static class Surface
         Logger.Trace("Initializing SDL.");
         if (!SDL.Init(SDL.InitFlags.Video))
             throw new Exception($"Failed to initialize SDL: {SDL.GetError()}");
-        
-        SDL.WindowFlags flags = SDL.WindowFlags.InputFocus | SDL.WindowFlags.MouseFocus;
+
+        SDL.WindowFlags flags = SDL.WindowFlags.InputFocus | SDL.WindowFlags.MouseFocus |
+                                SDL.WindowFlags.HighPixelDensity;
 
         if (options.Resizable)
             flags |= SDL.WindowFlags.Resizable;

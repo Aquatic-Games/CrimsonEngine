@@ -95,7 +95,7 @@ public static class Events
                 }
                 case SDL.EventType.MouseMotion:
                 {
-                    MouseMove(new Vector2T<float>(sdlEvent.Motion.X, sdlEvent.Motion.Y),
+                    MouseMove(new Vector2T<float>(sdlEvent.Motion.X, sdlEvent.Motion.Y) * Surface.DisplayScale,
                         new Vector2T<float>(sdlEvent.Motion.XRel, sdlEvent.Motion.YRel));
                     break;
                 }
