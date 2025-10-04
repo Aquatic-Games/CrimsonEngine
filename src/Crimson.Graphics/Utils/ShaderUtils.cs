@@ -66,7 +66,7 @@ internal static class ShaderUtils
         vertexShader = null;
         pixelShader = null;
 
-        string fullPath = Path.GetFullPath(Path.Combine("Content", "Shaders", $"{name}.hlsl"));
+        string fullPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "Content", "Shaders", $"{name}.hlsl"));
         string includeDir = Path.GetDirectoryName(fullPath);
         string hlsl = File.ReadAllText(fullPath);
         
