@@ -2,11 +2,11 @@ using System.Numerics;
 
 namespace Crimson.Math;
 
-public readonly struct Rectangle<T> where T : INumber<T>
+public struct Rectangle<T> where T : INumber<T>
 {
-    public readonly Vector2T<T> Position;
+    public Vector2T<T> Position;
 
-    public readonly Size<T> Size;
+    public Size<T> Size;
 
     public T X => Position.X;
 

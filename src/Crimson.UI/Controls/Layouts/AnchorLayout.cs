@@ -4,17 +4,19 @@ namespace Crimson.UI.Controls.Layouts;
 
 public class AnchorLayout : Control
 {
-    private readonly List<AnchorControl> _controls;
     private bool _layoutDirty;
+    
+    public readonly List<AnchorControl> Controls;
 
     public AnchorLayout()
     {
-        _controls = [];
+        Controls = [];
+        _layoutDirty = true;
     }
     
-    public void Add(Anchor anchor, Vector2T<int> offset, Size<int> size, Control control)
+    public void Add(Anchor anchor, Vector2T<int> offset, Control control)
     {
-        _controls.Add(new AnchorControl(anchor, offset, size, control));
+        Controls.Add(new AnchorControl(anchor, offset, control));
         _layoutDirty = true;
     }
 
@@ -22,29 +24,29 @@ public class AnchorLayout : Control
     {
         // Only recalculate the layout on change.
         if (_layoutDirty)
-            CalculateLayout(ScreenRegion, Scale);
+            CalculateLayout(ScreenRegion.Position, Scale);
         
-        for (int i = _controls.Count - 1; i >= 0; i--)
-            _controls[i].Control.Update(dt, ref mouseCaptured, mousePos);
+        for (int i = Controls.Count - 1; i >= 0; i--)
+            Controls[i].Control.Update(dt, ref mouseCaptured, mousePos);
     }
 
     protected internal override void Draw()
     {
-        foreach (AnchorControl control in _controls)
+        foreach (AnchorControl control in Controls)
             control.Control.Draw();
     }
 
-    protected internal override void CalculateLayout(Rectangle<int> region, float scale)
+    protected internal override void CalculateLayout(Vector2T<int> position, float scale)
     {
-        base.CalculateLayout(region, scale);
+        base.CalculateLayout(position, scale);
         
         _layoutDirty = false;
         
-        foreach (AnchorControl control in _controls)
+        foreach (AnchorControl control in Controls)
         {
             Vector2T<int> offset = (control.Offset.As<float>() * scale).As<int>();
             Size<int> layoutSize = ScreenRegion.Size;
-            Size<int> size = (control.Size.As<float>() * scale).As<int>();
+            Size<int> size = (control.Control.Size.As<float>() * scale).As<int>();
             
             offset += control.Anchor switch
             {
@@ -60,22 +62,20 @@ public class AnchorLayout : Control
                 _ => throw new ArgumentOutOfRangeException()
             };
             
-            control.Control.CalculateLayout(new Rectangle<int>(offset, size), scale);
+            control.Control.CalculateLayout(position, scale);
         }
     }
 
-    private readonly struct AnchorControl
+    public readonly struct AnchorControl
     {
         public readonly Anchor Anchor;
         public readonly Vector2T<int> Offset;
-        public readonly Size<int> Size;
         public readonly Control Control;
 
-        public AnchorControl(Anchor anchor, Vector2T<int> offset, Size<int> size, Control control)
+        public AnchorControl(Anchor anchor, Vector2T<int> offset, Control control)
         {
             Anchor = anchor;
             Offset = offset;
-            Size = size;
             Control = control;
         }
     }

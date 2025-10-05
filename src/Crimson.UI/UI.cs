@@ -17,7 +17,7 @@ public static class UI
     private static bool _scaleDirty;
     private static float _calculatedSize;
     
-    public static Control BaseControl = null!;
+    public static Control? Control;
 
     public static Theme Theme;
 
@@ -86,8 +86,6 @@ public static class UI
             ? Font.LoadResource(Content.Content.GetFullyQualifiedName(options.DefaultFont), Path.HasExtension(options.DefaultFont))
             : new Font(Resources.LoadEmbeddedResource("Crimson.UI.Roboto-Regular.ttf",
                 Assembly.GetExecutingAssembly()));
-
-        Clear();
     }
 
     public static void Destroy()
@@ -97,27 +95,25 @@ public static class UI
 
     public static void Clear()
     {
-        BaseControl = new AnchorLayout();
-        BaseControl.CalculateLayout(_screenRegion, Scale);
+        Control = null;
     }
 
     public static void Update(float dt)
     {
-        Vector2T<float> mPos = Input.Input.MousePosition;
-        Vector2T<int> mousePos = new Vector2T<int>((int) mPos.X, (int) mPos.Y);
+        Vector2T<int> mPos = Input.Input.MousePosition.As<int>();
         bool mouseCaptured = false;
-        BaseControl.Update(dt, ref mouseCaptured, mousePos);
+        Control?.Update(dt, ref mouseCaptured, mPos);
     }
 
     public static void Draw()
     {
-        BaseControl.Draw();
+        Control?.Draw();
     }
 
     public static void Resize(Rectangle<int> screenRegion)
     {
         _screenRegion = screenRegion;
         _scaleDirty = true;
-        BaseControl.CalculateLayout(_screenRegion, Scale);
+        Control?.CalculateLayout(_screenRegion, Scale);
     }
 }
