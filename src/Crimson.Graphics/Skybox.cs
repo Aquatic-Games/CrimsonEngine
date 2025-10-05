@@ -73,15 +73,11 @@ public sealed class Skybox : IContentResource<Skybox>, IDisposable
 
         // Multiply by 6 as we are uploading 6 textures.
         uint textureSize = (uint) right.Size.Width * (uint) right.Size.Height * rowPitch;
-        SDL.GPUTransferBufferCreateInfo transferInfo = new()
-        {
-            Size = textureSize * 6,
-            Usage = SDL.GPUTransferBufferUsage.Upload
-        };
+        IntPtr transferBuffer = Renderer.GetTransferBuffer(textureSize * 6, out uint transferOffset);
 
-        IntPtr transferBuffer = SDL.CreateGPUTransferBuffer(_device, in transferInfo).Check("Create transfer buffer");
-
-        void* data = (void*) SDL.MapGPUTransferBuffer(_device, transferBuffer, false).Check("Map transfer buffer");
+        bool cycle = transferOffset == 0;
+        Logger.Trace($"Updating skybox: Cycle: {cycle}, Offset: {transferOffset}");
+        void* data = (void*) SDL.MapGPUTransferBuffer(_device, transferBuffer, cycle).Check("Map transfer buffer");
         
         // lol
         fixed (void* pBitmap0 = right.Data)
@@ -91,12 +87,12 @@ public sealed class Skybox : IContentResource<Skybox>, IDisposable
         fixed (void* pBitmap4 = front.Data)
         fixed (void* pBitmap5 = back.Data)
         {
-            Unsafe.CopyBlock((byte*) data + textureSize * 0, pBitmap0, textureSize);
-            Unsafe.CopyBlock((byte*) data + textureSize * 1, pBitmap1, textureSize);
-            Unsafe.CopyBlock((byte*) data + textureSize * 2, pBitmap2, textureSize);
-            Unsafe.CopyBlock((byte*) data + textureSize * 3, pBitmap3, textureSize);
-            Unsafe.CopyBlock((byte*) data + textureSize * 4, pBitmap4, textureSize);
-            Unsafe.CopyBlock((byte*) data + textureSize * 5, pBitmap5, textureSize);
+            Unsafe.CopyBlock((byte*) data + transferOffset + textureSize * 0, pBitmap0, textureSize);
+            Unsafe.CopyBlock((byte*) data + transferOffset + textureSize * 1, pBitmap1, textureSize);
+            Unsafe.CopyBlock((byte*) data + transferOffset + textureSize * 2, pBitmap2, textureSize);
+            Unsafe.CopyBlock((byte*) data + transferOffset + textureSize * 3, pBitmap3, textureSize);
+            Unsafe.CopyBlock((byte*) data + transferOffset + textureSize * 4, pBitmap4, textureSize);
+            Unsafe.CopyBlock((byte*) data + transferOffset + textureSize * 5, pBitmap5, textureSize);
         }
         
         SDL.UnmapGPUTransferBuffer(_device, transferBuffer);
@@ -107,14 +103,14 @@ public sealed class Skybox : IContentResource<Skybox>, IDisposable
         SDL.GPUTextureTransferInfo source = new()
         {
             TransferBuffer = transferBuffer,
+            Offset = transferOffset,
             PixelsPerRow = (uint) right.Size.Width,
             RowsPerLayer = (uint) right.Size.Height,
-            Offset = 0
         };
 
         for (uint i = 0; i < 6; i++)
         {
-            source.Offset = textureSize * i;
+            source.Offset = transferOffset + textureSize * i;
             
             SDL.UploadToGPUTexture(copyPass, in source,
                 new SDL.GPUTextureRegion()
@@ -134,8 +130,6 @@ public sealed class Skybox : IContentResource<Skybox>, IDisposable
         SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
 
         Renderer.MipmapQueue.Add(_textureHandle);
-        
-        SDL.ReleaseGPUTransferBuffer(_device, transferBuffer);
 
         Cube cube = new Cube();
         _vertexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Vertex, cube.Vertices);

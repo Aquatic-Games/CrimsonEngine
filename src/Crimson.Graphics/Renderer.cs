@@ -17,7 +17,8 @@ namespace Crimson.Graphics;
 /// </summary>
 public static class Renderer
 {
-    private const uint TransferBufferSize = 64 * 1024 * 1024;
+    private static uint _transferBufferOffset;
+    private static uint _transferBufferSize = 32 * 1024 * 1024;
     
     private static IntPtr _window;
     
@@ -127,13 +128,9 @@ public static class Renderer
 
         MainTargetFormat = SDL.GetGPUSwapchainTextureFormat(Device, _window);
 
-        // Create 64MiB transfer buffer for use in various upload operations.
-        SDL.GPUTransferBufferCreateInfo transferBufferInfo = new()
-        {
-            Usage = SDL.GPUTransferBufferUsage.Upload,
-            Size = TransferBufferSize
-        };
-        _transferBuffer = SDL.CreateGPUTransferBuffer(Device, in transferBufferInfo).Check("Create transfer buffer");
+        // Create transfer buffer for use in various upload operations.
+        _transferBuffer =
+            SdlUtils.CreateTransferBuffer(Device, SDL.GPUTransferBufferUsage.Upload, _transferBufferSize);
 
         MipmapQueue = [];
 
@@ -431,28 +428,61 @@ public static class Renderer
         _imGuiRenderer?.Resize(newSize);
     }
 
+    internal static IntPtr GetTransferBuffer(uint size, out uint transferOffset)
+    {
+        if (size >= _transferBufferSize)
+        {
+            uint newSize = MathHelper.ToNextPowerOf2(size);
+            Logger.Debug($"Resizing transfer buffer from {_transferBufferSize / 1024}KiB to {newSize / 1024}KiB");
+            _transferBufferSize = newSize;
+            SDL.ReleaseGPUTransferBuffer(Device, _transferBuffer);
+            _transferBuffer =
+                SdlUtils.CreateTransferBuffer(Device, SDL.GPUTransferBufferUsage.Upload, _transferBufferSize);
+            _transferBufferOffset = 0;
+        }
+
+        if (_transferBufferOffset + size >= _transferBufferSize)
+            _transferBufferOffset = 0;
+
+        transferOffset = _transferBufferOffset;
+        _transferBufferOffset += size;
+        return _transferBuffer;
+    }
+
     internal static unsafe void UpdateBuffer<T>(IntPtr cb, IntPtr buffer, uint offset, ReadOnlySpan<T> data) where T : unmanaged
     {
-        if (data.Length >= TransferBufferSize)
-            throw new NotImplementedException();
+        // First we ensure the transfer buffer is large enough to fit the buffer in its memory. If it isn't, then create
+        // a new buffer.
+        // It's rare that a buffer upload will exceed even 4mb, so cycling the buffer for each upload is extremely
+        // wasteful. Instead we write to the buffer at an offset, and only cycle when there's no more space left in the
+        // buffer. In theory, a more advanced algorithm could be used to only cycle when absolutely necessary, but this
+        // algorithm is good enough, and SDL should be able to ignore the cycle instruction if the buffer is not bound.
+        // Doing it this way saves a significant amount of GPU memory as it will not need to create multiple large
+        // transfer buffers for every buffer update.
+        
+        uint dataLength = (uint) (data.Length * sizeof(T));
+        IntPtr transferBuffer = GetTransferBuffer(dataLength, out uint transferOffset);
 
-        void* map = (void*) SDL.MapGPUTransferBuffer(Device, _transferBuffer, true);
+        bool cycle = transferOffset == 0;
+        Logger.Trace($"Updating buffer {buffer}: Cycle: {cycle}, Offset: {transferOffset}");
+        void* map = (void*) SDL.MapGPUTransferBuffer(Device, transferBuffer, cycle);
         fixed (void* pData = data)
-            Unsafe.CopyBlock((byte*) map, pData, (uint) (data.Length * sizeof(T)));
+            Unsafe.CopyBlock((byte*) map + transferOffset, pData, dataLength);
+        SDL.UnmapGPUTransferBuffer(Device, transferBuffer);
 
         IntPtr pass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
 
         SDL.GPUTransferBufferLocation src = new()
         {
-            TransferBuffer = _transferBuffer,
-            Offset = 0
+            TransferBuffer = transferBuffer,
+            Offset = transferOffset
         };
 
         SDL.GPUBufferRegion dest = new()
         {
             Buffer = buffer,
             Offset = offset,
-            Size = (uint) (data.Length * sizeof(T))
+            Size = dataLength
         };
         
         SDL.UploadToGPUBuffer(pass, in src, in dest, false);
@@ -462,19 +492,25 @@ public static class Renderer
 
     internal static unsafe void UpdateTexture(IntPtr cb, in SDL.GPUTextureRegion region, byte[] data)
     {
-        if (data.Length >= TransferBufferSize)
-            throw new NotImplementedException();
+        // A similar reuse-buffer-but-cycle-when-necessary method is used here, see the comment in UpdateBuffer to get
+        // an idea of how this works.
         
-        void* map = (void*) SDL.MapGPUTransferBuffer(Device, _transferBuffer, true);
+        uint dataLength = (uint) data.Length;
+        IntPtr transferBuffer = GetTransferBuffer(dataLength, out uint transferOffset);
+        
+        bool cycle = transferOffset == 0;
+        Logger.Trace($"Updating texture {region.Texture}: Cycle: {cycle}, Offset: {transferOffset}");
+        void* map = (void*) SDL.MapGPUTransferBuffer(Device, transferBuffer, true);
         fixed (byte* pData = data)
-            Unsafe.CopyBlock(map, pData, (uint) data.Length);
-        SDL.UnmapGPUTransferBuffer(Device, _transferBuffer);
+            Unsafe.CopyBlock((byte*) map + transferOffset, pData, dataLength);
+        SDL.UnmapGPUTransferBuffer(Device, transferBuffer);
 
         IntPtr pass = SDL.BeginGPUCopyPass(cb).Check("Begin copy pass");
 
         SDL.GPUTextureTransferInfo transferInfo = new()
         {
             TransferBuffer = _transferBuffer,
+            Offset = transferOffset,
             PixelsPerRow = region.W
         };
         
