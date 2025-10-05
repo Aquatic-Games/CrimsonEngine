@@ -1,10 +1,16 @@
-﻿namespace Crimson.Graphics.RHI;
+﻿using Crimson.Math;
+
+namespace Crimson.Graphics.RHI;
 
 public abstract class GraphicsDevice : IDisposable
 {
     public bool IsDisposed { get; protected set; }
     
     public abstract Backend Backend { get; }
+
+    public abstract void BeginRendering(Color color);
+
+    public abstract void EndRendering();
 
     public abstract void Present();
     

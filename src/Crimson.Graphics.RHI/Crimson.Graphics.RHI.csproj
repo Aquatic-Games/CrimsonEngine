@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
+    </ItemGroup>
+
 </Project>

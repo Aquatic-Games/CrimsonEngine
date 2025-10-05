@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Crimson.Graphics.RHI.OpenGL\Crimson.Graphics.RHI.OpenGL.csproj" />
+      <ProjectReference Include="..\..\src\Crimson.Graphics.RHI\Crimson.Graphics.RHI.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="SDL3-CS" Version="3.2.18" />
+      <PackageReference Include="SDL3-CS.Native" Version="3.2.18" />
+    </ItemGroup>
+
+</Project>
