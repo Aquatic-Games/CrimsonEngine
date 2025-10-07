@@ -58,5 +58,7 @@ public class Camera : Entity
             },
             _ => throw new ArgumentOutOfRangeException()
         };
+        
+        base.Draw();
     }
 }
