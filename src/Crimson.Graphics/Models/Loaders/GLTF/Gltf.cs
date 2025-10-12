@@ -6,11 +6,17 @@ using System.Text.Json.Serialization.Metadata;
 
 namespace Crimson.Graphics.Models.Loaders.GLTF;
 
-public class Gltf : IModelLoader<Gltf>
+public record Gltf : IModelLoader<Gltf>
 {
     public Asset Asset;
     
     public Accessor[]? Accessors;
+
+    public Buffer[]? Buffers;
+
+    public BufferView[]? BufferViews;
+
+    public Image[]? Images;
 
     public Gltf(Asset asset, Accessor[]? accessors)
     {
@@ -46,14 +52,14 @@ public class Gltf : IModelLoader<Gltf>
                     string jsonText = Encoding.UTF8.GetString(jsonBytes);
                     Console.WriteLine(jsonText);
 
-                    gltf = JsonSerializer.Deserialize<Gltf>(jsonBytes,
-                        new JsonSerializerOptions
-                        {
-                            TypeInfoResolver = GltfSerializerContext.Default,
-                            IncludeFields = true,
-                            PropertyNameCaseInsensitive = true,
-                            Converters = { new AccessorTypeConverter() }
-                        });
+                    JsonSerializerOptions options = new()
+                    {
+                        TypeInfoResolver = GltfSerializerContext.Default,
+                        IncludeFields = true,
+                        PropertyNameCaseInsensitive = true,
+                        Converters = { new AccessorTypeConverter(), new MimeTypeConverter() }
+                    };
+                    gltf = JsonSerializer.Deserialize<Gltf>(jsonBytes, options);
                     
                     break;
                 }
