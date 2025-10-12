@@ -1,6 +1,8 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Crimson.Graphics.Models.Loaders.GLTF;
 
@@ -16,10 +18,12 @@ public class Gltf : IModelLoader<Gltf>
         Accessors = accessors;
     }
 
-    public static unsafe Gltf FromPath(string path)
+    public static Gltf FromPath(string path)
     {
         const uint glbMagic = 0x46546C67;
-        Gltf gltf;
+        const uint json = 0x4E4F534A;
+        const uint bin = 0x004E4942;
+        Gltf? gltf = null;
         
         using FileStream stream = File.OpenRead(path);
         using BinaryReader reader = new BinaryReader(stream);
@@ -29,12 +33,34 @@ public class Gltf : IModelLoader<Gltf>
             if (version != 2)
                 throw new NotSupportedException($"GLB version is {version}, expected 2.");
 
-            reader.ReadUInt32(); // Length;
-            
-            
-        }
+            reader.ReadUInt32(); // Length
 
-        throw new NotImplementedException();
+            int chunkSize = reader.ReadInt32();
+            uint chunkType = reader.ReadUInt32();
+
+            switch (chunkType)
+            {
+                case json:
+                {
+                    byte[] jsonBytes = reader.ReadBytes(chunkSize);
+                    string jsonText = Encoding.UTF8.GetString(jsonBytes);
+                    Console.WriteLine(jsonText);
+
+                    gltf = JsonSerializer.Deserialize<Gltf>(jsonBytes,
+                        new JsonSerializerOptions
+                        {
+                            TypeInfoResolver = GltfSerializerContext.Default,
+                            IncludeFields = true,
+                            PropertyNameCaseInsensitive = true,
+                            Converters = { new AccessorTypeConverter() }
+                        });
+                    
+                    break;
+                }
+            }
+        }
+        else
+            throw new NotImplementedException();
 
         return gltf;
     }

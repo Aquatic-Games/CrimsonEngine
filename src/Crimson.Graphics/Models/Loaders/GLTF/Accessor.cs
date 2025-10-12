@@ -8,12 +8,12 @@ public record struct Accessor
     public bool Normalized;
     public int Count;
     public AccessorType Type;
-    public int[]? Max;
-    public int[]? Min;
+    public double[]? Max;
+    public double[]? Min;
     // TODO: Sparse
     public string? Name;
 
-    public Accessor(int? bufferView, int byteOffset, ComponentType componentType, bool normalized, int count, AccessorType type, int[]? max, int[]? min, string? name)
+    public Accessor(int? bufferView, int byteOffset, ComponentType componentType, bool normalized, int count, AccessorType type, double[]? max, double[]? min, string? name)
     {
         BufferView = bufferView;
         ByteOffset = byteOffset;
