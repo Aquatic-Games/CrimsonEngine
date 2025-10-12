@@ -6,7 +6,7 @@ namespace Crimson.Engine.Entities;
 
 public static class EntityExtensions
 {
-    public static void AddToEntity(this Model model, Entity entity)
+    /*public static void AddToEntity(this Model model, Entity entity)
     {
         int counter = 0;
         foreach (ModelMesh mesh in model.Meshes)
@@ -36,5 +36,5 @@ public static class EntityExtensions
             foreach (ModelMesh m in mesh.Children)
                 AddMeshToEntity(m, submesh, ref counter);
         }
-    }
+    }*/
 }

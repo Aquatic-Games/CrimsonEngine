@@ -22,7 +22,7 @@ public class TestApp : GlobalApp
 
         Material material = new StandardLit(new MaterialDefinition(new Texture("/home/aqua/Pictures/BAGELMIP.png")));
 
-        Model model = Model.FromGltf("/home/aqua/Documents/test.glb");
+        //Model model = Model.FromGltf("/home/aqua/Documents/test.glb");
         
         //Mesh mesh = Mesh.FromPrimitive(new Cube(), material);
         //_renderable = new Renderable(renderer, mesh);

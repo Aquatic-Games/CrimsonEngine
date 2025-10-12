@@ -61,7 +61,7 @@ public class TestScene : Scene
         _material = new StandardLit(in def);
         _mesh = Mesh.FromPrimitive(new Cube(), _material);
         
-        Model model = Model.FromGltf("/home/aqua/Downloads/Fox.glb");
+        //Model model = Model.FromGltf("/home/aqua/Downloads/Fox.glb");
 
         BoxShapeDescription desc = new BoxShapeDescription(new Vector3(0.5f));
         BoxShape shape = desc.Create();
