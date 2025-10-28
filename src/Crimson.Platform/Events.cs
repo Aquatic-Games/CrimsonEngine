@@ -108,7 +108,6 @@ public static class Events
                 case SDL.EventType.TextInput:
                 {
                     string text = new string((sbyte*) sdlEvent.Text.Text);
-                    Console.WriteLine(text);
                     foreach (char c in text)
                         TextInput(c);
                     break;

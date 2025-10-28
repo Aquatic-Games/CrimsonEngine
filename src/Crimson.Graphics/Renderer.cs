@@ -74,8 +74,8 @@ public static class Renderer
     {
         get
         {
-            Debug.Assert(_imGuiRenderer != null, "Renderer has not been created with CreateImGuiRenderer enabled.");
-            return _imGuiRenderer.Context;
+            //Debug.Assert(_imGuiRenderer != null, "Renderer has not been created with CreateImGuiRenderer enabled.");
+            return _imGuiRenderer?.Context;
         }
     }
 
