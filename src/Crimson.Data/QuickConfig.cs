@@ -1,5 +1,7 @@
 ﻿using System.Collections;
+using System.Numerics;
 using System.Text;
+using Crimson.Math;
 
 namespace Crimson.Data;
 
@@ -37,44 +39,82 @@ public class QuickConfig
         _objectDict[name] = value;
     }
 
-    public string GetString(string name)
+    public void SetOption<T>(string name, Size<T> size) where T : INumber<T>
+        => SetOption<T>(name, [size.Width, size.Height]);
+
+    public string? GetString(string name)
     {
-        return (string) _objectDict[name];
+        if (_objectDict.TryGetValue(name, out object value))
+            return (string) value;
+
+        return null;
     }
     
-    public string GetString(string name, int index)
+    public string? GetString(string name, int index)
     {
-        return (string) ((object[]) _objectDict[name])[index];
+        if (_objectDict.TryGetValue(name, out object value))
+            return (string) ((object[]) value)[index];
+
+        return null;
     }
 
-    public double GetDouble(string name)
+    public double? GetDouble(string name)
     {
-        return (double) _objectDict[name];
+        if (_objectDict.TryGetValue(name, out object value))
+            return (double) value;
+
+        return null;
     }
     
-    public double GetDouble(string name, int index)
+    public double? GetDouble(string name, int index)
     {
-        return (double) ((object[]) _objectDict[name])[index];
+        if (_objectDict.TryGetValue(name, out object value))
+            return (double) ((object[]) value)[index];
+
+        return null;
     }
 
-    public bool GetBool(string name)
+    public bool? GetBool(string name)
     {
-        return (bool) _objectDict[name];
+        if (_objectDict.TryGetValue(name, out object value))
+            return (bool) value;
+
+        return null;
     }
 
-    public bool GetBool(string name, int index)
+    public bool? GetBool(string name, int index)
     {
-        return (bool) ((object[]) _objectDict[name])[index];
+        if (_objectDict.TryGetValue(name, out object value))
+            return (bool) ((object[]) value)[index];
+
+        return null;
     }
 
-    public T GetEnum<T>(string name) where T : struct
+    public T? GetEnum<T>(string name) where T : struct
     {
-        return Enum.Parse<T>((string) _objectDict[name]);
+        if (!_objectDict.TryGetValue(name, out object value))
+            return null;
+        
+        return Enum.Parse<T>((string) value);
     }
     
-    public T GetEnum<T>(string name, int index) where T : struct
+    public T? GetEnum<T>(string name, int index) where T : struct
     {
-        return Enum.Parse<T>((string) ((object[]) _objectDict[name])[index]);
+        if (!_objectDict.TryGetValue(name, out object value))
+            return null;
+        
+        return Enum.Parse<T>((string) ((object[]) value)[index]);
+    }
+
+    public Size<T>? GetSize<T>(string name) where T : INumber<T>
+    {
+        double? width = GetDouble(name, 0);
+        double? height = GetDouble(name, 1);
+
+        if (width is { } w && height is { } h)
+            return new Size<T>(T.CreateChecked(w), T.CreateChecked(h));
+
+        return null;
     }
 
     public string Serialize()

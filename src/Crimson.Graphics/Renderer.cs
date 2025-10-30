@@ -60,8 +60,10 @@ public static class Renderer
         get => _vsyncEnabled;
         set
         {
+            if (value == _vsyncEnabled)
+                return;
+            
             _vsyncEnabled = value;
-
             SDL.SetGPUSwapchainParameters(Device, _window, SDL.GPUSwapchainComposition.SDR,
                 value ? SDL.GPUPresentMode.VSync : SDL.GPUPresentMode.Immediate).Check("Set swapchain parameters");
         }

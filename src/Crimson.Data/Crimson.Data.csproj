@@ -1,2 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
+  </ItemGroup>
 </Project>

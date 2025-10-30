@@ -126,7 +126,7 @@ internal class SdlUtils
             SDL.Keycode.RAlt => Key.RightAlt,
             SDL.Keycode.LShift => Key.LeftShift,
             SDL.Keycode.RShift => Key.RightShift,
-            SDL.Keycode.LGui => Key.LeftSuper,
+            SDL.Keycode.LGUI => Key.LeftSuper,
             SDL.Keycode.RGUI => Key.RightSuper,
             _ => Key.Unknown
         };
