@@ -94,16 +94,22 @@ public class QuickConfig
     {
         if (!_objectDict.TryGetValue(name, out object value))
             return null;
-        
-        return Enum.Parse<T>((string) value);
+
+        if (!Enum.TryParse((string) value, true, out T eValue))
+            return null;
+
+        return eValue;
     }
     
     public T? GetEnum<T>(string name, int index) where T : struct
     {
         if (!_objectDict.TryGetValue(name, out object value))
             return null;
-        
-        return Enum.Parse<T>((string) ((object[]) value)[index]);
+
+        if (!Enum.TryParse((string) ((object[]) value)[index], true, out T eValue))
+            return null;
+
+        return eValue;
     }
 
     public Size<T>? GetSize<T>(string name) where T : INumber<T>
