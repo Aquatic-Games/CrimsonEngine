@@ -123,6 +123,60 @@ public class QuickConfig
         return null;
     }
 
+    public void SetValue(ref string @string, string name)
+    {
+        if (GetString(name) is { } s)
+            @string = s;
+    }
+
+    public void SetValue(ref string @string, string name, int index)
+    {
+        if (GetString(name, index) is { } s)
+            @string = s;
+    }
+
+    public void SetValue(ref double @double, string name)
+    {
+        if (GetDouble(name) is { } d)
+            @double = d;
+    }
+
+    public void SetValue(ref double @double, string name, int index)
+    {
+        if (GetDouble(name, index) is { } d)
+            @double = d;
+    }
+
+    public void SetValue(ref bool @bool, string name)
+    {
+        if (GetBool(name) is { } b)
+            @bool = b;
+    }
+
+    public void SetValue(ref bool @bool, string name, int index)
+    {
+        if (GetBool(name, index) is { } b)
+            @bool = b;
+    }
+
+    public void SetValue<T>(ref T @enum, string name) where T : struct
+    {
+        if (GetEnum<T>(name) is { } e)
+            @enum = e;
+    }
+
+    public void SetValue<T>(ref T @enum, string name, int index) where T : struct
+    {
+        if (GetEnum<T>(name, index) is { } e)
+            @enum = e;
+    }
+
+    public void SetValue<T>(ref Size<T> size, string name) where T : INumber<T>
+    {
+        if (GetSize<T>(name) is { } s)
+            size = s;
+    }
+
     public string Serialize()
     {
         StringBuilder builder = new StringBuilder();
