@@ -368,9 +368,11 @@ internal sealed class ImGuiRenderer : IDisposable
     public void Dispose()
     {
         SDL.ReleaseGPUTexture(_device, _texture!.Value);
+        SDL.ReleaseGPUSampler(_device, _sampler);
         SDL.ReleaseGPUGraphicsPipeline(_device, _pipeline);
         SDL.ReleaseGPUTransferBuffer(_device, _transferBuffer);
         SDL.ReleaseGPUBuffer(_device, _indexBuffer);
+        SDL.ReleaseGPUBuffer(_device, _vertexBuffer);
         
         ImGui.DestroyContext(_imguiContext);
     }
