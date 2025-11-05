@@ -25,6 +25,14 @@ public static class Input
 
     public static Vector2T<float> ScrollDelta => _scrollDelta;
 
+    public static IReadOnlyCollection<Key> KeysDown => _keysDown;
+
+    public static IReadOnlyCollection<Key> KeysPressed => _keysPressed;
+
+    public static IReadOnlyCollection<MouseButton> ButtonsDown => _buttonsDown;
+
+    public static IReadOnlyCollection<MouseButton> ButtonsPressed => _buttonsPressed;
+
     static Input()
     {
         _actionSets = [];
@@ -61,7 +69,7 @@ public static class Input
 
     public static void AddActionSet(ActionSet set)
     {
-        _actionSets.Add(set.Name, set);
+        _actionSets[set.Name] = set;
     }
 
     public static ActionSet GetActionSet(string name)
