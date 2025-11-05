@@ -40,9 +40,10 @@ public struct Locale : IContentResource<Locale>
     /// returned.
     /// </summary>
     /// <param name="str">The string ID.</param>
+    /// <param name="args">Arguments to pass into a formatted string.</param>
     /// <returns>The localized string, if it exists.</returns>
-    public string GetString(string str)
-        => Strings.GetValueOrDefault(str, str);
+    public string GetString(string str, params ReadOnlySpan<object?> args)
+        => string.Format(Strings.GetValueOrDefault(str, str), args);
 
     private static Dictionary<string, Locale> _locales;
 
@@ -76,10 +77,11 @@ public struct Locale : IContentResource<Locale>
     /// will be returned.
     /// </summary>
     /// <param name="str">The string ID.</param>
-    /// <returns></returns>
+    /// <param name="args">Arguments to pass into a formatted string.</param>
+    /// <returns>The localized string, if it exists.</returns>
     /// <remarks>This is a shortcut to <see cref="CurrentLocale"/>.<see cref="GetString"/>. </remarks>
-    public static string GetLocalizedString(string str)
-        => CurrentLocale.GetString(str);
+    public static string GetLocalizedString(string str, params ReadOnlySpan<object?> args)
+        => CurrentLocale.GetString(str, args);
 
     public static void LoadLocalesFromDirectory(string dir)
     {
