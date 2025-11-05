@@ -82,6 +82,37 @@ public static class Surface
                 SDL.StopTextInput(Window);
         }
     }
+
+    public static VideoMode? VideoMode
+    {
+        get
+        {
+            SDL.DisplayMode? mode = SDL.GetWindowFullscreenMode(Window);
+            if (mode is { } displayMode)
+            {
+                return new VideoMode(new Size<int>(displayMode.W, displayMode.H), displayMode.RefreshRate);
+            }
+
+            return null;
+        }
+    }
+
+    public static VideoMode[] AvailableVideoModes
+    {
+        get
+        {
+            SDL.DisplayMode[]? modes = SDL.GetFullscreenDisplayModes(SDL.GetDisplayForWindow(Window), out int count);
+            VideoMode[] vidModes = new VideoMode[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                SDL.DisplayMode mode = modes[i];
+                vidModes[i] = new VideoMode(new Size<int>(mode.W, mode.H), mode.RefreshRate);
+            }
+            
+            return vidModes;
+        }
+    }
     
     /// <summary>
     /// The underlying handle(s) to the surface, typically provided by the window manager.
