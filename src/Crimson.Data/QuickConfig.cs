@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Globalization;
 using System.Numerics;
 using System.Text;
 using Crimson.Math;
@@ -61,7 +62,7 @@ public class QuickConfig
     public double? GetDouble(string name)
     {
         if (_objectDict.TryGetValue(name, out object value))
-            return (double) value;
+            return Convert.ToDouble(value, new NumberFormatInfo { NumberDecimalSeparator = "." });
 
         return null;
     }
@@ -69,7 +70,7 @@ public class QuickConfig
     public double? GetDouble(string name, int index)
     {
         if (_objectDict.TryGetValue(name, out object value))
-            return (double) ((object[]) value)[index];
+            return Convert.ToDouble(((object[]) value)[index], new NumberFormatInfo { NumberDecimalSeparator = "." });
 
         return null;
     }
@@ -300,9 +301,14 @@ public class QuickConfig
             case uint:
             case long:
             case ulong:
-            case float:
-            case double:
                 builder.Append(value);
+                break;
+            
+            case float f:
+                builder.Append(f.ToString(new NumberFormatInfo { NumberDecimalSeparator = "." }));
+                break;
+            case double d:
+                builder.Append(d.ToString(new NumberFormatInfo { NumberDecimalSeparator = "." }));
                 break;
                 
             case bool b:
