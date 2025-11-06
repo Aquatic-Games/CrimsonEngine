@@ -6,8 +6,6 @@ namespace Crimson.UI.Controls;
 public class Button : Control
 {
     private string _text;
-
-    public Action? OnClicked;
     
     public string Text
     {
@@ -19,14 +17,6 @@ public class Button : Control
     {
         Text = text;
         OnClicked = onClicked;
-    }
-    
-    protected internal override void Update(float dt, ref bool mouseCaptured, Vector2T<int> mousePos)
-    {
-        base.Update(dt, ref mouseCaptured, mousePos);
-        
-        if (IsClicked)
-            OnClicked?.Invoke();
     }
 
     protected internal override void Draw()

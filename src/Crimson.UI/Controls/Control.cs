@@ -5,6 +5,8 @@ namespace Crimson.UI.Controls;
 
 public abstract class Control
 {
+    public Action? OnClicked;
+    
     protected Rectangle<int> ScreenRegion;
     protected float Scale;
 
@@ -33,6 +35,7 @@ public abstract class Control
             {
                 IsHeld = false;
                 IsClicked = true;
+                OnClicked?.Invoke();
             }
         }
         else
