@@ -21,6 +21,7 @@ public static class Renderer
     private static uint _transferBufferSize = 32 * 1024 * 1024;
     
     private static IntPtr _window;
+    private static Backend _backend;
     
     private static IntPtr _depthTexture;
 
@@ -40,7 +41,7 @@ public static class Renderer
 
     internal static HashSet<IntPtr> MipmapQueue;
 
-    public static string Backend => SDL.GetGPUDeviceDriver(Device) ?? "Unknown";
+    public static Backend Backend => _backend;
 
     /// <summary>
     /// The 3D <see cref="Crimson.Graphics.Camera"/> that will be used when drawing.
@@ -108,7 +109,7 @@ public static class Renderer
             SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreatePreferLowPowerBoolean, true);
         }
 
-        if (OperatingSystem.IsWindows() && !EnvVar.IsTrue(EnvVar.ForceVulkan))
+        if (OperatingSystem.IsWindows() && options.Backend is Backend.Unknown or Backend.D3D12)
         {
             SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateShadersDXILBoolean, true);
             // Use D3D12 on windows
@@ -117,8 +118,15 @@ public static class Renderer
 
         Logger.Trace("Creating device.");
         Device = SDL.CreateGPUDeviceWithProperties(props).Check("Create device");
+
+        _backend = SDL.GetGPUDeviceDriver(Device) switch
+        {
+            "vulkan" => Backend.Vulkan,
+            "direct3d12" => Backend.D3D12,
+            _ => Backend.Unknown
+        };
         
-        Logger.Debug($"Using SDL backend: {SDL.GetGPUDeviceDriver(Device)}");
+        Logger.Debug($"Using SDL backend: {_backend}");
         
         Logger.Trace("Claiming window for device.");
         SDL.ClaimWindowForGPUDevice(Device, _window).Check("Claim window for device");

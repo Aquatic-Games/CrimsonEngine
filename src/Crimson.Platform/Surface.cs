@@ -26,10 +26,13 @@ public static class Surface
         get
         {
             SDL.GetWindowSizeInPixels(Window, out int w, out int h);
-
             return new Size<int>(w, h);
         }
-        set => SDL.SetWindowSize(Window, value.Width, value.Height);
+        set
+        {
+            SDL.SetWindowSize(Window, value.Width, value.Height);
+            SDL.SetWindowPosition(Window, (int) SDL.WindowPosCentered(), (int) SDL.WindowPosCentered());
+        }
     }
 
     public static string Title

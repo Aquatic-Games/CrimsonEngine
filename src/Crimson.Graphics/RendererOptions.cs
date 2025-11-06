@@ -4,13 +4,16 @@ public record struct RendererOptions
 {
     public RendererType Type;
 
+    public Backend Backend;
+
     public bool Debug;
 
     public ImGuiInfo ImGui;
 
-    public RendererOptions(RendererType type, bool debug, ImGuiInfo imgui)
+    public RendererOptions(RendererType type, Backend backend, bool debug, ImGuiInfo imgui)
     {
         Type = type;
+        Backend = backend;
         Debug = debug;
         ImGui = imgui;
     }
