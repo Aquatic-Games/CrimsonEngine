@@ -77,7 +77,7 @@ public static class Physics
     public static bool Raycast(Vector3 position, Vector3 direction, float maxDistance, out RaycastHit hit)
     {
         RayHandler handler = new RayHandler();
-        Simulation.RayCast(position, direction, maxDistance, ref handler);
+        Simulation.RayCast(position, direction, maxDistance, _bufferPool, ref handler);
 
         if (!handler.HasHit)
         {
