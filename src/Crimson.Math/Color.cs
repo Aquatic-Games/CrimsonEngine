@@ -60,9 +60,26 @@ public record struct Color
     /// <summary>
     /// Create a <see cref="Color"/> from a packed 32-bit RGBA value.
     /// </summary>
-    /// <param name="packedRgba">The 32-bit RGBA value.</param>
-    public Color(uint packedRgba) : this((byte) ((packedRgba >> 24) & 0xFF), (byte) ((packedRgba >> 16) & 0xFF),
-        (byte) ((packedRgba >> 8) & 0xFF), (byte) (packedRgba & 0xFF)) { }
+    /// <param name="rgbOrRgba">A 24-bit RGB value, or a 32-bit RGBA value.</param>
+    public Color(uint rgbOrRgba)
+    {
+        const float multiplier = 1.0f / 255.0f;
+
+        if ((rgbOrRgba & 0xFF000000) > 0)
+        {
+            R = ((rgbOrRgba >> 24) & 0xFF) * multiplier;
+            G = ((rgbOrRgba >> 16) & 0xFF) * multiplier;
+            B = ((rgbOrRgba >> 8) & 0xFF) * multiplier;
+            A = (rgbOrRgba & 0xFF) * multiplier;
+        }
+        else
+        {
+            R = ((rgbOrRgba >> 16) & 0xFF) * multiplier;
+            G = ((rgbOrRgba >> 8) & 0xFF) * multiplier;
+            B = (rgbOrRgba & 0xFF) * multiplier;
+            A = 1;
+        }
+    }
 
     /// <summary>
     /// Linearly interpolate between two colors.

@@ -413,12 +413,8 @@ public static class Renderer
 
         _imGuiRenderer?.Render(cb, swapchainTexture, !hasCleared);
         
-        // We have to end the metric before submitting the command buffer, as SDL will auto present when this method
-        // is called, which will skew the metrics (especially if VSync is enabled.)
-        // When Graphite is implemented, we'll move this to just before the present.
-        Metrics.EndPerformanceMetric(Metrics.RenderTimeMetric);
-
         SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
+        Metrics.EndPerformanceMetric(Metrics.RenderTimeMetric);
     }
 
     /// <summary>
