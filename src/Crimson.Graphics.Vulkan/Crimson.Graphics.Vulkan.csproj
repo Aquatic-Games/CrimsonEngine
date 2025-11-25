@@ -13,5 +13,9 @@
         <PackageReference Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.22.0" />
         <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.22.0" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
+    </ItemGroup>
 
 </Project>
