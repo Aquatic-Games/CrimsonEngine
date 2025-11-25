@@ -3,6 +3,7 @@ using SDL3;
 using Silk.NET.Core;
 using Silk.NET.Core.Native;
 using Silk.NET.Vulkan;
+using Silk.NET.Vulkan.Extensions.KHR;
 
 namespace Crimson.Graphics.Vulkan;
 
@@ -14,6 +15,13 @@ public sealed unsafe class GraphicsDevice : IDisposable
     private readonly SurfaceKHR _surface;
     
     private readonly PhysicalDevice _physicalDevice;
+    private readonly Device _device;
+
+    private readonly uint _graphicsQueueIndex;
+    private readonly uint _presentQueueIndex;
+
+    private readonly Queue _graphicsQueue;
+    private readonly Queue _presentQueue;
 
     public GraphicsDevice(string appName, IntPtr sdlWindow)
     {
@@ -80,12 +88,77 @@ public sealed unsafe class GraphicsDevice : IDisposable
         _vk.GetPhysicalDeviceQueueFamilyProperties(_physicalDevice, &numQueueFamilies, null);
         QueueFamilyProperties* queueFamilyProperties = stackalloc QueueFamilyProperties[(int) numQueueFamilies];
         _vk.GetPhysicalDeviceQueueFamilyProperties(_physicalDevice, &numQueueFamilies, queueFamilyProperties);
+
+        uint? graphicsQueueIndex = null;
+        uint? presentQueueIndex = null;
         
-        _vk
+        for (uint i = 0; i < numQueueFamilies; i++)
+        {
+            if ((queueFamilyProperties[i].QueueFlags & QueueFlags.GraphicsBit) != 0)
+                graphicsQueueIndex = i;
+
+            if (SDL.VulkanGetPresentationSupport(_instance.Handle, _physicalDevice.Handle, i))
+                presentQueueIndex = i;
+
+            if (graphicsQueueIndex.HasValue && presentQueueIndex.HasValue)
+                break;
+        }
+
+        if (!graphicsQueueIndex.HasValue || !presentQueueIndex.HasValue)
+        {
+            throw new Exception(
+                $"GPU device does not support graphics and/or presentation! graphicsQueueIndex: {graphicsQueueIndex}, presentQueueIndex: {presentQueueIndex}");
+        }
+
+        _graphicsQueueIndex = graphicsQueueIndex.Value;
+        _presentQueueIndex = presentQueueIndex.Value;
+
+        HashSet<uint> uniqueQueueFamilies = [_graphicsQueueIndex, _presentQueueIndex];
+
+        DeviceQueueCreateInfo* queueInfos = stackalloc DeviceQueueCreateInfo[uniqueQueueFamilies.Count];
+        
+        int queueFamilyIndex = 0;
+        float queuePriority = 1.0f;
+        foreach (uint family in uniqueQueueFamilies)
+        {
+            queueInfos[queueFamilyIndex] = new DeviceQueueCreateInfo
+            {
+                SType = StructureType.DeviceQueueCreateInfo,
+                QueueCount = 1,
+                QueueFamilyIndex = family,
+                PQueuePriorities = &queuePriority
+            };
+        }
+
+        string[] deviceExtensions = [KhrSwapchain.ExtensionName];
+        nint pDeviceExtensions = SilkMarshal.StringArrayToPtr(deviceExtensions);
+        
+        Logger.Trace($"Device extensions: [{string.Join(", ", deviceExtensions)}]");
+
+        PhysicalDeviceFeatures enabledFeatures = new() { };
+
+        DeviceCreateInfo deviceInfo = new()
+        {
+            SType = StructureType.DeviceCreateInfo,
+
+            QueueCreateInfoCount = (uint) uniqueQueueFamilies.Count,
+            PQueueCreateInfos = queueInfos,
+            
+            EnabledExtensionCount = (uint) deviceExtensions.Length,
+            PpEnabledExtensionNames = (byte**) pDeviceExtensions,
+            
+            PEnabledFeatures = &enabledFeatures
+        };
+        
+        Logger.Trace("Creating device.");
+        _vk.CreateDevice(_physicalDevice, &deviceInfo, null, out _device).Check("Create device");
+
+        SilkMarshal.Free(pDeviceExtensions);
     }
     
     public void Dispose()
     {
+        _vk.DestroyDevice(_device, null);
         SDL.VulkanDestroySurface(_instance.Handle, (IntPtr) _surface.Handle, IntPtr.Zero);
         _vk.DestroyInstance(_instance, null);
         _vk.Dispose();

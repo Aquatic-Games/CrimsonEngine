@@ -11,4 +11,8 @@
       <ProjectReference Include="..\..\src\Crimson.Graphics.Vulkan\Crimson.Graphics.Vulkan.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="SDL3-CS" Version="3.3.3-preview.20251108-095121" />
+    </ItemGroup>
+
 </Project>
