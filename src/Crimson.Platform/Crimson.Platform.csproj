@@ -11,8 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="SDL3-CS" Version="3.3.3-preview.20251108-095121" />
-      <PackageReference Include="SDL3-CS.Native" Version="3.3.3-preview.20251109-092020" />
+      <PackageReference Include="Silk.NET.SDL" Version="3.0.0-pr2494.1094" />
     </ItemGroup>
 
 </Project>

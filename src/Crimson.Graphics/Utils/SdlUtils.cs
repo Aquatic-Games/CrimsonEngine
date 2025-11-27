@@ -1,20 +1,20 @@
 ﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using SDL3;
+using Silk.NET.SDL;
 
 namespace Crimson.Graphics.Utils;
 
 internal static class SdlUtils
 {
-    public static SDL.GPUColorTargetBlendState NonPremultipliedBlend => new()
+    public static GPUColorTargetBlendState NonPremultipliedBlend => new()
     {
         EnableBlend = 1,
-        SrcColorBlendfactor = SDL.GPUBlendFactor.SrcAlpha,
-        DstColorBlendfactor = SDL.GPUBlendFactor.OneMinusSrcAlpha,
-        DstAlphaBlendfactor = SDL.GPUBlendFactor.One,
-        SrcAlphaBlendfactor = SDL.GPUBlendFactor.One,
-        ColorBlendOp = SDL.GPUBlendOp.Add,
-        AlphaBlendOp = SDL.GPUBlendOp.Add,
+        SrcColorBlendfactor = GPUBlendFactor.SrcAlpha,
+        DstColorBlendfactor = GPUBlendFactor.OneMinusSrcAlpha,
+        DstAlphaBlendfactor = GPUBlendFactor.One,
+        SrcAlphaBlendfactor = GPUBlendFactor.One,
+        ColorBlendOp = GPUBlendOp.Add,
+        AlphaBlendOp = GPUBlendOp.Add,
     };
 
     public static SDL.GPUColorTargetBlendState NoBlend => new()
