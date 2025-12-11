@@ -24,6 +24,7 @@ namespace Crimson
         std::string _version;
 
         explicit App(const AppInfo& info);
+        void AppRun();
 
     public:
         [[nodiscard]] std::string Name() const

@@ -11,10 +11,17 @@ namespace Crimson
         _version = info.AppVersion;
     }
 
+    void App::AppRun()
+    {
+
+    }
+
     void App::Run(const AppInfo& info)
     {
         auto app = std::unique_ptr<App>(new App(info));
         if (GApp == nullptr)
             GApp = std::move(app);
+
+        GApp->AppRun();
     }
 }
