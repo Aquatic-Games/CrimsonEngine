@@ -23,22 +23,6 @@ public class Renderable : IDisposable
     /// </summary>
     public Material Material;
 
-    /// <summary>
-    /// Create a <see cref="Renderable"/> that can be drawn.
-    /// </summary>
-    /// <param name="mesh">The mesh to use.</param>
-    public Renderable(Mesh mesh)
-    {
-        _device = Renderer.Device;
-
-        VertexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Vertex, mesh.Vertices);
-        IndexBuffer = SdlUtils.CreateBuffer(_device, SDL.GPUBufferUsageFlags.Index, mesh.Indices);
-        
-        NumIndices = (uint) mesh.Indices.Length;
-
-        Material = mesh.Material;
-    }
-
     public Renderable(ReadOnlySpan<Vertex> vertices, ReadOnlySpan<uint> indices, Material material)
     {
         _device = Renderer.Device;
@@ -49,7 +33,9 @@ public class Renderable : IDisposable
         NumIndices = (uint) indices.Length;
         Material = material;
     }
-    
+
+    public Renderable(Mesh mesh) : this(mesh.Vertices, mesh.Indices, mesh.Material) { }
+
     /// <summary>
     /// Dispose of this <see cref="Renderable"/>.
     /// </summary>

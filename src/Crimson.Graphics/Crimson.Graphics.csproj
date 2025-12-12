@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="AssimpNetter" Version="6.0.2.1" />
       <PackageReference Include="FreeTypeSharp" Version="3.0.1" />
       <PackageReference Include="Hexa.NET.ImGui" Version="2.2.7" />
       <PackageReference Include="SDL3-CS" Version="3.3.3-preview.20251108-095121" />
