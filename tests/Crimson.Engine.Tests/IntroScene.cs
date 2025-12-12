@@ -17,8 +17,8 @@ public class IntroScene : Scene
     
     public override void Initialize()
     {
-        _logo = new Texture("/home/aqua/Pictures/Aquatic Games/nizzine-aquaticgameswide.png");
-        _logo2 = new Texture("/home/aqua/Pictures/Aquatic Games/nizzine-aquaticgameswide-night.png");
+        _logo = Content.Content.Load<Texture>("nizzine-aquaticgameswide");
+        _logo2 = Content.Content.Load<Texture>("nizzine-aquaticgameswide-night");
     }
 
     public override void Update(float dt)

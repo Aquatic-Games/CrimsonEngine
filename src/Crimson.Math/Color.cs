@@ -81,6 +81,12 @@ public record struct Color
         }
     }
 
+    public static Color operator *(Color color, float multiplier)
+        => new Color(color.R * multiplier, color.G * multiplier, color.B * multiplier, color.A * multiplier);
+
+    public static Color WithAlpha(Color color, float alpha)
+        => color with { A = alpha };
+
     /// <summary>
     /// Linearly interpolate between two colors.
     /// </summary>
