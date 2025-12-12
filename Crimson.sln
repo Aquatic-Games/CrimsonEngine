@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Input", "src\Crimso
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.UI", "src\Crimson.UI\Crimson.UI.csproj", "{45D1633C-D3ED-4C84-B374-8B555058CB79}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crimson.Models", "src\Crimson.Models\Crimson.Models.csproj", "{B6E70812-303D-46AB-B5DE-C5D0AECB74CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -107,6 +109,10 @@ Global
 		{45D1633C-D3ED-4C84-B374-8B555058CB79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45D1633C-D3ED-4C84-B374-8B555058CB79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45D1633C-D3ED-4C84-B374-8B555058CB79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6E70812-303D-46AB-B5DE-C5D0AECB74CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6E70812-303D-46AB-B5DE-C5D0AECB74CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6E70812-303D-46AB-B5DE-C5D0AECB74CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6E70812-303D-46AB-B5DE-C5D0AECB74CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C485B1C5-5D93-4E4D-98D3-BACDE2F5039A} = {4DB13778-0F69-4B82-A065-32546F54500F}
