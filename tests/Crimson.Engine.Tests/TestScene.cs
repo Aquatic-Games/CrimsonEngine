@@ -64,7 +64,6 @@ public class TestScene : Scene
         Model model = new Model("Content/Models/Box.glb");
 
         Entity test = new Entity("Test");
-        model.Meshes[0].Material = _material;
         test.AddComponent(new MeshRenderer(model.Meshes[0]));
         AddEntity(test);
         

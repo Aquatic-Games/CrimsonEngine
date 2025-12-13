@@ -1,20 +1,28 @@
 ﻿using System.Numerics;
 using Assimp;
+using Crimson.Graphics.Materials;
 using Crimson.Math;
 using Material = Crimson.Graphics.Materials.Material;
 
 namespace Crimson.Graphics;
 
-public class Model
+public class Model : IDisposable
 {
     public List<Mesh> Meshes;
-    public List<Material> Materials;
     
     public Model(string path)
     {
         using AssimpContext context = new AssimpContext();
         Scene scene = context.ImportFile(path, PostProcessSteps.Triangulate | PostProcessSteps.GenerateSmoothNormals);
 
+        Material[] materials = new Material[scene.MaterialCount];
+        int materialIndex = 0;
+        foreach (Assimp.Material aMaterial in scene.Materials)
+        {
+            MaterialDefinition definition = new(Texture.White);
+            materials[materialIndex++] = new StandardLit(in definition);
+        }
+        
         Meshes = [];
         foreach (Assimp.Mesh aMesh in scene.Meshes)
         {
@@ -59,7 +67,7 @@ public class Model
                     indices[arrayIndex++] = (uint) index;
             }
             
-            Meshes.Add(new Mesh(vertices.ToArray(), indices.ToArray(), null));
+            Meshes.Add(new Mesh(vertices.ToArray(), indices.ToArray(), materials[aMesh.MaterialIndex]));
         }
         
         ProcessNode(scene, scene.RootNode);
@@ -78,5 +86,11 @@ public class Model
         
         //foreach (int meshIndex in node.MeshIndices)
             
+    }
+
+    public void Dispose()
+    {
+        foreach (Mesh mesh in Meshes)
+            mesh.Material.Dispose();
     }
 }
