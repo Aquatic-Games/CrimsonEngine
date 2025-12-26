@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/grabs/">
+    <Project Path="lib/grabs/src/grabs.Core/grabs.Core.csproj" />
+    <Project Path="lib/grabs/src/grabs.Graphics/grabs.Graphics.csproj" />
+    <Project Path="lib/grabs/src/grabs.ShaderCompiler/grabs.ShaderCompiler.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Crimson.Engine.Tests/Crimson.Engine.Tests.csproj" />
+    <Project Path="tests/Crimson.Math.Tests/Crimson.Math.Tests.csproj" />
+  </Folder>
+  <Project Path="src/Crimson.Audio/Crimson.Audio.csproj" />
+  <Project Path="src/Crimson.Content/Crimson.Content.csproj" />
+  <Project Path="src/Crimson.Core/Crimson.Core.csproj" />
+  <Project Path="src/Crimson.Data/Crimson.Data.csproj" />
+  <Project Path="src/Crimson.Engine/Crimson.Engine.csproj" />
+  <Project Path="src/Crimson.Graphics/Crimson.Graphics.csproj" />
+  <Project Path="src/Crimson.Input/Crimson.Input.csproj" />
+  <Project Path="src/Crimson.Math/Crimson.Math.csproj" />
+  <Project Path="src/Crimson.Physics/Crimson.Physics.csproj" />
+  <Project Path="src/Crimson.Platform/Crimson.Platform.csproj" />
+  <Project Path="src/Crimson.UI/Crimson.UI.csproj" />
+</Solution>
