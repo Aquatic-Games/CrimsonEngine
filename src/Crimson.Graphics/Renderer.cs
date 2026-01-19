@@ -116,6 +116,9 @@ public static class Renderer
             SDL.SetStringProperty(props, SDL.Props.GPUDeviceCreateNameString, "direct3d12");
         }
 
+        if (OperatingSystem.IsMacOS() && options.Backend is Backend.Unknown or Backend.Metal)
+            SDL.SetBooleanProperty(props, SDL.Props.GPUDeviceCreateShadersMSLBoolean, true);
+
         Logger.Trace("Creating device.");
         Device = SDL.CreateGPUDeviceWithProperties(props).Check("Create device");
 
@@ -143,6 +146,8 @@ public static class Renderer
             SdlUtils.CreateTransferBuffer(Device, SDL.GPUTransferBufferUsage.Upload, _transferBufferSize);
 
         MipmapQueue = [];
+        Logger.Trace("Initializing ShaderCross");
+        ShaderCross.Init();
 
         Logger.Debug($"options.Type: {options.Type}");
         Logger.Debug($"options.ImGui.CreateRenderer: {options.ImGui.CreateRenderer}");
@@ -196,6 +201,8 @@ public static class Renderer
         _deferredRenderer?.Dispose();
         _imGuiRenderer?.Dispose();
         _uiBatcher.Dispose();
+        
+        ShaderCross.Quit();
 
         SDL.ReleaseGPUTransferBuffer(Device, _transferBuffer);
 

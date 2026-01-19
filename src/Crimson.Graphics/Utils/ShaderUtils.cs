@@ -1,8 +1,4 @@
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using Crimson.Core;
-using grabs.Graphics;
-using grabs.ShaderCompiler;
 using SDL3;
 
 namespace Crimson.Graphics.Utils;
@@ -110,57 +106,52 @@ internal static class ShaderUtils
         if (vertexEntryPoint != null)
         {
             Logger.Trace("Creating vertex shader.");
-            vertexShader = CreateShader(device, ShaderStage.Vertex, shaderFormat, hlsl, vertexEntryPoint, includeDir,
-                true, vertexUniforms, vertexSamplers);
+            vertexShader = CreateShader(device, SDL.GPUShaderStage.Vertex, shaderFormat, hlsl, vertexEntryPoint,
+                includeDir, true, vertexUniforms, vertexSamplers);
         }
 
         if (pixelEntryPoint != null)
         {
             Logger.Trace("Creating pixel shader.");
-            pixelShader = CreateShader(device, ShaderStage.Pixel, shaderFormat, hlsl, pixelEntryPoint, includeDir, true,
-                pixelUniforms, pixelSamplers);
+            pixelShader = CreateShader(device, SDL.GPUShaderStage.Fragment, shaderFormat, hlsl, pixelEntryPoint,
+                includeDir, true, pixelUniforms, pixelSamplers);
         }
     }
 
-    private static unsafe IntPtr CreateShader(IntPtr device, ShaderStage stage, SDL.GPUShaderFormat shaderFormat,
+    private static unsafe IntPtr CreateShader(IntPtr device, SDL.GPUShaderStage stage, SDL.GPUShaderFormat shaderFormat,
         string hlsl, string entryPoint, string? includeDir, bool debug, uint numUniforms, uint numSamplers)
     {
-        ShaderFormat grabsFormat;
-
-        if (shaderFormat.HasFlag(SDL.GPUShaderFormat.SPIRV))
-            grabsFormat = ShaderFormat.Spirv;
-        else if (shaderFormat.HasFlag(SDL.GPUShaderFormat.DXIL))
-            grabsFormat = ShaderFormat.Dxil;
-        else if (shaderFormat.HasFlag(SDL.GPUShaderFormat.DXBC))
-            grabsFormat = ShaderFormat.Dxbc;
-        else
-            throw new NotSupportedException();
-
-        SDL.GPUShaderStage sdlStage = stage switch
+        ShaderCross.HLSLInfo hlslInfo = new()
         {
-            ShaderStage.Vertex => SDL.GPUShaderStage.Vertex,
-            ShaderStage.Pixel => SDL.GPUShaderStage.Fragment,
-            _ => throw new ArgumentOutOfRangeException(nameof(stage), stage, null)
+            ShaderStage = (ShaderCross.ShaderStage) stage,
+            Source = hlsl,
+            Entrypoint = entryPoint,
+            IncludeDir = includeDir
         };
-        
-        byte[] compiled = Compiler.CompileHlsl(stage, grabsFormat, hlsl, entryPoint, includeDir, debug);
-            
-        fixed (byte* pData = compiled)
-        {
-            SDL.GPUShaderCreateInfo shaderInfo = new()
-            {
-                Stage = sdlStage,
-                Format = shaderFormat,
-                Code = (nint) pData,
-                CodeSize = (nuint) compiled.Length,
-                NumUniformBuffers = numUniforms,
-                NumSamplers = numSamplers,
-                Entrypoint = entryPoint
-            };
 
-            Logger.Trace("Creating shader.");
-            return SDL.CreateGPUShader(device, in shaderInfo).Check("Create GPU shader");
-        }
+        IntPtr compiled = ShaderCross.CompileSPIRVFromHLSL(in hlslInfo, out nuint compSize);
+        if (compiled == 0)
+            throw new Exception($"Failed to compile shader: {SDL.GetError()}");
+
+        ShaderCross.SPIRVInfo spirvInfo = new()
+        {
+            ShaderStage = (ShaderCross.ShaderStage) stage,
+            ByteCode = compiled,
+            ByteCodeSize = compSize,
+            Entrypoint = entryPoint
+        };
+
+        ShaderCross.GraphicsShaderResourceInfo resInfo = new()
+        {
+            NumUniformBuffers = numUniforms,
+            NumSamplers = numSamplers
+        };
+
+        IntPtr shader = ShaderCross.CompileGraphicsShaderFromSPIRV(device, in spirvInfo, in resInfo, 0);
+        if (shader == 0)
+            throw new Exception($"Failed to create shader: {SDL.GetError()}");
+
+        return shader;
     }
 
     /*public static unsafe IntPtr LoadGraphicsShader(IntPtr device, SDL.GPUShaderStage stage, string name, string entryPoint, uint numUniforms, uint numSamplers)
