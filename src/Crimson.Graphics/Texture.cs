@@ -67,7 +67,7 @@ public class Texture : IContentResource<Texture>, IDisposable
 
         SDL.GPUTextureCreateInfo textureInfo = new()
         {
-            Type = SDL.GPUTextureType.Texturetype2D,
+            Type = SDL.GPUTextureType.TextureType2D,
             Format = format.ToSdl(out _),
             Width = (uint) size.Width,
             Height = (uint) size.Height,

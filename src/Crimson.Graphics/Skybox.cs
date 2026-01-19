@@ -51,7 +51,7 @@ public sealed class Skybox : IContentResource<Skybox>, IDisposable
             Height = (uint) right.Size.Height,
             LayerCountOrDepth = 6,
             NumLevels = SdlUtils.CalculateMipLevels((uint) right.Size.Width, (uint) right.Size.Height),
-            Type = SDL.GPUTextureType.TexturetypeCube,
+            Type = SDL.GPUTextureType.TextureTypeCube,
             Usage = SDL.GPUTextureUsageFlags.Sampler | SDL.GPUTextureUsageFlags.ColorTarget,
             SampleCount = SDL.GPUSampleCount.SampleCount1
         };
@@ -167,7 +167,7 @@ public sealed class Skybox : IContentResource<Skybox>, IDisposable
             {
                 NumColorTargets = 1,
                 ColorTargetDescriptions = new IntPtr(&colorTarget),
-                HasDepthStencilTarget = 1,
+                HasDepthStencilTarget = true,
                 DepthStencilFormat = SDL.GPUTextureFormat.D32Float
             },
             VertexInputState = new SDL.GPUVertexInputState()
@@ -180,8 +180,8 @@ public sealed class Skybox : IContentResource<Skybox>, IDisposable
             PrimitiveType = SDL.GPUPrimitiveType.TriangleList,
             DepthStencilState = new SDL.GPUDepthStencilState()
             {
-                EnableDepthTest = 1,
-                EnableDepthWrite = 0,
+                EnableDepthTest = true,
+                EnableDepthWrite = false,
                 CompareOp = SDL.GPUCompareOp.LessOrEqual
             },
             RasterizerState = new SDL.GPURasterizerState()

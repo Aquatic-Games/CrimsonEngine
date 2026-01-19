@@ -98,9 +98,9 @@ internal class TextureBatcher : IDisposable
             
             DepthStencilState = new SDL.GPUDepthStencilState()
             {
-                EnableDepthTest = 0,
-                EnableDepthWrite = 0,
-                EnableStencilTest = 0
+                EnableDepthTest = false,
+                EnableDepthWrite = false,
+                EnableStencilTest = false
             },
             RasterizerState = new SDL.GPURasterizerState()
             {

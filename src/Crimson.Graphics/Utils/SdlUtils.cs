@@ -8,18 +8,18 @@ internal static class SdlUtils
 {
     public static SDL.GPUColorTargetBlendState NonPremultipliedBlend => new()
     {
-        EnableBlend = 1,
-        SrcColorBlendfactor = SDL.GPUBlendFactor.SrcAlpha,
-        DstColorBlendfactor = SDL.GPUBlendFactor.OneMinusSrcAlpha,
-        DstAlphaBlendfactor = SDL.GPUBlendFactor.One,
-        SrcAlphaBlendfactor = SDL.GPUBlendFactor.One,
+        EnableBlend = true,
+        SrcColorBlendFactor = SDL.GPUBlendFactor.SrcAlpha,
+        DstColorBlendFactor = SDL.GPUBlendFactor.OneMinusSrcAlpha,
+        DstAlphaBlendFactor = SDL.GPUBlendFactor.One,
+        SrcAlphaBlendFactor = SDL.GPUBlendFactor.One,
         ColorBlendOp = SDL.GPUBlendOp.Add,
         AlphaBlendOp = SDL.GPUBlendOp.Add,
     };
 
     public static SDL.GPUColorTargetBlendState NoBlend => new()
     {
-        EnableBlend = 0
+        EnableBlend = false
     };
     
     public static IntPtr Check(this IntPtr ptr, string operation)
@@ -99,7 +99,7 @@ internal static class SdlUtils
     {
         SDL.GPUTextureCreateInfo textureInfo = new()
         {
-            Type = SDL.GPUTextureType.Texturetype2D,
+            Type = SDL.GPUTextureType.TextureType2D,
             Width = width,
             Height = height,
             LayerCountOrDepth = 1,

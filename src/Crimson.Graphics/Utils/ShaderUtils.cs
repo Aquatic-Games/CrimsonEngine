@@ -155,7 +155,7 @@ internal static class ShaderUtils
                 CodeSize = (nuint) compiled.Length,
                 NumUniformBuffers = numUniforms,
                 NumSamplers = numSamplers,
-                Entrypoint = Marshal.StringToCoTaskMemAnsi(entryPoint)
+                Entrypoint = entryPoint
             };
 
             Logger.Trace("Creating shader.");

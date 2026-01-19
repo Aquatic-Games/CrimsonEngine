@@ -89,7 +89,7 @@ public abstract class Material : IDisposable
             {
                 NumColorTargets = 4,
                 ColorTargetDescriptions = (nint) colorTargets,
-                HasDepthStencilTarget = 1,
+                HasDepthStencilTarget = true,
                 DepthStencilFormat = SDL.GPUTextureFormat.D32Float
             },
             VertexInputState = new SDL.GPUVertexInputState()
@@ -102,8 +102,8 @@ public abstract class Material : IDisposable
             PrimitiveType = SDL.GPUPrimitiveType.TriangleList,
             DepthStencilState = new SDL.GPUDepthStencilState()
             {
-                EnableDepthTest = 1,
-                EnableDepthWrite = 1,
+                EnableDepthTest = true,
+                EnableDepthWrite = true,
                 CompareOp = SDL.GPUCompareOp.Less
             },
             RasterizerState = new SDL.GPURasterizerState()
