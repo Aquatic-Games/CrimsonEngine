@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <!--<Content Include="runtimes/linux-x64/*" CopyToOutputDirectory="Always" />
+        <Content Include="runtimes/osx-arm64/*" CopyToOutputDirectory="Always" />
+        <Content Include="runtimes/win-x64/*" CopyToOutputDirectory="Always" />-->
+        <Content Include="runtimes/**/*" CopyToOutputDirectory="Always" />
+    </ItemGroup>
+
+</Project>

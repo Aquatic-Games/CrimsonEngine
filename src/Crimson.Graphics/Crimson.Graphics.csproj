@@ -8,6 +8,7 @@
       <ProjectReference Include="..\Crimson.Content\Crimson.Content.csproj" />
       <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
       <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
+      <ProjectReference Include="..\Crimson.Graphics.SDLShaderCross.Native\Crimson.Graphics.SDLShaderCross.Native.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -32,11 +33,6 @@
     <ItemGroup>
       <None Remove="DEBUG.png" />
       <EmbeddedResource Include="DEBUG.png" />
-    </ItemGroup>
-    
-    <ItemGroup>
-        <None Include="libSDL3_shadercross.so" CopyToOutputDirectory="Always" />
-        <None Include="libSDL3_shadercross.dylib" CopyToOutputDirectory="Always" />
     </ItemGroup>
     
 </Project>
