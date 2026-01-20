@@ -141,17 +141,48 @@ internal static class ShaderUtils
             Entrypoint = entryPoint
         };
 
-        //ShaderCross.GraphicsShaderMetadata* info =
-        //    (ShaderCross.GraphicsShaderMetadata*) ShaderCross.ReflectGraphicsSPIRV(compiled, compSize, 0);
+        nint code;
+        nuint length;
 
-        ShaderCross.GraphicsShaderResourceInfo resInfo = new()
+        // workaround metal backend showing MSL | Metallib
+        if ((shaderFormat & SDL.GPUShaderFormat.MSL) != 0)
+            shaderFormat = SDL.GPUShaderFormat.MSL;
+
+        switch (shaderFormat)
         {
-            NumUniformBuffers = numUniforms,
-            NumSamplers = numSamplers
+            case SDL.GPUShaderFormat.SPIRV:
+            {
+                code = compiled;
+                length = compSize;
+                break;
+            }
+            case SDL.GPUShaderFormat.DXIL:
+                throw new NotImplementedException();
+            case SDL.GPUShaderFormat.MSL:
+            {
+                code = ShaderCross.TranspileMSLFromSPIRV(in spirvInfo);
+                length = strlen((sbyte*) code);
+                SDL.Free(compiled);
+                break;
+            }
+            default:
+                throw new ArgumentOutOfRangeException(nameof(shaderFormat), shaderFormat, null);
+        }
+
+        SDL.GPUShaderCreateInfo shaderInfo = new()
+        {
+            Stage = stage,
+            Format = shaderFormat,
+            Code = code,
+            CodeSize = length,
+            Entrypoint = entryPoint,
+            NumSamplers = numSamplers,
+            NumUniformBuffers = numUniforms
         };
 
-        IntPtr shader = ShaderCross.CompileGraphicsShaderFromSPIRV(device, in spirvInfo, in resInfo, 0);
-        //SDL.Free((IntPtr) info);
+        IntPtr shader = SDL.CreateGPUShader(device, in shaderInfo);
+        SDL.Free(code);
+        
         if (shader == 0)
             throw new Exception($"Failed to create shader: {SDL.GetError()}");
 
@@ -197,4 +228,15 @@ internal static class ShaderUtils
             return SDL.CreateGPUShader(device, in shaderInfo).Check("Create GPU shader");
         }
     }*/
+
+    private static unsafe nuint strlen(sbyte* @string)
+    {
+        nuint length = 0;
+        do
+        {
+            length++;
+        } while (@string[length] != 0);
+
+        return length;
+    }
 }

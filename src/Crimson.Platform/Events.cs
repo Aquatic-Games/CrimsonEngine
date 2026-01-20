@@ -95,7 +95,8 @@ public static class Events
                 }
                 case SDL.EventType.MouseMotion:
                 {
-                    MouseMove(new Vector2T<float>(sdlEvent.Motion.X, sdlEvent.Motion.Y),
+                    float scale = SDL.GetWindowPixelDensity(SDL.GetWindowFromID(sdlEvent.Window.WindowID));
+                    MouseMove(new Vector2T<float>(sdlEvent.Motion.X, sdlEvent.Motion.Y) * scale,
                         new Vector2T<float>(sdlEvent.Motion.XRel, sdlEvent.Motion.YRel));
                     break;
                 }

@@ -126,6 +126,7 @@ public static class Renderer
         {
             "vulkan" => Backend.Vulkan,
             "direct3d12" => Backend.D3D12,
+            "metal" => Backend.Metal,
             _ => Backend.Unknown
         };
         
