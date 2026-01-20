@@ -35,6 +35,7 @@
     </ItemGroup>
     
     <ItemGroup>
+        <None Include="libSDL3_shadercross.so" CopyToOutputDirectory="Always" />
         <None Include="libSDL3_shadercross.dylib" CopyToOutputDirectory="Always" />
     </ItemGroup>
     
