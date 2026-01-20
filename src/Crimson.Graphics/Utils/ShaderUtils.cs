@@ -141,13 +141,11 @@ internal static class ShaderUtils
             Entrypoint = entryPoint
         };
 
-        ShaderCross.GraphicsShaderResourceInfo resInfo = new()
-        {
-            NumUniformBuffers = numUniforms,
-            NumSamplers = numSamplers
-        };
+        ShaderCross.GraphicsShaderMetadata* info =
+            (ShaderCross.GraphicsShaderMetadata*) ShaderCross.ReflectGraphicsSPIRV(compiled, compSize, 0);
 
-        IntPtr shader = ShaderCross.CompileGraphicsShaderFromSPIRV(device, in spirvInfo, in resInfo, 0);
+        IntPtr shader = ShaderCross.CompileGraphicsShaderFromSPIRV(device, in spirvInfo, info->ResourceInfo, 0);
+        SDL.Free((IntPtr) info);
         if (shader == 0)
             throw new Exception($"Failed to create shader: {SDL.GetError()}");
 
