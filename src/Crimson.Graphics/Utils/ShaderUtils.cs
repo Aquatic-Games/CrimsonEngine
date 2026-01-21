@@ -128,64 +128,72 @@ internal static class ShaderUtils
             Entrypoint = entryPoint,
             IncludeDir = includeDir
         };
-
-        IntPtr compiled = ShaderCross.CompileSPIRVFromHLSL(in hlslInfo, out nuint compSize);
-        if (compiled == 0)
-            throw new Exception($"Failed to compile shader: {SDL.GetError()}");
-
-        ShaderCross.SPIRVInfo spirvInfo = new()
-        {
-            ShaderStage = (ShaderCross.ShaderStage) stage,
-            ByteCode = compiled,
-            ByteCodeSize = compSize,
-            Entrypoint = entryPoint
-        };
-
-        nint code;
-        nuint length;
-
-        // workaround metal backend showing MSL | Metallib
-        if ((shaderFormat & SDL.GPUShaderFormat.MSL) != 0)
-            shaderFormat = SDL.GPUShaderFormat.MSL;
-
-        switch (shaderFormat)
-        {
-            case SDL.GPUShaderFormat.SPIRV:
-            {
-                code = compiled;
-                length = compSize;
-                break;
-            }
-            case SDL.GPUShaderFormat.DXIL:
-                throw new NotImplementedException();
-            case SDL.GPUShaderFormat.MSL:
-            {
-                code = ShaderCross.TranspileMSLFromSPIRV(in spirvInfo);
-                length = strlen((sbyte*) code);
-                SDL.Free(compiled);
-                break;
-            }
-            default:
-                throw new ArgumentOutOfRangeException(nameof(shaderFormat), shaderFormat, null);
-        }
-
+        
         SDL.GPUShaderCreateInfo shaderInfo = new()
         {
             Stage = stage,
             Format = shaderFormat,
-            Code = code,
-            CodeSize = length,
             Entrypoint = entryPoint,
             NumSamplers = numSamplers,
             NumUniformBuffers = numUniforms
         };
+        
+        if ((shaderFormat & SDL.GPUShaderFormat.DXIL) != 0)
+        {
+            IntPtr dxil = ShaderCross.CompileDXILFromHLSL(in hlslInfo, out nuint dxilSize);
+            if (dxil == 0)
+                throw new Exception($"Failed to compile shader: {SDL.GetError()}");
+            
+            shaderInfo.Code = dxil;
+            shaderInfo.CodeSize = dxilSize;
+            shaderInfo.Format = SDL.GPUShaderFormat.DXIL;
+        }
+        else if ((shaderFormat & SDL.GPUShaderFormat.DXBC) != 0)
+        {
+            IntPtr dxbc = ShaderCross.CompileDXBCFromHLSL(in hlslInfo, out nuint dxbcSize);
+            if (dxbc == 0)
+                throw new Exception($"Failed to compile shader: {SDL.GetError()}");
+            
+            shaderInfo.Code = dxbc;
+            shaderInfo.CodeSize = dxbcSize;
+            shaderInfo.Format = SDL.GPUShaderFormat.DXBC;
+        }
+        else
+        {
+            IntPtr spirv = ShaderCross.CompileSPIRVFromHLSL(in hlslInfo, out nuint spirvSize);
+            if (spirv == 0)
+                throw new Exception($"Failed to compile shader: {SDL.GetError()}");
+
+            shaderInfo.Code = spirv;
+            shaderInfo.CodeSize = spirvSize;
+
+            ShaderCross.SPIRVInfo spirvInfo = new()
+            {
+                ShaderStage = (ShaderCross.ShaderStage) stage,
+                ByteCode = spirv,
+                ByteCodeSize = spirvSize,
+                Entrypoint = entryPoint
+            };
+
+            if ((shaderFormat & SDL.GPUShaderFormat.MSL) != 0)
+            {
+                IntPtr msl = ShaderCross.TranspileMSLFromSPIRV(in spirvInfo);
+                if (msl == 0)
+                    throw new Exception($"Failed to transpile SPIRV: {SDL.GetError()}");
+                
+                SDL.Free(spirv);
+                shaderInfo.Code = msl;
+                shaderInfo.CodeSize = strlen((sbyte*) msl);
+                shaderInfo.Format = SDL.GPUShaderFormat.MSL;
+            }
+        }
 
         IntPtr shader = SDL.CreateGPUShader(device, in shaderInfo);
-        SDL.Free(code);
+        SDL.Free(shaderInfo.Code);
         
         if (shader == 0)
             throw new Exception($"Failed to create shader: {SDL.GetError()}");
-
+        
         return shader;
     }
 
