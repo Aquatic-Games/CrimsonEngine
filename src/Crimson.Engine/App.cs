@@ -62,10 +62,11 @@ public static class App
 
     /// <summary>
     /// Run the application.
+    /// </summary>
     /// <param name="info">The <see cref="AppInfo"/> to use on app startup.</param>
+    /// <param name="scene">The scene to launch with.</param>
     /// <param name="application">A global <see cref="Crimson.Engine.Application"/> instance. If <see langword="null"/>
     /// is provided, a default one will be used.</param>
-    /// </summary>
     public static void Run(in AppInfo info, Scene scene, Application? application = null)
     {
         _appName = info.AppName;
@@ -131,6 +132,7 @@ public static class App
             Renderer.Render();
         }
         
+        _currentScene.Dispose();
         _application.Dispose();
         Renderer.Free();
         CInput.Free();

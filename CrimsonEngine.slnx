@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/tests/">
+    <File Path="tests\ActorsTest.cs" />
     <File Path="tests\LoggerTest.cs" />
     <File Path="tests\SimpleAppTest.cs" />
   </Folder>
