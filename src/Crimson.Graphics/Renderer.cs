@@ -50,6 +50,21 @@ public static class Renderer
     /// Gets the render size in pixels.
     /// </summary>
     public static Size<uint> Size => _renderSize;
+
+    /// <summary>
+    /// Enable/disable vertical sync. May not work on some platforms.
+    /// </summary>
+    public static bool VSync
+    {
+        get => field;
+        set
+        {
+            field = value;
+            // currently we just ignore any error this may generate
+            SDL.SetGPUSwapchainParameters(Context.Device, Context.Window, SDL.GPUSwapchainComposition.Sdr,
+                value ? SDL.GPUPresentMode.Vsync : SDL.GPUPresentMode.Immediate);
+        }
+    }
     
     /// <summary>
     /// Gets the name of the graphics backend associated with the renderer.
@@ -66,6 +81,7 @@ public static class Renderer
         BackgroundColor = Color.Black;
         
         Context = new RenderContext(window);
+        VSync = true; // enable vsync by default. todo this should be a field in RendererOptions as some platforms will not allow vsync to be disabled once enabled because yes 
 
         SDL.GetWindowSizeInPixels(window, out int w, out int h);
         _renderSize = new Size<uint>((uint) w, (uint) h);

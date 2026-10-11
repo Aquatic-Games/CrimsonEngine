@@ -1,4 +1,5 @@
 ﻿global using CInput = Crimson.Input.Input; // redefine as CInput to stop needing to put Input.Input everywhere
+using System.Diagnostics;
 using System.Reflection;
 using Crimson.Core;
 using Crimson.Engine.Actors;
@@ -21,6 +22,10 @@ public static class App
 
     private static Scene _currentScene = null!;
     private static Scene? _sceneToSwitch = null;
+
+    private static double _tickDelta;
+    private static double _tickTimer;
+    private static double _frameDelta;
     
     /// <summary>
     /// The application name.
@@ -48,7 +53,11 @@ public static class App
     public static int TicksPerSecond
     {
         get => field;
-        set => field = value;
+        set
+        {
+            field = value;
+            _tickDelta = 1.0 / field;
+        }
     }
 
     /// <summary>
@@ -105,6 +114,8 @@ public static class App
 
         _application.Init();
         _currentScene.Init();
+
+        Stopwatch sw = Stopwatch.StartNew();
         
         _isRunning = true;
         while (IsRunning)
@@ -113,12 +124,26 @@ public static class App
             Events.Poll();
             
             Renderer.NewFrame();
-            
-            _application.Tick(1.0f / 60.0f);
-            _currentScene.Tick(1.0f / 60.0f);
-            
-            _application.Loop(1.0f / 60.0f);
-            _currentScene.Loop(1.0f / 60.0f);
+
+            _frameDelta = sw.Elapsed.TotalSeconds;
+            sw.Restart();
+
+            // fixed update
+            // increment the tick timer by the frame delta
+            // once it equals the target tick delta, run a tick.
+            // put this in a while loop to ensure it doesn't get out of sync due to variations in the frame delta
+            _tickTimer += _frameDelta;
+            while (_tickTimer >= _tickDelta)
+            {
+                _application.Tick((float) _tickDelta);
+                _currentScene.Tick((float) _tickDelta);
+
+                _tickTimer -= _tickDelta;
+            }
+
+            // loop runs as fast as the application can render.
+            _application.Loop((float) _frameDelta);
+            _currentScene.Loop((float) _frameDelta);
 
             if (_sceneToSwitch != null)
             {
