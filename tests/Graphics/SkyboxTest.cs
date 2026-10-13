@@ -52,8 +52,8 @@ class SkyboxTest : Scene
         Vector3 forward = Vector3.Transform(-Vector3.UnitZ, euler);
         Vector3 up = Vector3.Transform(Vector3.UnitY, euler);
 
-        Renderer.AddCamera(Camera.Perspective(position, forward, up, float.DegreesToRadians(45), Renderer.Size, 0.1f,
-            100f, _skybox));
+        Renderer.AddCamera(Crimson.Graphics.Camera.Perspective(position, forward, up, float.DegreesToRadians(45),
+            Renderer.Size, 0.1f, 100f, _skybox));
         
         Renderer.DrawRenderable(_renderable, Matrix4x4.Identity);
         

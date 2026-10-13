@@ -16,11 +16,18 @@ public abstract class Scene : IDisposable
     private bool _isInitialized;
     private readonly List<Actor> _actorsToAdd;
 
+    /// <summary>
+    /// Gets the main camera.
+    /// </summary>
+    public Camera Camera => GetActor<Camera>("Camera"); // todo should have a way to rename the camera.
+
     protected Scene()
     {
         _actors = [];
         _actorNames = [];
         _actorsToAdd = [];
+        
+        AddActor(new Camera("Camera", float.DegreesToRadians(75)));
     }
 
     /// <summary>
@@ -124,9 +131,47 @@ public abstract class Scene : IDisposable
     /// In release, this returns <see langword="null"/>.<br />
     /// Use <see cref="TryGetActor"/> if you want to check the result at runtime.
     /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Actor GetActor(string name)
     {
         bool result = TryGetActor(name, out Actor? actor);
+        Debug.Assert(result, "The actor has not been added to the scene!");
+        return actor!;
+    }
+
+    /// <summary>
+    /// Tries to get an <see cref="Actor"/> with the specified type from the scene.
+    /// </summary>
+    /// <param name="name">The name of the actor.</param>
+    /// <param name="actor">The actor, if any.</param>
+    /// <typeparam name="T">The actor's type.</typeparam>
+    /// <returns><see langword="false"/> if the actor was not in the scene, otherwise <see langword="true"/></returns>
+    public bool TryGetActor<T>(string name, [NotNullWhen(true)] out T? actor) where T : Actor
+    {
+        if (!_actorNames.TryGetValue(name, out Actor? a))
+        {
+            actor = null;
+            return false;
+        }
+
+        actor = (T) a;
+        return true;
+    }
+
+    /// <summary>
+    /// Gets an <see cref="Actor"/> with the specified type from the scene.
+    /// </summary>
+    /// <param name="name">The name of the actor.</param>
+    /// <returns>The actor.</returns>
+    /// <typeparam name="T">The actor's type.</typeparam>
+    /// <remarks>
+    /// If the actor has not been added to the scene, an assertion error is thrown.
+    /// In release, this returns <see langword="null"/>.<br />
+    /// Use <see cref="TryGetActor"/> if you want to check the result at runtime.
+    /// </remarks>
+    public T GetActor<T>(string name) where T : Actor
+    {
+        bool result = TryGetActor(name, out T? actor);
         Debug.Assert(result, "The actor has not been added to the scene!");
         return actor!;
     }
