@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Crimson.Engine.Actors;
@@ -54,10 +57,17 @@ public abstract class Scene : IDisposable
         ReadOnlySpan<Actor> actors = CollectionsMarshal.AsSpan(_actors);
         foreach (Actor actor in actors)
             actor.Loop(dt);
-
-        ReadOnlySpan<Actor> actorsToAdd = CollectionsMarshal.AsSpan(_actorsToAdd);
-        if (actorsToAdd.IsEmpty)
+        
+        if (_actorsToAdd.Count == 0)
             return;
+        
+        ReadOnlySpan<Actor> actorsToAdd = CollectionsMarshal.AsSpan(_actorsToAdd);
+        
+        // resize the list and dict to make sure it holds everything,
+        // without needing to potentially resize multiple times.
+        Debug.Assert(_actors.Count == _actorNames.Count);
+        _actors.EnsureCapacity(_actors.Count + actorsToAdd.Length);
+        _actorNames.EnsureCapacity(_actorNames.Count + actorsToAdd.Length);
         
         foreach (Actor actor in actorsToAdd)
         {
@@ -65,6 +75,7 @@ public abstract class Scene : IDisposable
             _actorNames.Add(actor.Name, actor);
             actor.Init();
         }
+        
         _actors.Clear();
     }
 
@@ -91,5 +102,32 @@ public abstract class Scene : IDisposable
             _actors.Add(actor);
             _actorNames.Add(actor.Name, actor);
         }
+    }
+
+    /// <summary>
+    /// Tries to get an <see cref="Actor"/> from the scene.
+    /// </summary>
+    /// <param name="name">The name of the actor.</param>
+    /// <param name="actor">The actor, if any.</param>
+    /// <returns><see langword="false"/> if the actor was not in the scene, otherwise <see langword="true"/></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool TryGetActor(string name, [NotNullWhen(true)] out Actor? actor) 
+        => _actorNames.TryGetValue(name, out actor);
+
+    /// <summary>
+    /// Gets an <see cref="Actor"/> from the scene.
+    /// </summary>
+    /// <param name="name">The name of the actor.</param>
+    /// <returns>The actor.</returns>
+    /// <remarks>
+    /// If the actor has not been added to the scene, an assertion error is thrown.
+    /// In release, this returns <see langword="null"/>.<br />
+    /// Use <see cref="TryGetActor"/> if you want to check the result at runtime.
+    /// </remarks>
+    public Actor GetActor(string name)
+    {
+        bool result = TryGetActor(name, out Actor? actor);
+        Debug.Assert(result, "The actor has not been added to the scene!");
+        return actor!;
     }
 }
