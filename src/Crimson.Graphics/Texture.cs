@@ -1,4 +1,5 @@
-﻿using Crimson.Core;
+﻿using Crimson.Assets;
+using Crimson.Core;
 using Crimson.Graphics.Materials;
 using Crimson.Graphics.Utils;
 using Crimson.Math;
@@ -9,7 +10,7 @@ namespace Crimson.Graphics;
 /// <summary>
 /// A texture is a GPU-stored bitmap that can be applied to <see cref="Material"/>s and <see cref="Sprite"/>s.
 /// </summary>
-public sealed class Texture : IDisposable
+public sealed class Texture : IAsset<Texture>, IDisposable
 {
     /// <summary>
     /// Gets if this <see cref="Texture"/> has been disposed.
@@ -120,5 +121,11 @@ public sealed class Texture : IDisposable
         IsDisposed = true;
 
         SDL.ReleaseGPUTexture(_context.Device, TextureHandle);
+    }
+
+    public static async Task<Texture> LoadAssetAsync(string filePath)
+    {
+        Bitmap bitmap = await Task.Run(() => new Bitmap(filePath));
+        return new Texture(bitmap);
     }
 }

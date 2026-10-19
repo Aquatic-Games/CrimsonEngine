@@ -11,6 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Crimson.Assets\Crimson.Assets.csproj" />
         <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
         <ProjectReference Include="..\Crimson.Math\Crimson.Math.csproj" />
     </ItemGroup>

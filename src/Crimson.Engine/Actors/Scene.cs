@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -30,6 +31,12 @@ public abstract class Scene : IDisposable
         AddActor(new Camera("Camera", float.DegreesToRadians(75)));
     }
 
+    /// <summary>
+    /// Called before initialization, used to load resources.
+    /// This runs asynchronously.
+    /// </summary>
+    public virtual async Task Load() {  }
+    
     /// <summary>
     /// Runs once, when the scene is initialized.
     /// </summary>

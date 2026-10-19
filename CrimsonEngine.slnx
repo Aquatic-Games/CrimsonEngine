@@ -29,4 +29,5 @@
   <Project Path="src/Crimson.Math/Crimson.Math.csproj" />
   <Project Path="src/Crimson.Physics/Crimson.Physics.csproj" />
   <Project Path="src/Crimson.Platform/Crimson.Platform.csproj" />
+  <Project Path="src/Crimson.Assets/Crimson.Assets.csproj" />
 </Solution>
