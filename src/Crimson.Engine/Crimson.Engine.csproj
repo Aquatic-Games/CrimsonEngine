@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <ProjectReference Include="..\Crimson.Assets\Crimson.Assets.csproj" />
     <ProjectReference Include="..\Crimson.Audio\Crimson.Audio.csproj" />
     <ProjectReference Include="..\Crimson.Core\Crimson.Core.csproj" />
     <ProjectReference Include="..\Crimson.Graphics\Crimson.Graphics.csproj" />
