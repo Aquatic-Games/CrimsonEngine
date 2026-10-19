@@ -245,8 +245,8 @@ internal sealed unsafe class TextureBatcher : IDisposable
         
         // 2 * sizeof(Matrix4x4) = 128
         // the shader has its own camera struct that only wants the matrices, so we only need to pass in 2 matrices.
-        fixed (Camera* cam = &camera)
-            SDL.PushGPUVertexUniformData(cb, 0, (nint) cam, 128);
+        ShaderCamera cam = new ShaderCamera(in camera);
+        SDL.PushGPUVertexUniformData(cb, 0, (nint) (&cam), 128);
 
         SDL.GPUColorTargetInfo target = new()
         {
