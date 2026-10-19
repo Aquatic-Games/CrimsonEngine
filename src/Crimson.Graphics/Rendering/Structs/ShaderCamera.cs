@@ -3,7 +3,7 @@ using Crimson.Math;
 
 namespace Crimson.Graphics.Rendering.Structs;
 
-public readonly ref struct ShaderCamera
+internal readonly ref struct ShaderCamera
 {
     public readonly Matrix4x4 Projection;
 
