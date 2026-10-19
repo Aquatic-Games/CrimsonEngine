@@ -113,6 +113,11 @@ public static class App
         Renderer.Init(new SDL.Window(Window.Handle));
 
         _application.Init();
+        
+        // always load the first scene synchronously as there must always be a valid scene
+        // if the application needs to load the very first scene, it should be down to the application
+        // to provide a loading screen/other means of loading.
+        _currentScene.BeginLoad().GetAwaiter().GetResult();
         _currentScene.Init();
 
         Stopwatch sw = Stopwatch.StartNew();
@@ -151,6 +156,8 @@ public static class App
                 _currentScene = _sceneToSwitch;
                 _sceneToSwitch = null;
                 GC.Collect();
+                if (!_currentScene.IsLoaded)
+                    _currentScene.BeginLoad().GetAwaiter().GetResult();
                 _currentScene.Init();
             }
             
@@ -172,6 +179,25 @@ public static class App
     {
         _isRunning = false;
     }
+
+    /// <summary>
+    /// Loads the scene in a background thread. Does NOT initialize or make the scene current once loaded.
+    /// </summary>
+    /// <param name="scene">The scene to load.</param>
+    /// <returns>The scene's load <see cref="Task"/>.</returns>
+    /// <remarks>
+    /// You only need to call this if you want to load the scene asynchronously, for example, for a loading screen.
+    /// Setting <see cref="CurrentScene"/> will always synchronously load the scene if it has not already been loaded.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// Scene myScene = new MyScene();
+    /// App.LoadScene(myScene).GetAwaiter().GetResult();
+    /// App.CurrentScene = myScene;
+    /// </code>
+    /// </example>
+    public static Task LoadScene(Scene scene)
+        => scene.BeginLoad();
     
     private static void Resize(Size<uint> newSize)
     {

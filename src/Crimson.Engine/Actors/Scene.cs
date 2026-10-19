@@ -11,6 +11,8 @@ namespace Crimson.Engine.Actors;
 /// </summary>
 public abstract class Scene : IDisposable
 {
+    private Task? _loadTask;
+    
     private readonly List<Actor> _actors;
     private readonly Dictionary<string, Actor> _actorNames;
 
@@ -21,6 +23,11 @@ public abstract class Scene : IDisposable
     /// Gets the main camera.
     /// </summary>
     public Camera Camera => GetActor<Camera>("Camera"); // todo should have a way to rename the camera.
+
+    /// <summary>
+    /// Gets if the scene has been <see cref="Load"/>ed.
+    /// </summary>
+    public bool IsLoaded => _loadTask?.IsCompleted ?? false;
 
     protected Scene()
     {
@@ -181,5 +188,11 @@ public abstract class Scene : IDisposable
         bool result = TryGetActor(name, out T? actor);
         Debug.Assert(result, "The actor has not been added to the scene!");
         return actor!;
+    }
+
+    internal Task BeginLoad()
+    {
+        _loadTask = Task.Run(Load);
+        return _loadTask;
     }
 }
