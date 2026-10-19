@@ -1,6 +1,5 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Crimson.Core;
 using Crimson.Graphics.Materials;
 using Crimson.Graphics.Rendering.Structs;
 using Crimson.Graphics.Utils;
@@ -17,7 +16,7 @@ internal sealed class ForwardPlusRenderer : IDisposable
     private readonly Comparison<Draw> _ftbComparison;
     private Camera _currentCamera;
     
-    public unsafe ForwardPlusRenderer(RenderContext context)
+    public ForwardPlusRenderer(RenderContext context)
     {
         _context = context;
         
@@ -64,7 +63,8 @@ internal sealed class ForwardPlusRenderer : IDisposable
             StoreOp = SDL.GPUStoreOp.Store
         };
 
-        SDL.GPURenderPass pass = SDL.BeginGPURenderPass(cb, &colorTargetInfo, 1, &depthTargetInfo).Check("Begin render pass");
+        SDL.GPURenderPass pass = SDL.BeginGPURenderPass(cb, &colorTargetInfo, 1, &depthTargetInfo)
+            .Check("Begin render pass");
 
         ReadOnlySpan<Draw> opaques = CollectionsMarshal.AsSpan(_opaques);
         for (int i = 0; i < opaques.Length; i++)

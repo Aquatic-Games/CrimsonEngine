@@ -15,7 +15,7 @@ internal sealed class RenderContext : IDisposable
     /// 32MiB initial transfer buffer size.
     /// </summary>
     private const uint InitialTranferBufferSize = 32 * 1024 * 1024;
-
+    
     private Dictionary<Sampler, SDL.GPUSampler> _samplers;
     
     private SDL.GPUTransferBuffer _transferBuffer;
@@ -26,6 +26,13 @@ internal sealed class RenderContext : IDisposable
     public readonly SDL.GPUDevice Device;
 
     public readonly HashSet<SDL.GPUTexture> MipmapQueue;
+    
+    /// <summary>
+    /// lock used to prevent the transfer buffer from being copied to by multiple threads.
+    /// while technically this is supported, there is no guarantee that multiple threads won't
+    /// try to access it at the same time.
+    /// </summary>
+    public readonly Lock CopyLock;
 
     public RenderContext(SDL.Window window)
     {
@@ -64,6 +71,8 @@ internal sealed class RenderContext : IDisposable
         _transferBufferSize = InitialTranferBufferSize;
         _transferBufferOffset = 0;
         _transferBuffer = CreateTransferBuffer(SDL.GPUTransferBufferUsage.Upload, _transferBufferSize);
+
+        CopyLock = new Lock();
     }
 
     public unsafe SDL.GPUShader CreateShader(SDL.GPUShaderStage stage, string shader)
@@ -238,9 +247,11 @@ internal sealed class RenderContext : IDisposable
 
     public unsafe void CopyDataToBuffer(SDL.GPUBuffer buffer, void* data, uint offset, uint size)
     {
+        CopyLock.Enter();
+        
         SDL.GPUTransferBuffer transBuffer = GetUploadBuffer(size, out uint bufferOffset, out bool cycle);
         Logger.Trace($"Uploading {size / 1024}KiB data to buffer {buffer.Handle} (Offset: {bufferOffset}, Cycle: {cycle})");
-
+        
         nint mapped = SDL.MapGPUTransferBuffer(Device, transBuffer, cycle).Check("Map transfer buffer");
         Unsafe.CopyBlock((byte*) mapped + bufferOffset, data, size);
         SDL.UnmapGPUTransferBuffer(Device, transBuffer);
@@ -265,12 +276,16 @@ internal sealed class RenderContext : IDisposable
         
         SDL.EndGPUCopyPass(pass);
         SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
+        
+        CopyLock.Exit();
     }
 
     // todo Vec2<uint> for X and Y
     public unsafe void CopyDataToTexture(SDL.GPUTexture texture, void* data, uint x, uint y, Size<uint> size,
         PixelFormat format)
     {
+        CopyLock.Enter();
+        
         uint dataSize = size.Width * size.Height * format.BytesPerPixel;
 
         SDL.GPUTransferBuffer transBuffer = GetUploadBuffer(dataSize, out uint offset, out bool cycle);
@@ -308,6 +323,8 @@ internal sealed class RenderContext : IDisposable
 
         SDL.EndGPUCopyPass(pass);
         SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
+        
+        CopyLock.Exit();
     }
 
     public void Dispose()

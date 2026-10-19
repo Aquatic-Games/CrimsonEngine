@@ -40,7 +40,7 @@ class SimpleMeshTest : Scene
         if (_rotation >= float.Pi * 2)
             _rotation -= float.Pi * 2;
         
-        Renderer.AddCamera(Camera.Perspective(new Vector3(0, 0, 3), -Vector3.UnitZ, Vector3.UnitY, float.DegreesToRadians(45), Renderer.Size, 0.1f, 100f));
+        Renderer.AddCamera(Crimson.Graphics.Camera.Perspective(new Vector3(0, 0, 3), -Vector3.UnitZ, Vector3.UnitY, float.DegreesToRadians(45), Renderer.Size, 0.1f, 100f));
         Renderer.DrawRenderable(_renderable, Matrix4x4.CreateFromYawPitchRoll(_rotation, _rotation * 2, _rotation));
         
         base.Loop(dt);

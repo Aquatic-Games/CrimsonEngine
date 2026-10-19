@@ -1,6 +1,6 @@
 namespace Crimson.Assets;
 
-public interface IAsset<T>
+public interface IAsset<out T>
 {
-    public static abstract Task<T> LoadAssetAsync(string filePath);
+    public static abstract T LoadAsset(string filePath);
 }

@@ -82,6 +82,7 @@ public sealed class Texture : IAsset<Texture>, IDisposable
             SampleCount = SDL.GPUSampleCount.Count1
         };
 
+        // todo verify that CreateGPUTexture IS threadsafe. it seems to be though
         Logger.Trace($"Creating {size} texture.");
         TextureHandle = SDL.CreateGPUTexture(_context.Device, &textureInfo).Check("Create texture");
 
@@ -94,7 +95,10 @@ public sealed class Texture : IAsset<Texture>, IDisposable
             _context.CopyDataToTexture(TextureHandle, pData, 0, 0, size, format);
 
         if (generateMips)
-            _context.MipmapQueue.Add(TextureHandle);
+        {
+            lock (_context.CopyLock)
+                _context.MipmapQueue.Add(TextureHandle);
+        }
     }
 
     /// <summary>
@@ -123,9 +127,8 @@ public sealed class Texture : IAsset<Texture>, IDisposable
         SDL.ReleaseGPUTexture(_context.Device, TextureHandle);
     }
 
-    public static async Task<Texture> LoadAssetAsync(string filePath)
+    public static Texture LoadAsset(string filePath)
     {
-        Bitmap bitmap = await Task.Run(() => new Bitmap(filePath));
-        return new Texture(bitmap);
+        return new Texture(filePath);
     }
 }

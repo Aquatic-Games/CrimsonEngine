@@ -5,8 +5,18 @@
 /// </summary>
 public static class Asset
 {
-    public static async Task<T> LoadAsync<T>(string path) where T : IAsset<T>
+    /// <summary>
+    /// Load an asset from disk.
+    /// </summary>
+    /// <param name="path">The path to the asset.</param>
+    /// <typeparam name="T">The asset's type.</typeparam>
+    /// <returns>The loaded asset.</returns>
+    /// <remarks>
+    /// This method typically runs synchronously, however it depends on the asset. Some assets will have asynchronous
+    /// loading, however all built-in asset types are guaranteed to be thread safe and valid by the time they are used.
+    /// </remarks>
+    public static T Load<T>(string path) where T : IAsset<T>
     {
-        return await T.LoadAssetAsync(path);
+        return T.LoadAsset(path);
     }
 }

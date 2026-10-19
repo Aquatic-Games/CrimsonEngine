@@ -33,9 +33,9 @@ public abstract class Scene : IDisposable
 
     /// <summary>
     /// Called before initialization, used to load resources.
-    /// This runs asynchronously.
+    /// This runs on a separate thread, you must ensure thread safety.
     /// </summary>
-    public virtual async Task Load() {  }
+    public virtual void Load() { }
     
     /// <summary>
     /// Runs once, when the scene is initialized.

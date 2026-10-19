@@ -54,6 +54,7 @@ public class Skybox : IDisposable
         uint imageDataSize = size.Width * size.Height * format.BytesPerPixel;
         uint bufferDataSize = vertexSize + indexSize;
         uint totalDataSize = imageDataSize * 6 + bufferDataSize; // multiply by 6, one for each side of the cube
+        _context.CopyLock.Enter();
         SDL.GPUTransferBuffer transBuffer = _context.GetUploadBuffer(totalDataSize, out uint offset, out bool cycle);
         nint mapped = SDL.MapGPUTransferBuffer(_context.Device, transBuffer, cycle).Check("Map transfer buffer");
         
@@ -144,6 +145,8 @@ public class Skybox : IDisposable
 
         SDL.EndGPUCopyPass(pass);
         SDL.SubmitGPUCommandBuffer(cb).Check("Submit command buffer");
+        
+        _context.CopyLock.Exit();
 
         SDL.GPUShader vertexShader = _context.CreateShader(SDL.GPUShaderStage.Vertex, "Environment/Skybox");
         SDL.GPUShader pixelShader = _context.CreateShader(SDL.GPUShaderStage.Fragment, "Environment/Skybox");

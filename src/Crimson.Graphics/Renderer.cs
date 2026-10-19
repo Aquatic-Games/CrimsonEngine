@@ -243,12 +243,16 @@ public static class Renderer
             return;
         }
 
-        foreach (SDL.GPUTexture texture in Context.MipmapQueue)
+        lock (Context.CopyLock)
         {
-            Logger.Trace($"Generating mipmaps for texture {texture.Handle}.");
-            SDL.GenerateMipmapsForGPUTexture(cb, texture);
+            foreach (SDL.GPUTexture texture in Context.MipmapQueue)
+            {
+                Logger.Trace($"Generating mipmaps for texture {texture.Handle}.");
+                SDL.GenerateMipmapsForGPUTexture(cb, texture);
+            }
+
+            Context.MipmapQueue.Clear();
         }
-        Context.MipmapQueue.Clear();
 
         ClearInfo clearInfo = new ClearInfo(BackgroundColor, false);
 

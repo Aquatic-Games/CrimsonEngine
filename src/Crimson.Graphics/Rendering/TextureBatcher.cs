@@ -161,6 +161,8 @@ internal sealed unsafe class TextureBatcher : IDisposable
         uint totalIndicesSize = (uint) draws.Length * NumIndices * sizeof(Index);
         uint totalSize = totalVerticesSize + totalIndicesSize;
 
+        _context.CopyLock.Enter();
+        
         SDL.GPUTransferBuffer transBuffer = _context.GetUploadBuffer(totalSize, out uint offset, out bool cycle);
         nint mapped = SDL.MapGPUTransferBuffer(_context.Device, transBuffer, cycle).Check("Map transfer buffer");
 
@@ -238,6 +240,8 @@ internal sealed unsafe class TextureBatcher : IDisposable
         SDL.UploadToGPUBuffer(copyPass, &indexSrc, &indexDest, false);
         
         SDL.EndGPUCopyPass(copyPass);
+        
+        _context.CopyLock.Exit();
         
         #endregion
 
